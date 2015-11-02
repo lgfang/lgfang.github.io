@@ -1,0 +1,42 @@
+.container-narrow {
+  margin: 0 auto;
+  max-width: 700px;
+}
+
+/*
+ * body {
+ *     margin-left:2em;
+ *     margin-right:2em;
+ * }
+ *
+ * .title {
+ *     text-align: center;
+ *     /\* border-bottom: 1px solid #797979; *\/
+ * }
+ *
+ * .figure {
+ *    text-align: center;
+ * }
+ */
+
+.src, .example {
+    /* Put src/example within a box */
+    overflow: auto;
+    font-family: consolas, Monaco, "Lucida Console", "Courier New", Courier, monospace;
+    /*
+     * width: 800px;
+     * padding: 12pt;
+     * box-shadow: 5px 5px 8px 8px #888;
+     */
+    display: block;
+    padding: 9.5px;
+    border: 1px solid;
+    background: #F5F5F5;
+}
+
+code {
+    border: 1px outset #555;
+    background: #D9E2E1;
+    padding: 2px;
+    border-radius: 0.35em;
+}
