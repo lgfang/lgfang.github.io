@@ -7,6 +7,7 @@ tagline: it does not matter how slowly you go
 
 {% for post in site.posts limit: 8 %}
 
+<div class="article-delem">
 <a style="color:black;font-size:160%" href="{{ post.url }}"> {{ post.title }}</a>
 <br/>
 <small style="color:#4A4A4A"><strong>{{ post.date | date: "%B %e, %Y" }}</strong> . {{ post.categories }}</small>
@@ -20,6 +21,8 @@ tagline: it does not matter how slowly you go
     {% endfor %}
 </ul>
 
+<br/>
+</div>
 <br/>
 
 {% endfor %}

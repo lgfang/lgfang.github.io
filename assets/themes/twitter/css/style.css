@@ -63,3 +63,15 @@
   background: #57A957;
   border: 1px solid #4c964d;
   color: #FFF; }
+
+
+.article-delem {
+background-color: transparent;
+background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAABCAYAAACsXeyTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAFUlEQVQIHWNIS0sr/v//PwMMDzY+ADqMahlW4J91AAAAAElFTkSuQmCC");
+background-repeat: repeat-x;
+background-attachment: scroll;
+background-position: left bottom;
+background-clip: border-box;
+background-origin: padding-box;
+background-size: auto auto;
+}
