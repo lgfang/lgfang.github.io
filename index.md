@@ -1,7 +1,7 @@
 ---
 layout: page
-title: Do not stop
-tagline: it does not matter how slowly you go 
+title: Lungang's blog
+tagline: 
 ---
 {% include JB/setup %}
 
