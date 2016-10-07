@@ -1,0 +1,379 @@
+---
+layout: post
+title: 用 Org-Mode 与 GithubPages 搭建个人博客
+tagline:
+categories: computer
+tags: [emacs, blog, github, jekyll, org-mode]
+---
+
+<p>
+如果你已经熟练使用 Emacs Org-Mode 并且也对 github 有所了解，那么在 Github Pages 上
+搭建一个博客将是十分简单的事情。你 <b>不需要</b> 装诸如 Ruby、Jekyll 之类的软件，就可
+以用 Org-Mode 写博客然后发表到 Gitub Pages 上。
+</p>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">在 GithubPages 上创建博客</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+你只需照着 <a href="https://pages.github.com/">https://pages.github.com/</a> 几步就可以创建一个自己的博客。请注意，这其
+实就已经是一个“能工作”的博客了！“能工作”的意思是你往里添加的html页面都可见了。
+</p>
+
+<p>
+当然，作为一个博客，仅仅能显示我们自己添加的页面还差了点。至少每次发表一个文章
+之后，它应当能自动显示在博客首页而不需我们自己编辑 <code>index.el</code> 。这就需要用到
+Jekyll 了。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2">配置 Jekyll</h2>
+<div class="outline-text-2" id="text-2">
+</div><div id="outline-container-sec-2-1" class="outline-3">
+<h3 id="sec-2-1">导入 Jekyll 框架</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+虽然我们需要用到 Jekyll，但我们 <b>不用</b> 在本机安装相关软件。相关处理都是在
+Github Pages 服务器端运行的。我们要做的只是导入 Jekyll 框架并按照 Jekyll 的规则
+命名以及编辑文件（准确的说，我们用的是 Jekyll-Bootstrap）。如下克隆一个
+Jekyll-Bootstrap 的模板然后把它 push 到自己的博客上（以下以我的博客为例）。
+</p>
+
+<pre class="example">
+git clone --depth 1 https://github.com/plusjade/jekyll-bootstrap.git blog
+git remote set-url origin https://lgfang@github.com/lgfang/lgfang.github.io.git
+git push -f
+</pre>
+
+<p>
+刷新博客页面应当可以看到博客内容已经变了。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-2-2" class="outline-3">
+<h3 id="sec-2-2">更改配置</h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+（详情参见博客源码）
+</p>
+
+<ul class="org-ul">
+<li>修改 _config.yml 填入自己的 google tracking id 和 disqus 账号等个人信息。
+
+<p>
+前者是让google帮你统计页面访问情况的，后者是一个第三方评论系统。相信用法后面
+org-mode 配置时会提到。
+</p>
+</li>
+
+<li>更改 README.md 中的描述
+</li>
+
+<li>修改 index.md 成显示最近五篇博客的摘要。
+</li>
+
+<li>重定向 404 页面到寻找丢失儿童的页面。
+</li>
+
+<li>把主题改成 twitter 的。
+
+<div class="org-src-container">
+
+<pre class="src src-shell-script"><span class="org-builtin">cd</span> _layouts
+sed -i <span class="org-string">'s/bootstrap-3/twitter/g'</span> *html
+</pre>
+</div>
+
+<p>
+NOTE: 可用的主题在 _includes/themes 下。
+</p>
+</li>
+
+<li>添加更多的 css 和 js
+
+<p>
+把 Org-Mode publish html 用到的 css 和 javascript 也加入到博客中。因为后面
+将要提到的“笔记”的缘故，我把这些文件放到 <code>mynotes/cssjs</code> 目录下，并且编
+辑_includes/themes/twitter/default.html 加入对 css 的引用:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-diff"><span class="org-diff-context">$ git diff</span>
+<span class="org-diff-context">diff --git a/_includes/themes/twitter/default.html b/_includes/themes/twitter/default.html</span>
+<span class="org-diff-context">index 3747764..01ba331 100644</span>
+<span class="org-diff-header">--- </span><span class="org-diff-header"><span class="org-diff-file-header">a/_includes/themes/twitter/default.html</span></span>
+<span class="org-diff-header">+++ </span><span class="org-diff-header"><span class="org-diff-file-header">b/_includes/themes/twitter/default.html</span></span>
+<span class="org-diff-hunk-header">@@ -17,6 +17,7 @@</span>
+<span class="org-diff-context">     &lt;!-- Le styles --&gt;</span>
+<span class="org-diff-context">     &lt;link href="{{ ASSET_PATH }}/bootstrap/css/bootstrap.2.2.2.min.css" rel="stylesheet"&gt;</span>
+<span class="org-diff-context">     &lt;link href="{{ ASSET_PATH }}/css/style.css?body=1" rel="stylesheet" type="text/css" media="all"&gt;</span>
+<span class="org-diff-indicator-added">+</span><span class="org-diff-added">    &lt;link href="{{ BASE_PATH }}/mynotes/cssjs/tango.css" rel="stylesheet" type="text/css" media="all"&gt;</span>
+
+<span class="org-diff-context">     &lt;!-- Le fav and touch icons --&gt;</span>
+<span class="org-diff-context">   &lt;!-- Update these with your own images</span>
+</pre>
+</div>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-2-3" class="outline-3">
+<h3 id="sec-2-3">我的模板</h3>
+<div class="outline-text-3" id="text-2-3">
+<p>
+至此 Jekyll 端的配置就基本完成了。为了方便起见我创建了一个名为“blog-template”
+的 branch ；所有博客设置的改动都在这 branch 上。你图省事的话也可以直接克隆我现
+成的模板。
+</p>
+
+<p>
+愿意的话现在就可以用 markdown 的语法来写博客并按 yyyy-mm-dd-blog-title.md 的
+格式放到 _posts 目录下就可以发表了。但是，作为资深 Org-Mode 用户:) 这显然不是
+我的目的。用 Org-Mode 写博客不仅仅是免去了学习 markdown 的语法，更重要的是可
+以利用 Org-Mode 的各种强大功能。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-2-4" class="outline-3">
+<h3 id="sec-2-4">经验教训</h3>
+<div class="outline-text-3" id="text-2-4">
+<ol class="org-ol">
+<li>一定要验证自己的每一步 Jekyll 改动都对，因为 debug 不方便。
+</li>
+<li>检查自己注册时的邮箱，错误信息会发到此处。
+</li>
+</ol>
+
+<p>
+我在此次配置过程犯了一个小错误，结果花了几乎一晚上来 debug ：我试图在
+categories.html 里包含一个我手工创建的 html 文件，但是文件名写错了。结果是
+push 了新的博文，博客也不更新。应该是 Jekyll 处理失败就退出，导致整个博客始终
+停留在错误被引入之前的状态。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3">配置 Org-Mode for blog</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+org-mode 需要做如下配置：
+</p>
+
+<ul class="org-ul">
+<li>创建两个工程（project）。
+
+<ul class="org-ul">
+<li>一个用于发布博文，即把 Org-Mode 的原文转成 html
+
+<ol class="org-ol">
+<li>结果文件必须放到 _posts 下。
+</li>
+
+<li>只导出 body， 因为我们需要 Jekyll 来帮我们生成 head 。
+</li>
+
+<li>导出的 link 要用绝对路径，这主要为了链接图片方便。Jekyll 处理之后，博客
+的 url 里会带上日期；而我本地的博文和图片等附件没有按日期创建目录（又烦
+又不方便将来查看）；所以最简单的办法就是把图片全放到固定的目录，然后在博
+文里用绝对路径指向它们。
+</li>
+</ol>
+</li>
+
+<li>一个用于发布附件（图片之类的）
+
+<p>
+如前所述，图片不能直接放到 _posts 下。创建一个和 _posts 平级的目录 images，
+把附件都放到这。
+</p>
+</li>
+</ul>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(setq
+      <span class="org-comment-delimiter">;; </span><span class="org-comment">nil as default to avoid leaking sensitive info unintentionally,</span>
+      <span class="org-comment-delimiter">;; </span><span class="org-comment">overwritten in per-project settings bellow</span>
+      org-html-postamble nil
+      org-publish-project-alist
+      '(
+        (<span class="org-string">"blog-attachments"</span>
+         <span class="org-builtin">:base-directory</span> <span class="org-string">"~/myblog"</span>
+         <span class="org-builtin">:base-extension</span> <span class="org-string">"png</span><span class="org-string"><span class="org-regexp-grouping-backslash">\\</span></span><span class="org-string"><span class="org-regexp-grouping-construct">|</span></span><span class="org-string">jpg"</span>
+         <span class="org-builtin">:recursive</span> t
+         <span class="org-builtin">:publishing-directory</span> <span class="org-string">"~/websites/blog/images"</span>
+         <span class="org-builtin">:publishing-function</span> org-publish-attachment)
+
+        (<span class="org-string">"blog"</span>
+         <span class="org-builtin">:base-directory</span> <span class="org-string">"~/myblog"</span>
+         <span class="org-builtin">:base-extension</span> <span class="org-string">"org"</span>
+         <span class="org-builtin">:recursive</span> t
+         <span class="org-builtin">:publishing-directory</span> <span class="org-string">"~/websites/blog/_posts"</span>
+         <span class="org-builtin">:publishing-function</span> org-html-publish-to-html
+         <span class="org-builtin">:auto-sitemap</span> nil
+         <span class="org-builtin">:body-only</span> t <span class="org-comment-delimiter">;; </span><span class="org-comment">Only export section between &lt;body&gt; &lt;/body&gt;</span>
+         <span class="org-builtin">:html-link-use-abs-url</span> t
+         ))
+
+      org-export-allow-bind-keywords t  <span class="org-comment-delimiter">; </span><span class="org-comment">I like "#+BIND:var value"</span>
+)
+</pre>
+</div>
+</li>
+
+<li>创建 yasnippet 模板
+
+<p>
+每篇博文的开头都要加上所谓的 front matter 才能够被 Jekyll 识别处理。老老实实
+每次手工输入绝对不是 emacs 老鸟干的事。我定义了一个名为 <code>new-blg</code> 的
+yasnippet 模板(NOTE: 为了和 yasnippet 自带的 "blog" 模板区分，我的模板名省略
+了字母"o"）。每次输入它就可以自动展开成所需的 front matter。具体代码如下：
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp"># -*- mode: snippet -*-
+# name: new-blg
+# --
+# -*-mode:org<span class="org-comment-delimiter">;</span><span class="org-comment">coding:utf-8-*-</span>
+# Created:  `(format <span class="org-string">"%s %s"</span> (user-full-name) (format-time-string <span class="org-string">"%m/%d/%Y"</span>))`
+# Modified`(format <span class="org-string">": %s %s"</span> (user-full-name) (format-time-string <span class="org-string">"%m/%d/%Y %H:%M&gt;"</span>))`
+
+#+OPTIONS: toc:nil num:nil
+#+BIND: org-html-link-home <span class="org-string">"`(replace-regexp-in-string "</span>/Users/lgfang/myblog<span class="org-string">" "</span>http://lgfang.github.io/images<span class="org-string">" default-directory t t)`"</span>
+
+#+TITLE: ${1:title}
+
+#+BEGIN_HTML
+---
+layout: post
+title: $1
+tagline:
+categories: ${2:computer}
+tags: [${3:emacs}]
+---
+#+END_HTML
+
+$0
+</pre>
+</div>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-4" class="outline-2">
+<h2 id="sec-4">配置 Org-Mode for Notes</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+我主页上除了博文外，还有一些经年积累下来的笔记和演讲稿（什么该算做博文，什么该
+算做笔记？我也很迷糊，谁有建议请留言，谢！）。对于这些资料，Org-Mode publish 出
+来的效果更适合我的需求：可以做为幻灯片播放，可以快速跳转。因此，为它们定义了两
+个和之前设置略有不同的 project。因为这些页面是原封不动发布到网站上，所以google
+analytic 和 disqus 的代码我们必须自己通过设置 postamble 来加上（请注意我把个人
+信息存在变量中）。
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(setq
+       org-publish-project-alist
+       '(
+         <span class="org-comment-delimiter">;; </span><span class="org-comment">...</span>
+        (<span class="org-string">"notes-attachments"</span>
+         <span class="org-builtin">:base-directory</span> <span class="org-string">"~/mynotes"</span>
+         <span class="org-builtin">:base-extension</span> <span class="org-string">"css</span><span class="org-string"><span class="org-regexp-grouping-backslash">\\</span></span><span class="org-string"><span class="org-regexp-grouping-construct">|</span></span><span class="org-string">js</span><span class="org-string"><span class="org-regexp-grouping-backslash">\\</span></span><span class="org-string"><span class="org-regexp-grouping-construct">|</span></span><span class="org-string">png</span><span class="org-string"><span class="org-regexp-grouping-backslash">\\</span></span><span class="org-string"><span class="org-regexp-grouping-construct">|</span></span><span class="org-string">jpg</span><span class="org-string"><span class="org-regexp-grouping-backslash">\\</span></span><span class="org-string"><span class="org-regexp-grouping-construct">|</span></span><span class="org-string">patch"</span>
+         <span class="org-builtin">:recursive</span> t
+         <span class="org-builtin">:publishing-directory</span> <span class="org-string">"~/websites/blog/mynotes"</span>
+         <span class="org-builtin">:publishing-function</span> org-publish-attachment)
+
+        (<span class="org-string">"notes"</span>
+         <span class="org-builtin">:base-directory</span> <span class="org-string">"~/mynotes"</span>
+         <span class="org-builtin">:base-extension</span> <span class="org-string">"org"</span>
+         <span class="org-builtin">:recursive</span> t
+         <span class="org-builtin">:publishing-directory</span> <span class="org-string">"~/websites/blog/mynotes"</span>
+         <span class="org-builtin">:publishing-function</span> org-html-publish-to-html
+         <span class="org-builtin">:exclude</span> <span class="org-string">"</span><span class="org-string"><span class="org-regexp-grouping-backslash">\\</span></span><span class="org-string"><span class="org-regexp-grouping-construct">(</span></span><span class="org-string">todo</span><span class="org-string"><span class="org-regexp-grouping-backslash">\\</span></span><span class="org-string"><span class="org-regexp-grouping-construct">|</span></span><span class="org-string">confidential</span><span class="org-string"><span class="org-regexp-grouping-backslash">\\</span></span><span class="org-string"><span class="org-regexp-grouping-construct">)</span></span><span class="org-string">"</span>
+         <span class="org-builtin">:html-postamble</span> get-public-postamble
+         <span class="org-builtin">:auto-sitemap</span> t
+         <span class="org-builtin">:sitemap-filename</span> <span class="org-string">"notes_list.org"</span>
+         <span class="org-builtin">:sitemap-title</span> <span class="org-string">"List of lgfang's notes"</span>
+         <span class="org-builtin">:sitemap-style</span> tree
+         <span class="org-builtin">:sitemap-sort-files</span> anti-chronologically
+         <span class="org-builtin">:sitemap-sort-folders</span> last
+         <span class="org-builtin">:sitemap-file-entry-format</span> <span class="org-string">"%t"</span>)
+        <span class="org-comment-delimiter">;; </span><span class="org-comment">...                             </span>
+        ))
+
+(<span class="org-keyword">defun</span> <span class="org-function-name">get-public-postamble</span> (plist)
+  (<span class="org-keyword">let</span> ((title (plist-get plist <span class="org-builtin">:title</span>))
+        (creator (plist-get plist <span class="org-builtin">:creator</span>))
+        (time (format-time-string org-html-metadata-timestamp-format)))
+    (format
+     <span class="org-string">"</span>
+<span class="org-string">     &lt;br/&gt;</span>
+<span class="org-string">     &lt;p&gt;</span>
+<span class="org-string">     &lt;span class=\"date\"&gt;Created: %s&lt;/span&gt; by &lt;span class=\"creator\"&gt;%s&lt;/span&gt;</span>
+<span class="org-string">     &lt;/p&gt;</span>
+
+<span class="org-string">     &lt;!-- DISQUS  --&gt;</span>
+<span class="org-string">     &lt;div id=\"disqus_thread\"&gt;&lt;/div&gt;</span>
+<span class="org-string">     &lt;script type=\"text/javascript\"&gt;</span>
+<span class="org-string">         /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */</span>
+<span class="org-string">         var disqus_shortname = '%s'; // required: replace example with your forum shortname</span>
+
+<span class="org-string">         /* * * DON'T EDIT BELOW THIS LINE * * */</span>
+<span class="org-string">         (function() {</span>
+<span class="org-string">             var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;</span>
+<span class="org-string">             dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';</span>
+<span class="org-string">             (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);</span>
+<span class="org-string">         })();</span>
+<span class="org-string">     &lt;/script&gt;</span>
+<span class="org-string">     &lt;noscript&gt;Please enable JavaScript to view the &lt;a href=\"http://disqus.com/?ref_noscript\"&gt;comments powered by Disqus.&lt;/a&gt;&lt;/noscript&gt;</span>
+<span class="org-string">     &lt;a href=\"http://disqus.com\" class=\"dsq-brlink\"&gt;comments powered by &lt;span class=\"logo-disqus\"&gt;Disqus&lt;/span&gt;&lt;/a&gt;</span>
+
+<span class="org-string">     &lt;!-- google analytic --&gt;</span>
+<span class="org-string">     &lt;script&gt;</span>
+<span class="org-string">       (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){</span>
+<span class="org-string">       (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),</span>
+<span class="org-string">       m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)</span>
+<span class="org-string">       })(window,document,'script','//www.google-analytics.com/analytics.js','ga');</span>
+
+<span class="org-string">       ga('create', '%s', 'auto');</span>
+<span class="org-string">       ga('send', 'pageview');</span>
+
+<span class="org-string">     &lt;/script&gt;</span>
+<span class="org-string">     "</span>
+     time creator
+     <span class="org-comment-delimiter">;; </span><span class="org-comment">The following variables are defined in private-info.el</span>
+     disqus_shortname google_analytic_track_id_blog)))
+</pre>
+</div>
+
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp"># -*- mode: snippet -*-
+# name: new-notes
+# --
+# -*-mode:org<span class="org-comment-delimiter">;</span><span class="org-comment">coding:utf-8-*-</span>
+# Created:  `(format <span class="org-string">"%s %s"</span> (user-full-name) (format-time-string <span class="org-string">"%m/%d/%Y"</span>))`
+# Modified`(format <span class="org-string">": %s %s"</span> (user-full-name) (format-time-string <span class="org-string">"%m/%d/%Y %H:%M&gt;"</span>))`
+#+HTML_HEAD: &lt;link rel=<span class="org-string">"stylesheet"</span> type=<span class="org-string">"text/css"</span> href=<span class="org-string">"../cssjs/lgfang.css"</span> /&gt;
+#+INFOJS_OPT: toc:t tdepth:2 ltoc:nil view:showall path:../cssjs/org-info.js up:../index.html home:../../index.html
+#+OPTIONS: num:t
+
+#+TITLE: ${1:title}
+
+* ${2:header1}
+$0
+</pre>
+</div>
+</div>
+</div>

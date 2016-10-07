@@ -1,0 +1,99 @@
+---
+layout: post
+title: Two "time" in Shell
+tagline:
+categories: computer
+tags: [bash, shell]
+---
+
+<p>
+<code>time</code> is a Linux/Unix external command. It is also a bash keyword. Both are
+used for measuring time spent on certain process. But there are subtle
+differences.
+</p>
+
+<p>
+The most obvious difference is the output format. But more importantly, as an
+external command, <code>time</code> takes the program to be run as a parameter. Meanwhile,
+the builtin <code>time</code> is a modifier of the program (or pipe) to be run. As
+mentioned in man page:
+</p>
+<blockquote>
+<p>
+The use of `time' as a reserved word permits the timing of shell builtins, shell
+functions, and pipelines. An external `time' command cannot time these easily.
+</p>
+</blockquote>
+
+<p>
+Below are some examples:
+</p>
+
+<ul class="org-ul">
+<li>the difference of output format
+
+<pre class="example">
+[/home/lungangfang/tmp]type -a time
+time is a shell keyword
+time is /usr/bin/time
+[/home/lungangfang/tmp]./a.out
+stdout of program
+stderr of program
+[/home/lungangfang/tmp]time ./a.out
+stdout of program
+stderr of program
+
+real    0m0.001s
+user    0m0.000s
+sys     0m0.000s
+[/home/lungangfang/tmp]/usr/bin/time ./a.out
+stdout of program
+stderr of program
+0.00user 0.01system 0:00.00elapsed ?%CPU (0avgtext+0avgdata 0maxresident)k
+0inputs+0outputs (82major+11minor)pagefaults 0swaps
+</pre>
+</li>
+
+<li>the difference of IO redirection
+
+<pre class="example">
+# Built-in time
+[/home/lungangfang/tmp]time ./a.out 2&gt; time.out
+stdout of program
+
+real    0m0.021s
+user    0m0.000s
+sys     0m0.000s
+
+[/home/lungangfang/tmp]cat time.out
+stderr of program
+
+[/home/lungangfang/tmp](time ./a.out) 2&gt; time.out
+stdout of program
+
+[/home/lungangfang/tmp]cat time.out
+stderr of program
+
+real    0m0.001s
+user    0m0.000s
+sys     0m0.000s
+
+# External time
+[/home/lungangfang/tmp]/usr/bin/time ./a.out 2&gt; time.out
+stdout of program
+
+[/home/lungangfang/tmp]cat time.out
+stderr of program
+0.00user 0.00system 0:00.00elapsed ?%CPU (0avgtext+0avgdata 0maxresident)k
+0inputs+0outputs (82major+12minor)pagefaults 0swaps
+
+[/home/lungangfang/tmp]/usr/bin/time -o time.out ./a.out
+stdout of program
+stderr of program
+
+[/home/lungangfang/tmp]cat time.out
+0.00user 0.00system 0:00.00elapsed ?%CPU (0avgtext+0avgdata 0maxresident)k
+0inputs+0outputs (81major+15minor)pagefaults 0swaps
+</pre>
+</li>
+</ul>

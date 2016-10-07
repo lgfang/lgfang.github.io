@@ -1,0 +1,118 @@
+---
+layout: post
+title: Quit Nested SSH Sessions
+tagline:
+categories: computer
+tags: [shell, linux tools]
+---
+
+<p>
+When you want to quit a SSH session, you usually simply enter <code>exit</code>. But
+sometimes, there is no <code>exit</code> or alike command available, say, when a session is
+NOT a shell or not responding. In this case, we often use the escape sequence
+<code>~.</code> to terminate the connection. This solution, however, may cause some
+confusion when nested SSH sessions are involved. Suppose you ssh from host A to
+server B and then from B ssh to C, when you type the escape sequence <code>~.</code>, it is
+not the session from B to C but the session for A to B that quits. And, nested
+telnet sessions are in a similar situation. This blog is to answer why this
+happens and present a way to quit nested ssh/telnet sessions (from B to C).
+</p>
+
+<p>
+NOTE: <code>~.</code> is the default escape sequence that terminates ssh connections. To
+enter it, press <code>&lt;enter&gt;</code> then <code>~</code> then <code>.</code>. The default escape sequence for
+telnet connections is <code>^]q</code>, i.e. press <code>Ctrl+]</code> then press <code>q</code>.
+</p>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">The Reason</h2>
+<div class="outline-text-2" id="text-1">
+<pre class="example">
+ O  normal chars              normal chars            normal chars
+/|\ ------------&gt; localhost A ------------&gt; machine B ------------&gt; machine C
+/ \  keyboard                 ssh session1            ssh session2
+
+
+                               '~' NOT
+ O      ~                      fowarded
+/|\ ------------&gt; localhost A ------------&gt; machine B ------------&gt; machine C
+/ \  keyboard                 ssh session1            ssh session2
+                             enter command mode
+
+
+ O      .                       closed
+/|\ ------------&gt; localhost A -----X------&gt; machine B ------------&gt; machine C
+/ \  keyboard                 ssh session1            ssh session2
+</pre>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2">Solutions</h2>
+<div class="outline-text-2" id="text-2">
+</div><div id="outline-container-sec-2-1" class="outline-3">
+<h3 id="sec-2-1">Use different escape characters</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+All sessions use different escape characters. Or, disable escape in first the
+telnet/ssh session.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-shell-script">ssh -e none hostname            <span class="org-comment-delimiter"># </span><span class="org-comment">for ssh</span>
+telnet -E hostname              <span class="org-comment-delimiter"># </span><span class="org-comment">for telnet</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2-2" class="outline-3">
+<h3 id="sec-2-2">Or, in session A send escape characters to session B explicitly</h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+For nested telnet sessions:
+</p>
+
+<ol class="org-ol">
+<li>Enter command mode of telnet session A by typing an <code>^]</code>
+
+<pre class="example">
+ O   ^]                     NOT forwarded
+/|\ -------&gt; Telnet session --------&gt; Telnet session ---&gt; machine C
+/ \           on Machine A             On Machine B
+</pre>
+</li>
+
+<li>Type in command <code>send escape</code> so that session A send an escape character
+to session B (and quit command mode). Session B thereby enter command mode
+as well.
+
+<pre class="example">
+ O  "send escape"              ^]
+/|\ --------&gt; Telnet session --------&gt; Telnet session ---&gt; machine C
+/ \           on Machine A             On Machine B
+</pre>
+</li>
+
+<li>Type <code>q</code>. Since session A is now in normal mode, <code>q</code> is transfered to
+session B, which just entered command mode. Therefore, session B quit upon
+the receiving of <code>q</code>.
+
+<pre class="example">
+ O    'q'                      'q'
+/|\ --------&gt; Telnet session --------&gt; Telnet session -X-&gt; machine C
+/ \           on Machine A             On Machine B
+</pre>
+</li>
+</ol>
+
+
+<p>
+This technique works with ssh as well but is much simpler: press as many <code>~</code>
+as level of nest before <code>.</code> (by default, <code>~</code> is the escape character while
+<code>.</code> is to terminate ssh).
+</p>
+</div>
+</div>
+</div>

@@ -1,0 +1,45 @@
+---
+layout: post
+title: Tail Multiple Files Simultaneously
+tagline:
+categories: computer
+tags: [shell, linux tools]
+---
+
+<p>
+In real world projects, we often want to monitor multiple log files
+Simultaneously. This can be achieved much simpler than opening a handful of
+windows and tail one file in each of these windows.
+</p>
+
+<ul class="org-ul">
+<li>GNU tail
+
+<p>
+Now, the GNU tail (tail comes with Linux) supports multiple files as this:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-shell-script">tail -F file1 file2 ...
+</pre>
+</div>
+
+<p>
+This solution is simple and neat. It does not demand extra libraries or tools.
+However, there is a small downside: outputs from all files interleaved. When
+the logs scroll really fast, this would make it hard to identify the source
+(file) of each line.
+</p>
+</li>
+
+<li>multitail
+
+<p>
+Besides the "standard" tail, there is also a 3rd-party tool called <a href="http://www.vanheusden.com/multitail/download.php">multitail</a>.
+It splits a window into several panes and tail one file per pane. This makes
+its output much neater. The only issue is that you do not always have
+multitail at hand. "multitail" is not installed by default in most systems and
+you may have to install it as well as its dependencies from source code.
+</p>
+</li>
+</ul>

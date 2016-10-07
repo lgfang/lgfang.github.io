@@ -1,0 +1,58 @@
+---
+layout: post
+title: Enable Flycheck for KSH on Linux
+tagline:
+categories: computer
+tags: [emacs, shell]
+---
+
+<p>
+<a href="http://www.flycheck.org/">Flycheck</a> is a great Emacs extension for on-the-fly syntax check. It is easy to
+configure, use, and extend. With <a href="http://www.shellcheck.net/about.html">shellcheck</a> as the backend, it worked perfectly
+for my shell scripts until recently. The other day, I was not able to enable
+flycheck for a shell script. After some test, it is clear that flycheck only
+cannot handle ksh scripts. Luckily, the code of <code>flycheck.el</code> was very easy to
+follow. After digging into it, I soon figured out the root cause and a simple
+solution.
+</p>
+
+<p>
+The root cause is that, when using shellcheck as backend, flycheck supports
+ksh88 while ksh are mapped to pdksh (public domain ksh). Furthermore, as the
+code snippet indicates, this issue occurs only on Linux boxes.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp"><span class="org-comment-delimiter">;; </span><span class="org-comment">in flycheck.el</span>
+(<span class="org-keyword">defconst</span> <span class="org-variable-name">flycheck-shellcheck-supported-shells</span> '(bash ksh88 sh zsh)
+  <span class="org-doc">"Shells supported by Shellcheck."</span>)
+
+<span class="org-comment-delimiter">;; </span><span class="org-comment">in sh-script.el</span>
+(<span class="org-keyword">defcustom</span> <span class="org-variable-name">sh-alias-alist</span>
+  (append (<span class="org-keyword">if</span> (eq system-type 'gnu/linux)
+         '((csh . tcsh)
+           (ksh . pdksh))) <span class="org-comment-delimiter">; </span><span class="org-comment">&lt;----- OOPS</span>
+     <span class="org-comment-delimiter">;; </span><span class="org-comment">for the time being</span>
+     '((ksh . ksh88)
+           (bash2 . bash)
+       (sh5 . sh)))
+  <span class="org-comment-delimiter">;; </span><span class="org-comment">...</span>
+  )
+</pre>
+</div>
+
+<p>
+The "fix" is quite straightforward. And, it doesn't involve any modification of
+flycheck. Instead, I simply customize the <code>sh-alias-alist</code> by putting the
+following lines into my Emacs init file.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(<span class="org-keyword">when</span> (eq system-type 'gnu/linux)
+  (setq sh-alias-alist
+        '((csh . tcsh)
+          (ksh . ksh88)                 <span class="org-comment-delimiter">; </span><span class="org-comment">flycheck doesn't handle pdksh</span>
+          (bash2 . bash)
+          (sh5 . sh))))
+</pre>
+</div>

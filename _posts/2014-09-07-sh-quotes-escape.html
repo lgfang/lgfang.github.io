@@ -1,0 +1,530 @@
+---
+layout: post
+title: Understanding Quoting and Escaping in Bash Scripts
+tagline:
+categories: computer
+tags: [quoting, bash, shell, coding]
+---
+
+<p>
+According to my observation, quoting and escaping has long been one of the
+largest source of confusion with regard to shell scripting. Sometimes, even
+veterans are caught by its pitfalls. However, hard it might seem, it is actually
+easy to grasp if you understand the rule. The key to understanding is to keep in
+mind that <b>commands you write are interpreted in two steps</b>. In this long blog,
+I explain that and also summarize some frequently met escaping rules.
+</p>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">Questions</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+Let's start with a couple of questions.
+</p>
+
+<p>
+How to replace two-character the string <code>\A</code> with one character <code>-</code> using
+'sed'?
+</p>
+
+<p>
+Why all commands in the first group work while none in the second groups
+works?
+</p>
+<div class="org-src-container">
+
+<pre class="src src-shell-script"><span class="org-comment-delimiter"># </span><span class="org-comment">Works</span>
+<span class="org-builtin">echo</span> <span class="org-string">'hi \A there'</span> | sed <span class="org-string">'s/\\A/-/'</span>
+<span class="org-builtin">echo</span> <span class="org-string">'hi \A there'</span> | sed <span class="org-string">"s/\\\A/-/"</span>
+<span class="org-builtin">echo</span> <span class="org-string">'hi \A there'</span> | sed <span class="org-string">"s/\\\\A/-/"</span>
+<span class="org-builtin">echo</span> <span class="org-string">'hi \A there'</span> | sed s/<span class="org-string">\\\\</span>A/-/
+<span class="org-comment-delimiter"># </span><span class="org-comment">Oops</span>
+<span class="org-builtin">echo</span> <span class="org-string">'hi \A there'</span> | sed <span class="org-string">'s/\A/-/'</span>
+<span class="org-builtin">echo</span> <span class="org-string">'hi \A there'</span> | sed <span class="org-string">"s/\\A/-/"</span>
+<span class="org-builtin">echo</span> <span class="org-string">'hi \A there'</span> | sed s/<span class="org-string">\\</span>\A/-/
+</pre>
+</div>
+
+<p>
+Why things change when strings being processed change? Say, if the string to
+be replaced is not <code>\A</code> but <code>\$</code>, none of above commands works, even those
+which worked for <code>\A</code>. We have to add more backslashes.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-shell-script"><span class="org-builtin">echo</span> <span class="org-string">'hi \$ there'</span> | sed <span class="org-string">'s/\\\$/-/'</span>
+<span class="org-builtin">echo</span> <span class="org-string">'hi \$ there'</span> | sed <span class="org-string">"s/\\\\\\$/-/"</span>
+<span class="org-builtin">echo</span> <span class="org-string">'hi \$ there'</span> | sed <span class="org-string">"s/\\\\\\\$/-/"</span>
+</pre>
+</div>
+
+<p>
+Why sometimes adding one more backslash does not matter but other times it
+does?
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2">There are three steps</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+As I always say, whenever you type a command and press the &lt;enter&gt;, the
+command line is processed in following steps:
+</p>
+
+<ol class="org-ol">
+<li>The shell gets the command line and, if needed, do some "magic" stuff like
+expansion etc.;
+</li>
+
+<li>The shell evokes the command and passes <b>cooked</b> string to the command as
+argument(s);
+</li>
+
+<li>The command runs.
+</li>
+</ol>
+
+<p>
+Consequently, it is crucial to be very clear about what shell will do with the
+input string and what input the command expects. For instance:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-shell-script">find . -name *.txt              <span class="org-comment-delimiter"># </span><span class="org-comment">WRONG!</span>
+find . -name <span class="org-string">'*.txt'</span>            <span class="org-comment-delimiter"># </span><span class="org-comment">Correct</span>
+ls *.txt                        <span class="org-comment-delimiter"># </span><span class="org-comment">Correct</span>
+ls <span class="org-string">'*.txt'</span>                      <span class="org-comment-delimiter"># </span><span class="org-comment">WRONG!</span>
+</pre>
+</div>
+<p>
+Why we shall quote the operand of 'find' but not that of 'ls'? The reason is
+that we want to pass '*.txt' to 'find' literally while having shell to do file
+name globing to '*.txt' before passing it to 'ls'. In other words,
+</p>
+<ul class="org-ul">
+<li>'find' expects a regexp string.
+</li>
+<li>'ls' expects a list of file names.
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3">Character escaping can happen at both steps</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+When it comes to character escaping, it can happend at both steps as well.
+Take 'echo' for example, when we type the following line on command line, the
+five-character string (' a \ n b ') is processed by shell in the first place
+and then passed to 'echo'. 'echo' then process it again.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-shell-script"><span class="org-builtin">echo</span> -e <span class="org-string">'a\nb'</span>
+</pre>
+</div>
+
+<p>
+Another example is that both shell and 'sed' handle character escaping.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-shell-script">sed <span class="org-string">'s/\A/nul/'</span> input.txt
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-4" class="outline-2">
+<h2 id="sec-4">Escaping rules of 'bash'</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+As we now see that character escaping can happen at different stages of
+command processing, the key to write commands involve character escaping
+correctly is to understand what the escaping rules for each stage are. In this
+section, let's take a look at bash.
+</p>
+
+<blockquote>
+<p>
+Enclosing characters in single quotes (`'') preserves the literal value of
+each character within the quotes. A single quote may not occur between single
+quotes, even when preceded by a backslash.
+</p>
+</blockquote>
+
+<blockquote>
+<p>
+Enclosing characters in double quotes (`"') preserves the literal value of all
+characters within the quotes, with the exception of `$', ``', `\'
+</p>
+
+<p>
+&#x2026;
+</p>
+
+<p>
+The backslash retains its special meaning only when followed by one of the
+following characters: `$', ``', `"', `\', or `newline'
+</p>
+
+<p>
+&#x2026;
+</p>
+</blockquote>
+
+<p>
+NOTE:
+</p>
+<ul class="org-ul">
+<li>NOTHING within single quotes will be escaped.
+
+<pre class="example">
+$ echo It\'s hard    # &lt;--- works
+It's hard
+
+$ echo "It's hard"   # &lt;--- looks better
+It's hard
+
+$ echo 'It\'s hard'' # &lt;--- OOPS (also note the trailling quote)
+It\s hard
+
+$ echo 'It'\''s hard'# &lt;--- if you do need "nested" single quote
+It's hard
+</pre>
+</li>
+
+<li><code>newline</code> here means NOT <code>\n</code> but the newline itself (i.e. what you got when
+you press &lt;enter&gt; key.)
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-5" class="outline-2">
+<h2 id="sec-5">Escaping rules of 'echo'</h2>
+<div class="outline-text-2" id="text-5">
+<blockquote>
+<p>
+`echo'
+</p>
+
+<p>
+&#x2026; If the `-e' option is given, interpretation of the following
+backslash-escaped characters is enabled&#x2026;.
+</p>
+
+<p>
+`\n'
+      newline
+</p>
+
+<p>
+`\\'
+      backslash
+</p>
+
+<p>
+`\a'
+      alert (bell)
+</p>
+</blockquote>
+
+<p>
+NOTE:
+</p>
+<ul class="org-ul">
+<li>Escaping only happens when called with <code>-e</code>.
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-6" class="outline-2">
+<h2 id="sec-6">Some examples</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+This section presents some examples to deepen your understanding of
+aforementioned rules. If you are familiar with them, feel free to skip this
+section.
+</p>
+</div>
+
+<div id="outline-container-sec-6-1" class="outline-3">
+<h3 id="sec-6-1">How bash escapes characters</h3>
+<div class="outline-text-3" id="text-6-1">
+<p>
+Note that since we are focused on examine how backslash works in <code>bash</code>, we
+are running 'echo' <b>WITHOUT</b> <code>-e</code> to avoid confusion might be caused by
+escapes done by 'echo'.
+</p>
+
+<pre class="example">
+$ echo a\
+&gt; b
+ab
+
+$ echo "a\
+&gt; b"
+ab
+
+$ echo 'a\
+&gt; b'
+a\
+b
+
+$ echo a\\
+a\
+
+$ echo a\nb
+anb
+
+$ echo "a\nb"
+a\nb
+
+$ echo 'a\nb'
+a\nb
+
+$ echo a\\nb
+a\nb
+
+$ echo "a\\nb"
+a\nb
+
+$ echo 'a\\nb'
+a\\nb
+</pre>
+</div>
+</div>
+
+<div id="outline-container-sec-6-2" class="outline-3">
+<h3 id="sec-6-2">How echo escape works</h3>
+<div class="outline-text-3" id="text-6-2">
+<p>
+Since, for bash, nothing within single quotes escaped, to examine how escape
+works in <code>echo</code>, we enclose the strings within <b>SINGLE QUOTES</b> to avoid
+confusion.
+</p>
+
+<pre class="example">
+$ echo -e 'a\'
+a\
+
+$ echo -e 'a\\'
+a\
+
+$ echo -e 'a\nb'
+a
+b
+
+$ echo -e 'a\\nb'
+a\nb
+
+$ echo -e 'a\\\nb'
+a\
+b
+
+$ echo -e 'a\\\\nb'
+a\\nb
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-7" class="outline-2">
+<h2 id="sec-7">A case study</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+Now, let's do an exercise. What should I do if I want to write a string some
+like this into a file?
+</p>
+<pre class="example">
+cmd 1 \
+cmd 2
+</pre>
+
+<p>
+Before looking at the answer, check the output of underneath commands and
+explain why.
+</p>
+<pre class="example">
+$ echo -e "1- a \\ b"; echo -e "2- a \n b"; echo -e "3- a \\\n b"
+1- a \ b
+2- a
+ b
+3- a \n b
+</pre>
+
+<p>
+More confusing things:
+</p>
+<pre class="example">
+$ echo -e "1: a \\\n b"; echo -e "2: a \\\\n b"; echo -e "3: a \\\\\n b"
+1: a \n b
+2: a \n b
+3: a \
+ b
+</pre>
+
+<p>
+Here is the answer:
+</p>
+<pre class="example">
+$ cmd1=hi; cmd2=there
+
+$ echo -e "$cmd1\\\\\n$cmd2"
+hi\
+there
+
+# bash:    \\ \\ \n -&gt; \\\n
+# echo -e: \\ \n -&gt; \ newline
+
+$ echo -e "$cmd1\\\\n$cmd2"
+hi\nthere
+
+# bash:    \\ \\ n -&gt; \\n
+# echo -e: \\ n -&gt; \ n
+
+$ echo -e "$cmd1\\\n$cmd2"
+hi\nthere
+
+# bash:    \\ \n -&gt; \\n
+# echo -e: \\ n -&gt; \ n
+</pre>
+</div>
+</div>
+
+<div id="outline-container-sec-8" class="outline-2">
+<h2 id="sec-8">Answer to the opening questions</h2>
+<div class="outline-text-2" id="text-8">
+<p>
+The key is understand escape rules of both 'bash' and 'sed'. That way, we can
+split the task into two steps and figure out the expected input for each step.
+Here we go!
+</p>
+
+<ul class="org-ul">
+<li>For <code>\A</code> to <code>-</code>.
+
+<ol class="org-ol">
+<li>The command (string) passed to 'sed'
+
+<p>
+It should be <code>s/\\A/-/</code>.
+</p>
+
+<p>
+The command is some like <code>s/from/to/</code> but <code>s/\A/-/</code> is incorrect since
+'sed' will interpret the <code>\</code> as an escape character. Hence, we need to
+use an extra backslash to escape it.
+</p>
+</li>
+
+<li>The string passed to 'bash', i.e. what to type on command line.
+
+<p>
+This depends on quotes you choose.
+</p>
+
+<ul class="org-ul">
+<li>If use single quotes, since nothing in single quotes will be escaped by
+bash. We can simply type
+<div class="org-src-container">
+
+<pre class="src src-shell-script">sed <span class="org-string">'s/\\A/-/'</span>
+</pre>
+</div>
+</li>
+
+<li>If use double quotes, we'll need to add one backslash escape a
+backslash. Consequently, number of backslashes are doubled.
+<div class="org-src-container">
+
+<pre class="src src-shell-script"><span class="org-builtin">echo</span> <span class="org-string">'hi \A there'</span> | sed <span class="org-string">"s/\\\\A/-/"</span>
+</pre>
+</div>
+</li>
+</ul>
+</li>
+</ol>
+</li>
+
+<li>For <code>\$</code> to <code>-</code>
+
+<ol class="org-ol">
+<li>The command (string) passed to 'sed'
+
+<p>
+It should be <code>s/\\\$/-</code>. The "from" string is <code>\$</code>, but since both <code>\</code>
+and <code>$</code> should be escaped the expected string becomes <code>\\\$</code>.
+</p>
+</li>
+
+<li>The string passed to 'bash', i.e. what to type on command line.
+
+<p>
+Again, the type of quotes we choose decides if we may need to escape
+backslashes and dollar sign or not. Hence either of the following is
+correct:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-shell-script">sed <span class="org-string">'s/\\\$/-/'</span>
+sed <span class="org-string">"s/\\\\\\\$/-/"</span>
+</pre>
+</div>
+</li>
+</ol>
+</li>
+</ul>
+
+<p>
+Exercises:
+</p>
+<ul class="org-ul">
+<li>Explain why the commands without quotes listed at the beginning of this blog
+work/do not work?
+</li>
+<li>Why sometimes use one less backslashes also works?
+</li>
+<li>Notice that both of the following commands (six and seven backslashes) work.
+But, if <code>$</code> is followed by other character(s), using six backslashes will
+result in error. Why?
+<div class="org-src-container">
+
+<pre class="src src-shell-script"><span class="org-builtin">echo</span> <span class="org-string">'hi \$name there'</span> | sed <span class="org-string">"s/\\\\\\\$name/-/"</span>
+</pre>
+</div>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-9" class="outline-2">
+<h2 id="sec-9">Bash ansi-c quoting</h2>
+<div class="outline-text-2" id="text-9">
+<p>
+Just FYI. In addition to single quotes and double quotes, bash also supports
+ansi-c quotes, which can be really handy sometimes.
+</p>
+
+<blockquote>
+<p>
+Words of the form `$'STRING'' are treated specially. The word expands to
+STRING, with backslash-escaped characters replaced as specified by the ANSI C
+standard.
+</p>
+</blockquote>
+
+<pre class="example">
+$ cmd1=hi; cmd2=there; escaped_newline=$'\\\n'
+
+$ echo "$cmd1 $escaped_newline $cmd2"
+hi \
+ there
+</pre>
+</div>
+</div>

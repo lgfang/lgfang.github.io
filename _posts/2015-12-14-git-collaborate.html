@@ -1,0 +1,88 @@
+---
+layout: post
+title: Git Work Flow for Non-trivial Tasks
+tagline:
+categories: computer
+tags: [git, work flow]
+---
+
+
+<div class="figure">
+<p><img src="http://lgfang.github.io/images/git-collaborate.png" alt="git-collaborate.png" width="1000" />
+</p>
+</div>
+
+<p>
+In past, we were often confronted with two issues when dealing with non-trivial
+tasks (say, big features) since one and only one commit was allowed, and only at
+the time when the feature was accomplished.
+</p>
+
+<ul class="org-ul">
+<li>Hard to track/backup our changes during development.
+
+<p>
+Most of us would like to be able to make a check point as we made a little
+progress. That way, had there been anything wrong, we could rollback to
+previous check point easily. But, since there was only one commit allowed,
+people had to backup/restore code manually.
+</p>
+</li>
+
+<li>Hard to collaboration in terms of coding
+
+<p>
+Usually, there were more than one people working on the task and hence the
+needs to sync changes among teammates. With SVN etc. they have to either share
+an account and work on the same copy of code or manually distribute and apply
+changes from each other.
+</p>
+</li>
+</ul>
+
+<p>
+Fortunately, with git, those two issues are no long issues at all. You simply
+</p>
+<ol class="org-ol">
+<li>Create a branch for the task you are working on.
+</li>
+<li>On that feature branch, commit as you want.
+</li>
+<li>Check out the branch into which your feature code should goes
+</li>
+<li>Then, run <code>git merge --squash fid-A</code> when the feature is done
+</li>
+<li><code>git commit</code>.
+</li>
+</ol>
+
+<p>
+Later on, whenever you make more modification in the feture branch, you shall
+redo the merge squash.
+</p>
+<ol class="org-ol">
+<li>Discard previous merge: <code>git reset --hard HEAD^</code> <b>on the release branch</b>
+</li>
+<li>Redo merge squash: <code>git merge --squash fid-A</code>
+</li>
+<li>Redo commit: <code>git commit</code> If you are using gerrit for code inspection, you
+shall commit the change <b>with previous commit ID</b>.
+</li>
+</ol>
+
+<p>
+NOTE:
+</p>
+<ul class="org-ul">
+<li>Creating the feature branch on official repository would be the best as the
+official repository is usually regularly backed-up by IT and accessable by all
+team members. However, if you are not allowed to do that, you can create the
+branch locally and have your teammates clone <b>your repository</b>. Thanks to the
+distribute nature of git, you needn't do anything to setup your local
+repository for that.
+</li>
+</ul>
+
+<p>
+Reference: <a href="https://sandofsky.com/blog/git-workflow.html">Understanding the Git Workflow</a>
+</p>

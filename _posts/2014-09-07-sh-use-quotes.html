@@ -1,0 +1,162 @@
+---
+layout: post
+title: Using Quotes Makes Your Scripts More Robust
+tagline:
+categories: computer
+tags: [quoting, bash, shell, coding]
+---
+
+<p>
+Many of those who are new to shell scripting often forget to quote strings or
+variables and hence embed bugs in their scripts. It makes things worse that
+these bugs are usually hard to reproduce though it is indeed very obvious by
+examining the scripts directly.
+</p>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">Quotes ensure strings recognized correctly</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+Without quotes, empty strings and strings with white-space cause problems.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-shell-script">[ <span class="org-string">"$VAR"</span> == abc ]            <span class="org-comment-delimiter"># </span><span class="org-comment">OK</span>
+[ $<span class="org-variable-name">VAR</span> == abc ]              <span class="org-comment-delimiter"># </span><span class="org-comment">OOPS</span>
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">If VAR == ""</span>
+<span class="org-comment-delimiter"># </span><span class="org-comment">==&gt; [ == abc ]</span>
+<span class="org-comment-delimiter"># </span><span class="org-comment">==&gt; -bash: [: ==: unary operator expected</span>
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">If VAR == "a b c"</span>
+<span class="org-comment-delimiter"># </span><span class="org-comment">==&gt; [ a b c = abc ]</span>
+<span class="org-comment-delimiter"># </span><span class="org-comment">bash: [: too many arguments</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2">Quotes preserve white-space in strings</h2>
+<div class="outline-text-2" id="text-2">
+<div class="org-src-container">
+
+<pre class="src src-shell-script"><span class="org-comment-delimiter"># </span><span class="org-comment">ls | grep -i linux              # OK</span>
+<span class="org-variable-name">files</span>=$(<span class="org-sh-quoted-exec">ls</span>)
+<span class="org-builtin">echo</span> <span class="org-string">"$files"</span> | grep -i linux   <span class="org-comment-delimiter"># </span><span class="org-comment">OK</span>
+<span class="org-builtin">echo</span> $<span class="org-variable-name">files</span> | grep -i linux     <span class="org-comment-delimiter"># </span><span class="org-comment">OOPS, everything is in the same line</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3">Quotes prevent shell expansions and substitutions</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+This is based on a real-world bug. A person spent days trying to reproduce a
+bug but just all in vein. In fact the script is rather short and simple. When
+that guy turned to me at last, I figured out the root cause instantly by
+skiming the script. Obviously, the poor guy should had used quotes in his
+script.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-shell-script">cat input | tr [A-Z] [a-z]      <span class="org-comment-delimiter"># </span><span class="org-comment">OOPS</span>
+</pre>
+</div>
+
+<p>
+The issue here is that <code>[A-Z]</code> and <code>[a-z]</code> might be expanded by shell based on
+file name globing. Hence the result of this command line depends files under
+"current directory".
+</p>
+
+<ul class="org-ul">
+<li>If there is no file named by a single alphabet character, the command line
+works as intended.
+</li>
+
+<li>If there are some files of this pattern
+
+<ul class="org-ul">
+<li>You'll get an error message if you are lucky. You are lucky in the sense
+that you know there is something wrong. For instance, the actual command
+get run after shell expansion might be this:
+<div class="org-src-container">
+
+<pre class="src src-shell-script">cat input | tr [A-Z] a b c <span class="org-comment-delimiter"># </span><span class="org-comment">you are lucky as an error msg will</span>
+</pre>
+</div>
+</li>
+
+<li>There are also chances that the command still runs but not the way you
+intended. This is a more dangerous situation since you are aware of the
+error. For example, the actual command run might be:
+<div class="org-src-container">
+
+<pre class="src src-shell-script">show up ==&gt; cat input | tr [A-Z] a <span class="org-comment-delimiter"># </span><span class="org-comment">OOPS</span>
+</pre>
+</div>
+<p>
+This is a valid command, hence there will be no error message. But this is
+not what you want.
+</p>
+</li>
+</ul>
+</li>
+</ul>
+
+<p>
+The correct command is
+</p>
+<div class="org-src-container">
+
+<pre class="src src-shell-script">cat input | tr <span class="org-string">'[A-Z]'</span> <span class="org-string">'[a-z]'</span>  <span class="org-comment-delimiter"># </span><span class="org-comment">OK</span>
+cat input | tr <span class="org-string">'A-Z'</span> <span class="org-string">'a-z'</span>      <span class="org-comment-delimiter"># </span><span class="org-comment">In fact, this is the correct usage of 'tr'</span>
+</pre>
+</div>
+
+<p>
+When running this kind of commands remotely, it is even trickier as both local
+file names and remote file names may impact the result.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-shell-script">ssh 135.1.2.3 <span class="org-string">'echo "[abcd]"'</span> <span class="org-comment-delimiter"># </span><span class="org-comment">OK</span>
+ssh 135.1.2.3 echo [abcd]     <span class="org-comment-delimiter"># </span><span class="org-comment">WRONG</span>
+ssh 135.1.2.3 echo <span class="org-string">"[abcd]"</span>   <span class="org-comment-delimiter"># </span><span class="org-comment">WRONG</span>
+ssh 135.1.2.3 <span class="org-string">'echo [abcd]'</span>   <span class="org-comment-delimiter"># </span><span class="org-comment">WRONG</span>
+</pre>
+</div>
+
+<p>
+Think about why the later three one are wrong.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-4" class="outline-2">
+<h2 id="sec-4">When to use 'eval'</h2>
+<div class="outline-text-2" id="text-4">
+<div class="org-src-container">
+
+<pre class="src src-shell-script"><span class="org-comment-delimiter">#</span><span class="org-comment">!/bin/</span><span class="org-keyword">bash</span>
+
+<span class="org-variable-name">foo</span>=<span class="org-string">"hello    world"</span>
+<span class="org-variable-name">bar</span>=<span class="org-string">"[$foo]"</span>
+<span class="org-builtin">echo</span> <span class="org-string">"$bar"</span>
+<span class="org-comment-delimiter"># </span><span class="org-comment">==&gt; [hello    world], this is expected</span>
+
+<span class="org-variable-name">hello</span>=<span class="org-string">"echo $bar"</span>
+$<span class="org-variable-name">hello</span>                          <span class="org-comment-delimiter"># </span><span class="org-comment">==&gt; [hello world], spaces squeezed</span>
+
+<span class="org-variable-name">hello</span>=<span class="org-string">"echo '$bar'"</span>
+$<span class="org-variable-name">hello</span>                          <span class="org-comment-delimiter"># </span><span class="org-comment">==&gt; '[hello world]', still not work</span>
+
+<span class="org-builtin">eval</span> <span class="org-string">"$hello"</span>                   <span class="org-comment-delimiter"># </span><span class="org-comment">==&gt; [hello    world], yes!</span>
+</pre>
+</div>
+</div>
+</div>

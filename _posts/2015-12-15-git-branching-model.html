@@ -1,0 +1,100 @@
+---
+layout: post
+title: Git Branching Model
+tagline:
+categories: computer
+tags: [git, work flow]
+---
+
+
+<div class="figure">
+<p><img src="http://lgfang.github.io/images/git-release-branches.png" alt="git-release-branches.png" width="1000" />
+</p>
+</div>
+
+<p>
+Above digram illustrates the git branching model from a release manager's
+perspective. Basically,
+</p>
+
+<ol class="org-ol">
+<li>The "master" branch is always stable (it is not necessary, but helps to
+understand the topology).
+</li>
+
+<li>A release branches off from the master for release development.
+</li>
+
+<li>Code changes are merged back (<code>git merge --no-ff</code>) when development is
+finished.
+<ul class="org-ul">
+<li>NOTE: Once a branch diverges from the master branch (i.e. it is no longer
+the "current" release), code changes are no longer merged back. For
+example:
+<ul class="org-ul">
+<li>rel-2.6 code is not back-ported to master once rel-2.6 is delivered and
+rel-3.0 is cut.
+</li>
+<li>If there is a rel-2.5.x branch, its code is merged to rel-2.5 but not
+master.
+</li>
+</ul>
+</li>
+</ul>
+</li>
+
+<li>The release branch is left open for <b>bug fixes only</b>.
+</li>
+
+<li>Bug fixes go into the release branch <b>and</b> <code>cherry-pick</code> into all other
+applicable branches.
+<ul class="org-ul">
+<li>Master branch does not <code>cherry-pick</code> bug fixes, as it will get the fixes
+eventually by merging currently developing release branch later.
+</li>
+</ul>
+</li>
+
+<li>A sub-release branches off the release branch in a similar way if new
+features are needed after the delivery of that release.
+</li>
+</ol>
+
+<p>
+Naming convention:
+</p>
+<ul class="org-ul">
+<li>Branches
+<ul class="org-ul">
+<li>Release branches: rel-&lt;release number&gt;. For example: rel-2.5, rel-2.0.1
+</li>
+<li>Feature branches: fid-&lt;feature id&gt;. For example: fid-14894
+</li>
+<li>Bug branches: bug-&lt;ticket number&gt;.
+</li>
+</ul>
+</li>
+<li>Tags
+<ul class="org-ul">
+<li>Release tags: tag-rel&lt;release number&gt;. Example: tag-rel2.5
+</li>
+<li>Daily build/smoke test tags: tag-&lt;release number&gt;-&lt;build number&gt;. Example:
+tag-2.5-b85
+</li>
+</ul>
+</li>
+</ul>
+
+<p>
+References:
+</p>
+<ul class="org-ul">
+<li><a href="http://nvie.com/posts/a-successful-git-branching-model/">A successful Git branching model</a>
+</li>
+<li><a href="http://scottchacon.com/2011/08/31/github-flow.html">github flow</a>
+</li>
+<li><a href="http://git-scm.com/book/en/Git-Branching-Branching-Workflows">Branching workflows</a>
+</li>
+<li><a href="http://git-scm.com/book/en/Distributed-Git-Distributed-Workflows">Distributed workflows</a>
+</li>
+</ul>

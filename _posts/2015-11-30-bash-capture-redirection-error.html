@@ -1,0 +1,24 @@
+---
+layout: post
+title: Capture Error of IO Redirection
+tagline:
+categories: computer
+tags: [bash, shell, coding]
+---
+
+<p>
+Most BASH programmers know how to redirect stderr of a command. But, what if the
+IO redirection itself failed? Though it is not frequently used, capturing
+possible error message of IO redirection sometimes can be useful. This can be
+done by group the whole commandline (or pipe) and redirect it as shown below.
+</p>
+
+<pre class="example">
+$ date &gt; log_file/doet/not/exist 2&gt;&amp;1
+-bash: file/doet/not/exist: No such file or directory
+
+$ msg=$( (date &gt; log_file/doet/not/exist 2&gt;&amp;1) 2&gt;&amp;1)   # &lt;-- error captured:
+
+$ echo $msg
+-bash: log_file/doet/not/exist: No such file or directory
+</pre>

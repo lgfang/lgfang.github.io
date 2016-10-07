@@ -1,0 +1,40 @@
+---
+layout: post
+title: Risk of printf(str)
+tagline:
+categories: computer
+tags: [c, coding]
+---
+
+<p>
+<span class="underline">The C Programming Language 2nd</span> mentioned a subtle issue of <code>printf</code>: even if
+there is only one literal string to printf, do print it with format specifier
+"%s". The rule applies other similar print functions as well. The reason? Read
+on.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-c"><span class="org-preprocessor">#include</span> <span class="org-string">&lt;stdio.h&gt;</span>
+
+<span class="org-type">int</span> <span class="org-function-name">main</span>()
+{
+        <span class="org-type">char</span>* <span class="org-variable-name">str</span>= <span class="org-string">"a string with % may not work\n"</span>;
+        printf (<span class="org-string">"%s"</span>, str);
+        printf (str);
+        <span class="org-keyword">return</span> 0;
+}
+</pre>
+</div>
+
+<pre class="example">
+[/home/lungangfang/tmp]./a.out
+a string with % may not work
+a string with Successay not work
+
+[/home/lungangfang/tmp]gcc --version
+gcc (GCC) 3.2.3 20030502 (Red Hat Linux 3.2.3-20)
+Copyright (C) 2002 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+</pre>

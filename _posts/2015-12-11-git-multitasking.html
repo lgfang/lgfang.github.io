@@ -1,0 +1,46 @@
+---
+layout: post
+title: Work on Multiple Tasks Concurrently with a Single Git Clone
+tagline:
+categories: computer
+tags: [git, gerrit, linux tools, work flow]
+---
+
+
+<div class="figure">
+<p><img src="http://lgfang.github.io/images/git-multitasking.png" alt="git-multitasking.png" width="1000" />
+</p>
+</div>
+
+<p>
+Suppose you are working on a bug 1234 on release 5.0 and now you are assigned
+another task, say feature A, on this release. Should you clone another copy of
+the repository to start coding for feature A? No! All that you need to do is
+create a branch based on rel-2.5 and work on that "task branch". This approach
+works even if you are using "git + gerrit".
+</p>
+
+<p>
+Let's assume that you've already commit code for bug 1234 on rel-2.5 locally,
+awaiting approval of code review. You can create the task branch for feature A
+this way:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-shell-script-mode">git branch feature-A rel-2.5
+git checkout feature-A
+</pre>
+</div>
+
+<p>
+In fact, as illustrated in the above picture, this approach enables you to work
+on more than two tasks concurrently
+</p>
+
+<p>
+If you are using gerrit as the code inspection tool, you submit code review as
+usual (i.e. <code>git push origin HEAD:refs/for/rel-2.5</code>) even if you are working on
+a task branch. This works because the target is explicitly specified
+(<code>HEAD:refs/for/rel-2.5</code>).
+</p>

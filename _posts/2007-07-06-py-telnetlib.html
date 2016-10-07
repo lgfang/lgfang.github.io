@@ -1,0 +1,86 @@
+---
+layout: post
+title: Meaning of Read Functions in telnetlib
+tagline:
+categories: computer
+tags: [python, coding]
+---
+
+<p>
+Recently, I was writing a test script using telnetlib of Python. However, the
+family of read functions can be really confusing, say, what is lazy read, what
+is eager read? Neither Python document nor google gives many clue. Fortunately,
+the library is open-source and very easy to follow. Here is what I got after
+reading the source.
+</p>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">How telnetlib works</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+To understand the meaning of each read function in the telnetlib, we need to
+understand how telnetlib works. First, telnetlib receives packets from
+internet using socket connections. Then, it stores the data into its raw
+queue. After that, the library cooks (parse/handle) the data according to
+telnet protocol, putting result into its cooked queue.
+</p>
+
+<pre class="example">
+---------,      ,----------,      ,-----,      ,--------,      ,-----------,
+ network |=====&gt;|socket buf|=====&gt;|raw-q|=====&gt;|cooked-q|=====&gt;|application|
+---------`      `----------`      `-----`      `--------`      `-----------`
+   |               |                 |              |               |
+   |               |                 |              |               |
+   |               |                 |              |---------------|
+   |               |                 |               read_very_lazy |
+   |               |                 |                              |
+   |               |                 |------------------------------|
+   |               |                          read_lazy             |
+   |               |                                                |
+   |               |------------------------------------------------|
+   |                          read_very_eager/read_eager            |
+   |                                                                |
+   |----------------------------------------------------------------|
+   |    read_until/read_all/read_some/expect                        |
+</pre>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2">Meaning of read functions</h2>
+<div class="outline-text-2" id="text-2">
+<dl class="org-dl">
+<dt> read_very_lazy </dt><dd>read cooked data from cooked queque
+</dd>
+
+<dt> read_lazy </dt><dd>If there is data in raw queue, read it. Then, read from cooked
+queue.
+</dd>
+
+<dt> read_eager </dt><dd>Read from socket buffer using non-blocking mode<sup><a id="fnr.1" name="fnr.1" class="footref" href="#fn.1">1</a></sup> first.
+Then, read from cooked queue.
+</dd>
+
+<dt> read_very_eager </dt><dd>Similar with read_eager. The difference is that
+read_eager returns so long as it read something from cooked queue while
+read_very_eager tries to read as much as possible.
+</dd>
+
+<dt> others </dt><dd>The remaining read functions basically block until they received
+designated data.
+</dd>
+</dl>
+</div>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" name="fn.1" class="footnum" href="#fnr.1">1</a></sup> <p class="footpara">
+This "non-blocking" is about normal data, as explained in Python document:
+"Do not block unless in the midst of an IAC sequence."
+</p></div>
+
+
+</div>
+</div>

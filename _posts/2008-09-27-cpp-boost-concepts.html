@@ -1,0 +1,299 @@
+---
+layout: post
+title: Check Template Parameters Using "concept"
+tagline:
+categories: computer
+tags: [c++, coding]
+---
+
+<p>
+I believe every serious C++ programmer has used template more or less (at least
+the STL). I also believe that every one that used template would be "impressed"
+by compilation error messages for templates. An other issue of template
+compilation is that if it is not used, it is not instantiated and hence no error
+check. The Boost Concept Check Library (BCCL) somehow addressed these two
+issues.
+</p>
+
+<p>
+In my opinion, the "concept" itself is an important concept of generic
+programming. Generic programming is to separate algorithms and data types.
+Algorithms are developed to handle data types comply with certain "concept",
+i.e. a set of traits. However, C++ programming language itself does not have
+"concept". Therefore, there is no built-in support of specifying "concept".
+</p>
+
+<p>
+A good new is that SGI STL comes with g++ partly adopted BCCL and hence can be
+used for this purpose. Following examples demonstrate how to make use of it.
+Most of the examples come from <code>bits/boost_concept_check.h</code> and
+<code>bits/concept_check.h</code> (NOTE: all code snippets excerpted in the post are
+modified to better for the sake of simplicity.)
+</p>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">Check concept with a function</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+We found that <code>std::min_element</code> specifies concept requirement:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-c++"><span class="org-keyword">template</span>&lt;<span class="org-keyword">typename</span> <span class="org-type">_ForwardIter</span>&gt;
+  <span class="org-type">_ForwardIter</span>
+  <span class="org-function-name">min_element</span>(<span class="org-type">_ForwardIter</span> <span class="org-variable-name">__first</span>, <span class="org-type">_ForwardIter</span> <span class="org-variable-name">__last</span>)
+  {
+    <span class="org-comment-delimiter">// </span><span class="org-comment">concept requirements</span>
+    __glibcpp_function_requires(<span class="org-type">_ForwardIteratorConcept</span>&lt;<span class="org-type">_ForwardIter</span>&gt;)
+    __glibcpp_function_requires(<span class="org-type">_LessThanComparableConcept</span>&lt;
+      <span class="org-keyword">typename</span> <span class="org-constant">iterator_traits</span>&lt;<span class="org-type">_ForwardIter</span>&gt;::<span class="org-type">value_type</span>&gt;)
+    <span class="org-comment-delimiter">// </span><span class="org-comment">...</span>
+  }
+</pre>
+</div>
+
+<p>
+Follow the hint, we would see this:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-c++"><span class="org-comment-delimiter">// </span><span class="org-comment">lgfang: the "ifndef" indicates that we must compile with</span>
+<span class="org-comment-delimiter">// </span><span class="org-comment">"-D_GLIBCPP_CONCEPT_CHECKS" (unless we include bits/boost_concept_check.h</span>
+<span class="org-comment-delimiter">// </span><span class="org-comment">directly cause that file does not contain such ifdef.</span>
+
+<span class="org-preprocessor">#if</span><span class="org-negation-char"><span class="org-preprocessor">n</span></span><span class="org-preprocessor">def</span> _GLIBCPP_CONCEPT_CHECKS
+
+<span class="org-preprocessor">#define</span> <span class="org-function-name">__glibcpp_function_requires</span>(...)
+<span class="org-preprocessor">#define</span> <span class="org-function-name">__glibcpp_class_requires</span>(<span class="org-variable-name">_a</span>,<span class="org-variable-name">_b</span>)
+
+<span class="org-preprocessor">#else</span> <span class="org-comment-delimiter">// </span><span class="org-comment">the checks are on</span>
+
+<span class="org-preprocessor">#include</span> <span class="org-string">&lt;bits/boost_concept_check.h&gt;</span>
+
+<span class="org-preprocessor">#define</span> <span class="org-function-name">__glibcpp_function_requires</span>(...)                                 \
+            <span class="org-constant">__gnu_cxx</span>::<span class="org-type">__function_requires</span>&lt; <span class="org-constant">__gnu_cxx</span>::__VA_ARGS__ &gt;();
+<span class="org-preprocessor">#define</span> <span class="org-function-name">__glibcpp_class_requires</span>(<span class="org-variable-name">_a</span>,<span class="org-variable-name">_C</span>)                                  \
+            _GLIBCPP_CLASS_REQUIRES(_a, __gnu_cxx, _C);
+<span class="org-preprocessor">#endif</span> <span class="org-comment-delimiter">// </span><span class="org-comment">enable/disable</span>
+</pre>
+</div>
+
+<div class="org-src-container">
+
+<pre class="src src-c++"><span class="org-keyword">namespace</span> <span class="org-constant">__gnu_cxx</span> { <span class="org-comment-delimiter">// </span><span class="org-comment">lgfang: it is regarded as a gnu extension</span>
+
+<span class="org-preprocessor">#define</span> <span class="org-variable-name">_IsUnused</span> <span class="org-keyword">__attribute__</span> ((__unused__))
+    <span class="org-comment-delimiter">// </span><span class="org-comment">lgfang:__attribute__ ((__unused__)) is a gnu extension, tells compiler</span>
+    <span class="org-comment-delimiter">// </span><span class="org-comment">NOT to report error when corresponding variable is not used.</span>
+
+<span class="org-keyword">template</span> &lt;<span class="org-keyword">class</span> <span class="org-type">_Concept</span>&gt;
+<span class="org-keyword">inline</span> <span class="org-type">void</span> <span class="org-function-name">__function_requires</span>()
+<span class="org-comment-delimiter">//</span><span class="org-comment">lgfang: this is a function (hence the "function" in its name), therefore it</span>
+<span class="org-comment-delimiter">//</span><span class="org-comment">can used (called) in functions but NOT in class definitions.</span>
+{
+  <span class="org-type">void</span> (<span class="org-constant">_Concept</span>::*<span class="org-variable-name">__x</span>)() _IsUnused = &amp;<span class="org-constant">_Concept</span>::__constraints;
+  <span class="org-comment-delimiter">// </span><span class="org-comment">lgfang: defined a variable named __x, type of which is: member function of</span>
+  <span class="org-comment-delimiter">// </span><span class="org-comment">class _Concept, accepts no parameter and returns nothing.</span>
+
+  <span class="org-comment-delimiter">// </span><span class="org-comment">lgfang: we will not use __x, hence modify it with "__attribute__</span>
+  <span class="org-comment-delimiter">// </span><span class="org-comment">((__unused__))"</span>
+
+  <span class="org-comment-delimiter">// </span><span class="org-comment">lgfang: defining __x is enough to make compiler to instantiate</span>
+  <span class="org-comment-delimiter">// </span><span class="org-comment">_Concept::__constraints&#20102;. So, the remaining work is to make compiler</span>
+  <span class="org-comment-delimiter">// </span><span class="org-comment">instantiate needed interfaces. Let us take LessThanComparableConcept as an</span>
+  <span class="org-comment-delimiter">// </span><span class="org-comment">example.</span>
+
+  <span class="org-comment-delimiter">// </span><span class="org-comment">lgfang: No extra operation needed, that is the run time performance impact</span>
+  <span class="org-comment-delimiter">// </span><span class="org-comment">is minimum.</span>
+}
+
+<span class="org-keyword">template</span> &lt;<span class="org-keyword">class</span> <span class="org-type">_Tp</span>&gt;
+<span class="org-keyword">struct</span> <span class="org-type">_LessThanComparableConcept</span> <span class="org-comment-delimiter">// </span><span class="org-comment">lgfang: a concept class</span>
+{
+  <span class="org-type">void</span> <span class="org-function-name">__constraints</span>() { <span class="org-comment-delimiter">// </span><span class="org-comment">lgfang: must be this name</span>
+    __aux_require_boolean_expr(__a &lt; __b); <span class="org-comment-delimiter">// </span><span class="org-comment">lgfang: this the real requirement.</span>
+                                           <span class="org-comment-delimiter">// </span><span class="org-comment">there are more examples below.</span>
+  }
+  <span class="org-type">_Tp</span> <span class="org-variable-name">__a</span>, <span class="org-variable-name">__b</span>;
+    <span class="org-comment-delimiter">// </span><span class="org-comment">lgfang: __a and __b must be member variables. If moved into</span>
+    <span class="org-comment-delimiter">// </span><span class="org-comment">__constraints, a constraint is introduced: default constructor must be</span>
+    <span class="org-comment-delimiter">// </span><span class="org-comment">available. See</span>
+    <span class="org-comment-delimiter">// </span><span class="org-comment">http://www.boost.org/doc/libs/1_36_0/libs/concept_check/creating_concepts.htm</span>
+};
+
+}
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2">Check concept in class definitions</h2>
+<div class="outline-text-2" id="text-2">
+<div class="org-src-container">
+
+<pre class="src src-c++"><span class="linenr"> 1: </span><span class="org-keyword">template</span> &lt;<span class="org-keyword">typename</span> <span class="org-type">_Tp</span>, <span class="org-keyword">typename</span> <span class="org-type">_Alloc</span> = <span class="org-type">allocator</span>&lt;<span class="org-type">_Tp</span>&gt; &gt;
+<span class="linenr"> 2: </span>  <span class="org-keyword">class</span> <span class="org-type">deque</span> : <span class="org-keyword">protected</span> <span class="org-type">_Deque_base</span>&lt;<span class="org-type">_Tp</span>, <span class="org-type">_Alloc</span>&gt;
+<span class="linenr"> 3: </span>{
+<span class="linenr"> 4: </span>  <span class="org-comment-delimiter">// </span><span class="org-comment">concept requirements</span>
+<span class="linenr"> 5: </span>  __glibcpp_class_requires(_Tp, _SGIAssignableConcept)
+<span class="linenr"> 6: </span>  <span class="org-comment-delimiter">// </span><span class="org-comment">...</span>
+<span class="linenr"> 7: </span>}
+<span class="linenr"> 8: </span>
+<span class="linenr"> 9: </span><span class="org-preprocessor">#define</span> <span class="org-function-name">__glibcpp_class_requires</span>(<span class="org-variable-name">_a</span>,<span class="org-variable-name">_C</span>)                                  \
+<span class="linenr">10: </span>            _GLIBCPP_CLASS_REQUIRES(_a, __gnu_cxx, _C);
+<span class="linenr">11: </span>
+<span class="linenr">12: </span><span class="org-preprocessor">#define</span> <span class="org-function-name">_GLIBCPP_CLASS_REQUIRES</span>(<span class="org-variable-name">_type_var</span>, <span class="org-variable-name">_ns</span>, <span class="org-variable-name">_concept</span>) \
+<span class="linenr">13: </span>  <span class="org-keyword">typedef</span> <span class="org-type">void</span> (<span class="org-constant">_ns</span>::<span class="org-constant">_concept</span> &lt;_type_var&gt;::* <span class="org-type">_func</span>##_type_var##_concept)(); \
+<span class="linenr">14: </span>  <span class="org-keyword">template</span> &lt;_func##_type_var##_concept _Tp1&gt; \
+<span class="linenr">15: </span>  <span class="org-keyword">struct</span> <span class="org-type">_concept_checking</span>##_type_var##_concept { }; \
+<span class="linenr">16: </span>  <span class="org-keyword">typedef</span> <span class="org-type">_concept_checking</span>##_type_var##<span class="org-type">_concept</span>&lt; \
+<span class="linenr">17: </span>    &amp;<span class="org-constant">_ns</span>::<span class="org-constant">_concept</span> &lt;_type_var&gt;::__constraints&gt; \
+<span class="linenr">18: </span>     _concept_checking_typedef##_type_var##_concept
+<span class="linenr">19: </span>
+<span class="linenr">20: </span>
+<span class="linenr">21: </span><span class="org-keyword">template</span> &lt;<span class="org-keyword">class</span> <span class="org-type">_Tp</span>&gt;
+<span class="linenr">22: </span><span class="org-keyword">struct</span> <span class="org-type">_SGIAssignableConcept</span>
+<span class="linenr">23: </span>{
+<span class="linenr">24: </span>  <span class="org-type">void</span> <span class="org-function-name">__constraints</span>() {
+<span class="linenr">25: </span>    <span class="org-type">_Tp</span> <span class="org-variable-name">__b</span>(__a) _IsUnused;
+<span class="linenr">26: </span>    __a = __a;                        <span class="org-comment-delimiter">// </span><span class="org-comment">require assignment operator</span>
+<span class="linenr">27: </span>    __const_constraints(__a);
+<span class="linenr">28: </span>  }
+<span class="linenr">29: </span>  <span class="org-type">void</span> <span class="org-function-name">__const_constraints</span>(<span class="org-keyword">const</span> <span class="org-type">_Tp</span><span class="org-warning">&amp;</span> <span class="org-variable-name">__b</span>) {
+<span class="linenr">30: </span>    <span class="org-type">_Tp</span> <span class="org-variable-name">__c</span>(__b) _IsUnused;
+<span class="linenr">31: </span>    __a = __b;              <span class="org-comment-delimiter">// </span><span class="org-comment">const required for argument to assignment</span>
+<span class="linenr">32: </span>  }
+<span class="linenr">33: </span>  <span class="org-type">_Tp</span> <span class="org-variable-name">__a</span>;
+<span class="linenr">34: </span>};
+</pre>
+</div>
+
+<p>
+Let's take a close look at the <code>_GLIBCPP_CLASS_REQUIRES</code>.
+</p>
+
+<ul class="org-ul">
+<li>Line 12: This macro accepts 3 parameters. NOTE: this is different from
+<code>__function_requires</code>.
+</li>
+
+<li>Line 13: typedef a type used below.
+</li>
+
+<li>Line 14,15: a class template is defined.
+</li>
+
+<li>Line 16-18: typedef one more type, which is not actually used. The purpose
+is to make the compiler to instantiate the class template just defined. This
+way, the check of concept is achieved. 
+</li>
+</ul>
+
+<p>
+NOTE: there is no run time operation involved. Therefore is no run time cost,
+only more compilation time.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3">Create our own 'concept'</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+Now that we understand how it works, we can now define our own "concept"
+(Check if the concept already exists in <code>boost_concept_check.h</code> first).
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-c++"><span class="org-preprocessor">#include</span> <span class="org-string">&lt;bits/boost_concept_check.h&gt;</span>
+<span class="org-comment-delimiter">// </span><span class="org-comment">lgfang: boost_concept_check.h says: do not include it directly, but ...</span>
+
+<span class="org-keyword">using</span> <span class="org-keyword">namespace</span> <span class="org-constant">std</span>;
+
+<span class="org-comment-delimiter">// </span><span class="org-comment">lgfang: different macro names in different versions of g++, hence one more</span>
+<span class="org-comment-delimiter">// </span><span class="org-comment">layer of encapsulation :(.</span>
+<span class="org-preprocessor">#define</span> <span class="org-function-name">my_function_requires</span>(...) <span class="org-constant">__gnu_cxx</span>::<span class="org-type">__function_requires</span>&lt;<span class="org-constant">MySpace</span>::__VA_ARGS__ &gt;()
+<span class="org-preprocessor">#define</span> <span class="org-function-name">my_class_requires</span>(<span class="org-variable-name">a</span>, <span class="org-variable-name">C</span>) _GLIBCXX_CLASS_REQUIRES(a, MySpace, C)
+
+<span class="org-keyword">namespace</span> <span class="org-constant">MySpace</span> {  <span class="org-comment-delimiter">// </span><span class="org-comment">lgfang: must in a namespace. Not a big deal since I</span>
+                     <span class="org-comment-delimiter">// </span><span class="org-comment">always put my code into namespaces anyway.</span>
+    <span class="org-keyword">template</span> &lt;<span class="org-keyword">typename</span> <span class="org-type">T</span>&gt;
+    <span class="org-keyword">struct</span> <span class="org-type">HasValueConcept</span> { <span class="org-comment-delimiter">// </span><span class="org-comment">lgfang: use "struct" instead of "class" so that</span>
+                             <span class="org-comment-delimiter">// </span><span class="org-comment">we needn't type "public:"</span>
+        <span class="org-type">void</span> <span class="org-function-name">__constraints</span>() {
+            <span class="org-type">T</span> <span class="org-variable-name">b</span>; <span class="org-comment-delimiter">// </span><span class="org-comment">lgfang: ensure default constructor available.</span>
+            a.getVal(); <span class="org-comment-delimiter">// </span><span class="org-comment">lgfang: ensure there is member function "getVal"</span>
+            <span class="org-comment-delimiter">// </span><span class="org-comment">lgfang: we may restrict signature of the function if we want:</span>
+            <span class="org-comment-delimiter">// </span><span class="org-comment">const char* (T::*x)() = &amp;T::getVal;</span>
+            a.name; <span class="org-comment-delimiter">// </span><span class="org-comment">lgfang: check member variable is also feasible. But,</span>
+                    <span class="org-comment-delimiter">// </span><span class="org-comment">usually we should not impose such constraints in concept</span>
+                    <span class="org-comment-delimiter">// </span><span class="org-comment">"has value".</span>
+        }
+        <span class="org-type">T</span> <span class="org-variable-name">a</span>;
+    };
+
+}
+
+<span class="org-keyword">template</span> &lt;<span class="org-keyword">typename</span> <span class="org-type">T</span>&gt;
+<span class="org-type">void</span> <span class="org-function-name">dumpVal</span> (<span class="org-type">T</span><span class="org-warning">&amp;</span> <span class="org-variable-name">t</span>) {
+    <span class="org-comment-delimiter">// </span><span class="org-comment">lgfang: check the concept in a function.</span>
+    my_function_requires(<span class="org-type">HasValueConcept</span>&lt;<span class="org-type">T</span>&gt;);
+    t.getVal();
+}
+
+<span class="org-keyword">template</span> &lt;<span class="org-keyword">typename</span> <span class="org-type">T</span>&gt;
+<span class="org-keyword">struct</span> <span class="org-type">C</span> {
+    <span class="org-comment-delimiter">// </span><span class="org-comment">lgfang: check the concept in a class definition.</span>
+    my_class_requires(<span class="org-type">T</span>, HasValueConcept);
+    <span class="org-type">T</span> <span class="org-variable-name">a</span>;
+};
+
+<span class="org-keyword">struct</span> <span class="org-type">MyFun</span> { <span class="org-comment-delimiter">// </span><span class="org-comment">&#20462;&#25913;&#36825;&#20010;&#31867;&#65292;&#30475;&#30475;&#32534;&#35793;&#22120;&#20250;&#25253;&#20123;&#20160;&#20040;&#38169;</span>
+    <span class="org-keyword">const</span> <span class="org-type">char</span>* <span class="org-function-name">getVal</span>() {<span class="org-keyword">return</span> <span class="org-string">"hello"</span>;}
+    <span class="org-type">char</span>* <span class="org-variable-name">name</span>;
+};
+
+<span class="org-type">int</span> <span class="org-function-name">main</span>(){
+    <span class="org-type">MyFun</span> <span class="org-variable-name">obj</span>;
+    dumpVal(obj);
+    <span class="org-type">C</span>&lt;<span class="org-type">MyFun</span>&gt; <span class="org-variable-name">c</span>;
+    <span class="org-keyword">return</span> 0;
+}
+
+<span class="org-comment-delimiter">// </span><span class="org-comment">g++ testconcept.cc</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-4" class="outline-2">
+<h2 id="sec-4">Benefits</h2>
+<div class="outline-text-2" id="text-4">
+<ul class="org-ul">
+<li>Compiler does more check.
+</li>
+<li>Error message will be much more readable.
+</li>
+<li>Requirement is more explicit.
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-5" class="outline-2">
+<h2 id="sec-5">Reference</h2>
+<div class="outline-text-2" id="text-5">
+<ul class="org-ul">
+<li><a href="http://www.boost.org/doc/libs/1_36_0/libs/concept_check/concept_check.htm">http://www.boost.org/doc/libs/1_36_0/libs/concept_check/concept_check.htm</a>
+</li>
+<li><a href="http://blog.csdn.net/pongba/archive/2007/08/04/1726031.aspx">http://blog.csdn.net/pongba/archive/2007/08/04/1726031.aspx</a>
+</li>
+</ul>
+
+<p>
+For more comprehensive usage, please refer to boost document and SGI STL source code.
+</p>
+</div>
+</div>

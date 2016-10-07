@@ -1,0 +1,283 @@
+---
+layout: post
+title: An Introduction to Shared Library
+tagline: Creating, Linking and Versioning
+categories: computer
+tags: [c, c++, coding]
+---
+
+<p>
+In UNIX-like systems, shared libraries are what are called dynamic linked
+libraries in MS windows. They are usually named as "libXXX.so" where "XXX" is
+library name. The extension ".so" stands for Shared Object.
+</p>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">Creating SO</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+First, the ".o" files should be Position-Independent Code (PIC). This is
+achieved by compiling them with option "-fpic":
+</p>
+
+<pre class="example">
+[/home/lungangfang/tmp]gcc -c -fpic shared1-1.c
+</pre>
+
+<p>
+Then, combine all ".o" files we want into one SO file. In fact, it should be
+something done by ld. But we needn't call ld directly. gcc will do it for us.
+So the command would be some like:
+</p>
+
+<pre class="example">
+[/home/lungangfang/tmp]gcc -shared -o libmyshared.so shared1-1.o
+</pre>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2">Compiling Executables with SO</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+There are two ways to compile executables with SO.
+</p>
+
+<p>
+One is to compile just as if the shared libraries are normal object files.
+</p>
+
+<pre class="example">
+[/home/lungangfang/tmp]gcc caller.o libmyshared.so
+</pre>
+
+<p>
+However, a more common way is to use "-l" option to specify libraries to be
+linked.
+</p>
+
+<pre class="example">
+gcc caller.o -L. -lmyshared
+</pre>
+
+<p>
+In above example, ld will search for libmyshared.so in its path list. Since I
+put libmyshared.so to a non-standard location, I have to use "-L." to add path
+to libmyshared.so (current path in this example) to path list of ld.
+</p>
+
+<p>
+If libmyshared.so is not found, it will search for libmyshared.a. If there are
+both libmyshared.so and libmyshared.a, we may use option "-static" to enforce
+static linking.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3">Running  Executables</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+Now that we have an executable a.out which need libmyshared.so at run time,
+the problem becomes: where to find SOs at run time? Generally speaking, a
+linker would search for SOs among following paths:
+</p>
+
+<ul class="org-ul">
+<li>Default/trusted directories such as /lib and /usr/lib
+<pre class="example">
+ld --verbose | grep -i search
+</pre>
+</li>
+<li>paths specified in /etc/ld.so.conf (if it exists, <code>man ldconfig</code> for more
+information)
+</li>
+<li>paths specified by environment variable LD_LIBRARY_PATH
+</li>
+</ul>
+
+<pre class="example">
+[/home/lungangfang/tmp]echo $LD_LIBRARY_PATH
+
+[/home/lungangfang/tmp]./a.out
+./a.out: error while loading shared libraries: libmyshared.so: cannot
+open shared object file: No such file or directory
+[/home/lungangfang/tmp]export LD_LIBRARY_PATH=/home/lungangfang/tmp/
+[/home/lungangfang/tmp]./a.out
+From SO 1-1
+[/home/lungangfang/tmp]
+</pre>
+</div>
+</div>
+
+<div id="outline-container-sec-4" class="outline-2">
+<h2 id="sec-4">Avoid Version Conflict</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+So far, we've learn basic usage of SO. But, what if we released several
+versions of same shared library and they are all being used by some programs?
+</p>
+
+<p>
+That involves veresioning of SOs. In general, the procedure is some like:
+</p>
+
+<ol class="org-ol">
+<li>When building SOs, Set version (<code>DT_SONAME</code>) for them;
+</li>
+<li>Build executables as usual. However, the output executables will be a
+little different since the SOs are different: the executables will contain
+the <code>DT_SONAME</code> of SOs they linked to when building.
+</li>
+<li>At run time, executables will be linked to SOs according to major release
+version indicated by <code>DT_SONAME</code>.
+</li>
+</ol>
+</div>
+
+<div id="outline-container-sec-4-1" class="outline-3">
+<h3 id="sec-4-1">Naming Rule</h3>
+<div class="outline-text-3" id="text-4-1">
+<p>
+I've said shared libraries are usually named as "libXXX.so" for simplicity.
+But in fact, they can be named as "libXXX.so.maj.min", where "XXX" is library
+name, "maj" is major release version number, "min" is the subversion number
+(minor version) of that major release. "maj" and "min" are optional.
+Following are some valid SO names.
+</p>
+
+<pre class="example">
+libcap.so
+libcap.so.1
+libcap.so.1.10
+libcrypto.so.0.9.7a
+libattr.so.1.0.1
+</pre>
+</div>
+</div>
+
+<div id="outline-container-sec-4-2" class="outline-3">
+<h3 id="sec-4-2">Building SO with Version Enabled</h3>
+<div class="outline-text-3" id="text-4-2">
+<pre class="example">
+[/home/lungangfang/tmp]gcc -shared -Wl,-soname,libmyshared.so.2 \
+-o libmyshared.so.2.2 shared2-2.o
+</pre>
+
+<p>
+<code>-Wl</code> means following options should be passed to ld. Please be noted the
+options are delimited by comma (",") to distinguish them from other fields.
+</p>
+
+<p>
+Put it all in together, the command would do following for us:
+</p>
+
+<p>
+Generate an SO file named "libmyshared.so.2.2" and set its major release
+number to "libmyshared.so.2" (set <code>DT_SONAME</code> of libmyshared.so.2.2 to
+"libmyshared.so.2").
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-4-3" class="outline-3">
+<h3 id="sec-4-3">Organizing SO Files</h3>
+<div class="outline-text-3" id="text-4-3">
+<p>
+We have to organize SO files of same library in following way:
+</p>
+
+<ul class="org-ul">
+<li>There are SO files named as "libXXX.so.maj.min". Each of them is a release
+of the library.
+</li>
+<li>There are SO files named as "libXXX.so.maj". They are usually symbolic
+links to latest subversion of each major release. Thus, when linking to
+"libXXX.so.maj", we always get the latest subversion of that major
+release.
+</li>
+<li>A SO named as "libXXX.so". That file is usually a symbolic link to latest
+"libXXX.so.maj" so that we always get latest version of "libXXX" when
+building executables with "-lXXX" or run executables without version
+information.
+</li>
+</ul>
+
+<p>
+Following is an example:
+</p>
+
+<pre class="example">
+[/home/lungangfang/tmp]ls -l lib* | cut -b60-
+libmyshared.so -&gt; libmyshared.so.2
+libmyshared.so.1 -&gt; libmyshared.so.1.2
+libmyshared.so.1.1
+libmyshared.so.1.2
+libmyshared.so.2 -&gt; libmyshared.so.2.2
+libmyshared.so.2.1
+libmyshared.so.2.2
+</pre>
+</div>
+</div>
+
+<div id="outline-container-sec-4-4" class="outline-3">
+<h3 id="sec-4-4">Building Executables with Version Enabled</h3>
+<div class="outline-text-3" id="text-4-4">
+<p>
+There is nothing special. You just make sure the SOs you are using contains
+version info (<code>DT_SONAME</code>). Then, the output executables are SO version
+enabled.
+</p>
+
+<pre class="example">
+/lib64 $ readelf -d libc.so.6 | grep SONAME
+0x000000000000000e (SONAME)             Library soname: [libc.so.6]
+</pre>
+</div>
+</div>
+
+<div id="outline-container-sec-4-5" class="outline-3">
+<h3 id="sec-4-5">Running Executables with Version Enabled</h3>
+<div class="outline-text-3" id="text-4-5">
+<p>
+When running, the executables will be to linked to SOs as usual except that
+"libXXX.so.maj" instead of "libXXX.so" is looked for. For example, if you
+build a.out with libmyshared.so.1.1, SO file libmyshared.so.1 will be needed
+to run a.out because we set <code>DT_SONAME</code> of libmyshared.so.1.1 to
+"libmyshared.so.1" when we building it. Once we upgraded myshared to
+libmyshared.so.1.2, we just re-link libmyshared.so.1 to libmyshared.so.1.2.
+From then on, a.out will be linked to the new version of myshared at run
+time.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-5" class="outline-2">
+<h2 id="sec-5">Further Readings</h2>
+<div class="outline-text-2" id="text-5">
+<ul class="org-ul">
+<li>ld manual
+</li>
+
+<li><code>LD_PRELOAD</code>, <code>_init=(), =_fini()</code>
+</li>
+
+<li>If you meets '.la' and '.lo' files, you may want to have a look at libtool.
+Quoted from <a href="http://www.gnu.org/software/libtool/">http://www.gnu.org/software/libtool/</a> :
+<blockquote>
+<p>
+GNU libtool is a generic library support script. Libtool hides the
+complexity of using shared libraries behind a consistent, portable
+interface.
+</p>
+</blockquote>
+</li>
+
+<li>There is a more flexible way to use shared libraries. man dlopen, dlerror,
+dlsym, dlclose etc.
+</li>
+</ul>
+</div>
+</div>

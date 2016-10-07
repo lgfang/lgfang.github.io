@@ -1,0 +1,102 @@
+---
+layout: post
+title: Why Macro in C is So Notorious
+tagline:
+categories: computer
+tags: [c, c++, coding]
+---
+
+<p>
+In C programming language, macro is kind of notorious. Fortunately, we have
+alternative solutions in many cases. But there are still people who prefer macro
+as they may not aware of the risks of using macro. Therefore, I would like to
+list some in this post.
+</p>
+
+<ul class="org-ul">
+<li>Side effects
+
+<p>
+If a expression passed to macros has side effects, the outcome might be unexpected:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-c++"><span class="org-preprocessor">#define</span> <span class="org-function-name">POWER</span>(<span class="org-variable-name">x</span>) (x)(x)
+<span class="org-type">int</span> <span class="org-variable-name">i</span> = 1;
+SQUARE(++i); <span class="org-comment-delimiter">// </span><span class="org-comment">bug</span>
+SQUARE(i++); <span class="org-comment-delimiter">// </span><span class="org-comment">bug even subtle</span>
+</pre>
+</div>
+
+<p>
+In C++, we may use either inline functions or templates instead.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-c++"><span class="org-preprocessor"># inline</span> function version
+<span class="org-keyword">inline</span> <span class="org-type">int</span> <span class="org-function-name">mySquare</span>(<span class="org-keyword">const</span> <span class="org-type">int</span> <span class="org-variable-name">i</span>){<span class="org-keyword">return</span> ii;}
+<span class="org-preprocessor"># template</span> version
+<span class="org-keyword">template</span> <span class="org-type">T</span> <span class="org-function-name">mySquare</span>(cosnt <span class="org-type">T</span><span class="org-warning">&amp;</span> <span class="org-variable-name">i</span>){<span class="org-keyword">return</span> ii;}
+</pre>
+</div>
+</li>
+
+<li>Lack of grammar check
+
+<p>
+In many implementations of <code>stdio.h</code>, <code>getchar</code> and <code>putchar</code> are defined
+macros. The error in the following code snippet is that <code>putchar</code> is provided
+with no parameter. But, can you tell that from compilation error message?
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-c"><span class="org-comment-delimiter">/* </span><span class="org-comment">test.c </span><span class="org-comment-delimiter">*/</span>
+<span class="org-preprocessor">#include</span> <span class="org-string">&lt;stdio.h&gt;</span> <span class="org-comment-delimiter">/* </span><span class="org-comment">In stdio.h #define putchar(x) putc(x, stdout) </span><span class="org-comment-delimiter">*/</span>
+
+<span class="org-type">int</span> <span class="org-function-name">main</span>()
+{
+    putchar ();
+    <span class="org-keyword">return</span> 0;
+}
+</pre>
+</div>
+
+<pre class="example">
+$ gcc test.c
+test.c: In function `main':
+test.c:5: error: parse error before ',' token
+
+$ gcc --version test.c
+gcc (GCC) 3.4.4 (cygming special) (gdc 0.12, using dmd 0.125)
+Copyright (C) 2004 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+</pre>
+</li>
+
+<li>Cannot single-step debug
+</li>
+
+<li>Cross-reference tools cannot handle/expand macros
+</li>
+</ul>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">Is not protected by namespace</h2>
+<div class="outline-text-2" id="text-1">
+<div class="org-src-container">
+
+<pre class="src src-c++"><span class="org-keyword">namespace</span> <span class="org-constant">na</span>
+{
+<span class="org-preprocessor">    #define</span> <span class="org-variable-name">NUM</span> 1
+}
+<span class="org-keyword">namespace</span> <span class="org-constant">nb</span>
+{
+<span class="org-preprocessor">    #define</span> <span class="org-variable-name">NUM</span> 2
+}
+</pre>
+</div>
+</div>
+</div>

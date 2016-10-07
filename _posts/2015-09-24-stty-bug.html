@@ -1,0 +1,46 @@
+---
+layout: post
+title: Bug or Feature?
+tagline: The behavior of "stty"
+categories: computer
+tags: [tty, shell, linux tools]
+---
+
+<p>
+Get backspace working in a mixed environment often involves <code>stty erase ^?</code> (or
+<code>stty erase ^h</code>). However, today I found that sometimes they work sometimes they
+do not work. This seemed a bug to me at first. But, after more tests, I found it
+might be not a bug but a feature.
+</p>
+
+<p>
+Here is the summary of the behavior of <code>stty erase</code> on redhat linux.
+</p>
+
+<ol class="org-ol">
+<li>Whatever you set in your profile (default is "^?"), both "^h" and "^?" are
+regarded as &lt;erase&gt;.
+</li>
+
+<li>A <code>stty erase</code> command takes effect only when it really changes the &lt;erase&gt;.
+
+<p>
+For example, if you <code>stty erase ^h</code> in your profile, running <code>stty erase ^h</code>
+again in command line does nothing and both "^h" and "^?" still work as
+&lt;erase&gt;. But, running <code>stty erase ^?</code> will instantly make "^?" the only erase
+character.
+</p>
+</li>
+</ol>
+
+<p>
+So, when you find <code>stty erase ^?</code> does not work as expected, run <code>stty erase ^h</code>
+first and then retry <code>stty erase ^?</code>.
+</p>
+
+<p>
+This behavior might be a nice feature. While still keeps the ability to modify
+the settings of &lt;erase&gt;, it makes both "^h" and "^?" work as &lt;erase&gt; even if you
+"inherit" a profile which set &lt;erase&gt; explicitly, which is very
+beginner-friendly.
+</p>

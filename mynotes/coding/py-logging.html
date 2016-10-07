@@ -1,0 +1,1438 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>Logging in Python</title>
+<!-- 2015-12-11 Fri 11:38 -->
+<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta  name="generator" content="Org-mode" />
+<meta  name="author" content="Fang Lungang" />
+<link rel="stylesheet" type="text/css" href="../cssjs/lgfang.css" />
+
+<script type="text/javascript" src="../cssjs/org-info.js">
+/**
+ *
+ * @source: ../cssjs/org-info.js
+ *
+ * @licstart  The following is the entire license notice for the
+ *  JavaScript code in ../cssjs/org-info.js.
+ *
+ * Copyright (C) 2012-2013 Free Software Foundation, Inc.
+ *
+ *
+ * The JavaScript code in this tag is free software: you can
+ * redistribute it and/or modify it under the terms of the GNU
+ * General Public License (GNU GPL) as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option)
+ * any later version.  The code is distributed WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+ *
+ * As additional permission under GNU GPL version 3 section 7, you
+ * may distribute non-source (e.g., minimized or compacted) forms of
+ * that code without the copy of the GNU GPL normally required by
+ * section 4, provided you include this license notice and a URL
+ * through which recipients can access the Corresponding Source.
+ *
+ * @licend  The above is the entire license notice
+ * for the JavaScript code in ../cssjs/org-info.js.
+ *
+ */
+</script>
+
+<script type="text/javascript">
+
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+
+<!--/*--><![CDATA[/*><!--*/
+org_html_manager.set("TOC_DEPTH", "1");
+org_html_manager.set("LINK_HOME", "../../index.html");
+org_html_manager.set("LINK_UP", "../index.html");
+org_html_manager.set("LOCAL_TOC", "1");
+org_html_manager.set("VIEW_BUTTONS", "0");
+org_html_manager.set("MOUSE_HINT", "underline");
+org_html_manager.set("FIXED_TOC", "0");
+org_html_manager.set("TOC", "0");
+org_html_manager.set("VIEW", "showall");
+org_html_manager.setup();  // activate after the parameters are set
+/*]]>*///-->
+</script>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div class="container-narrow">
+<div id="content">
+<h1 class="title">Logging in Python</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">Introduction</a></li>
+<li><a href="#sec-2">Disclaimer</a></li>
+<li><a href="#sec-3">Reference</a></li>
+<li><a href="#sec-4">Highlights of behaviors of "logging"</a>
+<ul>
+<li><a href="#sec-4-1">A word on log level</a></li>
+<li><a href="#sec-4-2">We need NOT format messages ourselves</a></li>
+<li><a href="#sec-4-3">Exceptions in logging</a></li>
+<li><a href="#sec-4-4">Hierarchy of Logger</a></li>
+<li><a href="#sec-4-5">Logger and Handler</a></li>
+<li><a href="#sec-4-6">Filtering and Altering</a></li>
+</ul>
+</li>
+<li><a href="#sec-5">The Very Basic Logging</a></li>
+<li><a href="#sec-6">A Practical Logging set up</a></li>
+<li><a href="#sec-7">Log Level per Sub-System</a></li>
+<li><a href="#sec-8">Seperate stdout and stderr: Dispatching Based on Log Level</a></li>
+<li><a href="#sec-9">Sub-System Based Logging</a></li>
+<li><a href="#sec-10">Logging for Tracking</a>
+<ul>
+<li><a href="#sec-10-1">An Example</a></li>
+<li><a href="#sec-10-2">An Example Simpler by Suits Many Cases</a></li>
+</ul>
+</li>
+<li><a href="#sec-11">Logging in Libraries</a></li>
+<li><a href="#sec-12">Advices</a>
+<ul>
+<li><a href="#sec-12-1">Always Use Per-Sub-System Loggers</a></li>
+<li><a href="#sec-12-2">"import"-able log settings</a></li>
+</ul>
+</li>
+<li><a href="#sec-13">Control Logging via Configuration File</a>
+<ul>
+<li><a href="#sec-13-1">Use dictConfig</a></li>
+<li><a href="#sec-13-2">Use INI file</a></li>
+</ul>
+</li>
+<li><a href="#sec-14">Logging from Multiple Threads</a></li>
+<li><a href="#sec-15">Misc</a>
+<ul>
+<li><a href="#sec-15-1">Formatter for High-Resolution Time-Stamp</a></li>
+<li><a href="#sec-15-2">Change Log Configure on the Fly</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">Introduction</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+Yes, there are official documents for the "logging" module, which are
+clear and detailed. They helped a lot to get me started with the
+"logging" module. But, they seem do not address all my questions
+directly. Only after I had played with the "logging" module for some
+time did I find all the answers I wanted.
+</p>
+
+<p>
+Here comes the note I took. I am wondering if you have time to read
+(and interested in reading) this notes. I would be very grateful if
+you could send me your comments.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2">Disclaimer</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+Please note that all code shown in this article is for demostration
+only. For real-world projects, you should add error handling code etc.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3">Reference</h2>
+<div class="outline-text-2" id="text-3">
+<ul class="org-ul">
+<li><a href="http://docs.python.org/3.3/library/logging.html">Official Manual</a>
+</li>
+<li><a href="http://docs.python.org/3.3/howto/logging.html#logging-basic-tutorial">Official Tutorial</a>
+</li>
+<li><a href="http://docs.python.org/2.7/howto/logging-cookbook.html">Official Cookbook</a>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-4" class="outline-2">
+<h2 id="sec-4">Highlights of behaviors of "logging"</h2>
+<div class="outline-text-2" id="text-4">
+
+<div class="figure">
+<p><img src="http://docs.python.org/3.3/_images/logging_flow.png" alt="logging_flow.png" width="600" title="from http://docs.python.org" />
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-4-1" class="outline-3">
+<h3 id="sec-4-1">A word on log level</h3>
+<div class="outline-text-3" id="text-4-1">
+<p>
+Recommend to follow this convention in all other tools:
+</p>
+
+<p>
+The larger the log level is, the more sever the message is.
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="left" />
+
+<col  class="right" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="left">Level</th>
+<th scope="col" class="right">Numeric value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="left">CRITICAL</td>
+<td class="right">50</td>
+</tr>
+
+<tr>
+<td class="left">ERROR</td>
+<td class="right">40</td>
+</tr>
+
+<tr>
+<td class="left">WARNING</td>
+<td class="right">30</td>
+</tr>
+
+<tr>
+<td class="left">INFO</td>
+<td class="right">20</td>
+</tr>
+
+<tr>
+<td class="left">DEBUG</td>
+<td class="right">10</td>
+</tr>
+
+<tr>
+<td class="left">NOTSET</td>
+<td class="right">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div id="outline-container-sec-4-2" class="outline-3">
+<h3 id="sec-4-2">We need NOT format messages ourselves</h3>
+<div class="outline-text-3" id="text-4-2">
+<div class="org-src-container">
+
+<pre class="src src-python">logging.warning(<span class="org-string">'hello %s, it is %s now'</span>,
+                <span class="org-string">'world'</span>,
+                datetime.datetime.today())
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-4-3" class="outline-3">
+<h3 id="sec-4-3">Exceptions in logging</h3>
+<div class="outline-text-3" id="text-4-3">
+<p>
+All one have to do is set "logging.raiseExceptions" to "False" in production
+environment. The exceptions are just silently ignored (and you may have to
+bite the bullet of losing log).
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-4-4" class="outline-3">
+<h3 id="sec-4-4">Hierarchy of Logger</h3>
+<div class="outline-text-3" id="text-4-4">
+<ul class="org-ul">
+<li>There is a single root logger.
+
+<p>
+A caveat, though: root Logger is <code>logging.getLogger()</code> or
+<code>logging.getLogger('')</code>, NOT <code>logging.getLogger('root')</code>
+</p>
+</li>
+
+<li>The hierarchy is determined by the name.
+<ul class="org-ul">
+<li>Logger named "A" is a child of root logger.
+</li>
+<li>Logger "A.B" is a child of logger "A".
+</li>
+</ul>
+</li>
+
+<li>Log propagation
+
+<p>
+By default (controlled by Logger.Propagate), logs are passed to the
+<b>handlers</b> of ancestor loggers. Explained in details later.
+</p>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-4-5" class="outline-3">
+<h3 id="sec-4-5">Logger and Handler</h3>
+<div class="outline-text-3" id="text-4-5">
+<ul class="org-ul">
+<li>Every logger should have at least one handler.
+
+<ul class="org-ul">
+<li>The parent's handlers also count (unless <code>Propagate</code> is false).
+Hence, need not set handler explicitly for every logger.
+</li>
+
+<li>In fact, adding a handler to both a logger and its ancestors is
+<b>wrong</b>. That will cause the handler called multiple times for
+each log record. E.g., messages repeat several times in log.
+</li>
+
+<li><code>logging.basicConfig()</code> basically create a handler for root
+logger.
+</li>
+</ul>
+</li>
+
+<li>A logger controls if a log record should be created while a handler
+determines how to handle the log record sent to it. Refer to
+<a href="#sec-4-6">Filtering and Altering</a>.
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-4-6" class="outline-3">
+<h3 id="sec-4-6">Filtering and Altering</h3>
+<div class="outline-text-3" id="text-4-6">
+<p>
+This task involves log level and filters.
+</p>
+
+<ul class="org-ul">
+<li>The log level of a logger is kind of "global" to all handler of
+that logger, <b>including</b> the handlers of its ancestors.
+</li>
+
+<li>The log level of a handler only impacts the output of this handler
+itself.
+</li>
+
+<li>The log level of a parent logger does <b>NOT</b> impact logs from its
+child loggers. The reason is: those log record are propagated to
+parent's handlers from the child loggers. Therefore, only the log
+level of father's <b>handlers</b> matters.
+</li>
+
+<li>"logging.NOTSET" is a special log level. I would say it is NOT a
+log level but rather a flag. This flag tells the logging system to
+use a "pre-defined" logging pattern. That is, let the parent logger
+decide the log level for the child logger.
+</li>
+
+<li>There are more log levels in addition to the named ones
+("logging.DEBUG", "logging.INFO" etc.)
+</li>
+
+<li>You can change the log level of loggers/handlers on the fly. I.e.
+run some code, then change log level, then some other code. The
+thing is, you are able to do something does not necessarily mean
+you should do it.
+</li>
+
+<li>Filters works in a similar way in terms of the difference between
+attaching it to a logger and attaching it to a handler.
+</li>
+
+<li>Filters may be used to alter content of log records. Such as adding
+new attributes, modifying messages etc.
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-5" class="outline-2">
+<h2 id="sec-5">The Very Basic Logging</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+This is really the very basic logging set up for simple scripts
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-python"><span class="org-comment-delimiter">#</span><span class="org-comment">!/usr/bin/python -t</span>
+<span class="org-keyword">import</span> logging
+<span class="org-keyword">import</span> os.path
+
+logging.basicConfig(
+    level=logging.INFO,
+    filename=os.path.realpath(__file__)+<span class="org-string">'.log'</span>,
+    <span class="org-comment-delimiter"># </span><span class="org-comment">filemode='w'                # mainly useful during dev</span>
+    <span class="org-comment-delimiter"># </span><span class="org-comment">format='%(asctime)s %(levelname)s %(name)s: %(message)s',</span>
+    <span class="org-comment-delimiter"># </span><span class="org-comment">the following format + datefmt matches my emacs log mode definition</span>
+    <span class="org-builtin">format</span>=<span class="org-string">'%(asctime)s %(levelname)s %(filename)s:%(lineno)d: %(message)s'</span>,
+    datefmt=<span class="org-string">'%Y-%m-%d %H:%M:%S'</span>)
+<span class="org-comment-delimiter"># </span><span class="org-comment">...</span>
+logging.debug(<span class="org-string">''</span>)
+logging.info(<span class="org-string">''</span>)
+logging.warning(<span class="org-string">''</span>)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-6" class="outline-2">
+<h2 id="sec-6">A Practical Logging set up</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+A more frequently wanted setup is to print necessary prompts and messages on
+screen (stdout) while put detailed information into a log file.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-python"><span class="org-comment-delimiter">#</span><span class="org-comment">!/bin/env python</span>
+<span class="org-comment-delimiter"># </span><span class="org-comment">-*- coding: utf-8 -*-</span>
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">Print INFO to stdout while debug etc. into log file, STDERR NOT USED.</span>
+
+<span class="org-keyword">import</span> logging
+<span class="org-keyword">import</span> logging.handlers
+<span class="org-keyword">import</span> sys
+<span class="org-keyword">import</span> os.path
+
+<span class="org-keyword">def</span> <span class="org-function-name">init_logging</span>(filename=<span class="org-constant">None</span>):
+    <span class="org-variable-name">formatter</span> = logging.Formatter(
+        fmt=<span class="org-string">'%(asctime)s %(levelname)s %(name)s: %(message)s'</span>,
+        datefmt=<span class="org-string">'%Y-%m-%d %H:%M:%S'</span>)
+    <span class="org-variable-name">logfile</span> = logging.handlers.RotatingFileHandler(filename=filename, mode=<span class="org-string">'w'</span>)
+    logfile.setLevel(logging.NOTSET)
+
+    <span class="org-variable-name">stdout</span> = logging.StreamHandler(stream=sys.stdout)
+    stdout.setLevel(logging.INFO)
+
+    <span class="org-keyword">for</span> handler <span class="org-keyword">in</span> (logfile, stdout):
+        handler.setFormatter(formatter)
+        logging.getLogger().addHandler(handler)
+
+    <span class="org-comment-delimiter"># </span><span class="org-comment">DO NOT use "basicConfig", which creates an extra stream handler</span>
+    logging.getLogger().setLevel(logging.NOTSET)
+
+<span class="org-keyword">if</span> <span class="org-builtin">__name__</span> == <span class="org-string">'__main__'</span>:
+    init_logging(os.path.join(<span class="org-string">'/tmp'</span>, sys.argv[0] + <span class="org-string">'.log'</span>))
+    <span class="org-comment-delimiter"># </span><span class="org-comment">To show how it works</span>
+    <span class="org-keyword">for</span> each <span class="org-keyword">in</span> (logging.getLogger(<span class="org-string">'s1'</span>),
+                 logging.getLogger(<span class="org-string">'s1.ss'</span>),
+                 logging.getLogger(<span class="org-string">'s2'</span>)):
+        each.debug(<span class="org-string">''</span>)
+        each.info(<span class="org-string">''</span>)
+        each.warning(<span class="org-string">''</span>)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-7" class="outline-2">
+<h2 id="sec-7">Log Level per Sub-System</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+Confronted with a bug, we want to change the log level of suspicious
+subsystem/subsystems only instead of promote the log level of the
+whole system.
+</p>
+
+<p>
+It seems to me this can be achieved this way:
+</p>
+
+<ol class="org-ol">
+<li>Each subsystem has its own logger, a non-root logger. Note that it
+is safe to name all the loggers as "logger" so long as they are in
+different modules.
+</li>
+
+<li>All non-root loggers use default log level ("NOTSET").
+</li>
+
+<li>All non-root loggers bind no handler.
+</li>
+
+<li>Root logger is configured with log level, formatter, handler etc.
+</li>
+</ol>
+
+<p>
+This way,
+</p>
+
+<ul class="org-ul">
+<li>Almost no extra coding. Most configuration is still done on root
+logger. One just define and use different loggers for different
+sub-systems.
+</li>
+
+<li>Normally, changing log level of root logger to change the overall
+log level.
+</li>
+
+<li>If certain sub-system is of special interests, just change the log
+level of corresponding logger (either promote or demote it). This
+will NOT impact logs from other loggers.
+</li>
+
+<li>If a sub-system changed its log level, all its sub-sub-system log
+level changed as well (remember the meaning of "logging.NOTSET"?).
+
+<ul class="org-ul">
+<li>The good side is that is usually what we want.
+</li>
+
+<li>If that is not the case, we can only explicitly set sub-system and
+its sub-sub-system to different log levels some like this:
+<div class="org-src-container">
+
+<pre class="src src-python">logging.getLogger(<span class="org-string">'s1'</span>).setLevel(logging.DEBUG)
+logging.getLogger(<span class="org-string">'s1'</span>).getChild(<span class="org-string">'ss'</span>).setLevel(
+    logging.getLogger().getEffectiveLevel())
+</pre>
+</div>
+</li>
+</ul>
+</li>
+</ul>
+
+<p>
+With all above discussion, here is the sample code.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-python"><span class="org-comment-delimiter">#</span><span class="org-comment">!/usr/bin/python -t</span>
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">NO need to configure loggers explicitly in modules/subsystems. Just log with</span>
+<span class="org-comment-delimiter"># </span><span class="org-comment">loggers got by logging.getLogger. For instance:</span>
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">In module/subsystem 1, logger = logging.getLogger('s1') or just</span>
+<span class="org-comment-delimiter"># </span><span class="org-comment">logger = logging.getLogger(__name__)</span>
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">In sub module of module 1, logger = logging.getLogger('s1.ss')</span>
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">In module 2, logger = logging.getLogger('s2')</span>
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">In main entrance</span>
+<span class="org-keyword">import</span> logging
+logging.basicConfig(
+    level=logging.WARNING,
+    <span class="org-comment-delimiter"># </span><span class="org-comment">filename='test.log',</span>
+    <span class="org-builtin">format</span>=<span class="org-string">'%(asctime)s %(levelname)s %(name)s: %(message)s'</span>,
+    <span class="org-comment-delimiter"># </span><span class="org-comment">datefmt='%Y-%m-%d %H:%M:%S',</span>
+    )
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">Change log level per sub-system</span>
+logging.getLogger(<span class="org-string">'s1'</span>).setLevel(logging.DEBUG)
+logging.getLogger(<span class="org-string">'s1'</span>).getChild(<span class="org-string">'ss'</span>).setLevel(
+    logging.getLogger().getEffectiveLevel())
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">To show how it works</span>
+<span class="org-keyword">for</span> each <span class="org-keyword">in</span> (logging.getLogger(<span class="org-string">'s1'</span>),
+             logging.getLogger(<span class="org-string">'s1.ss'</span>),
+             logging.getLogger(<span class="org-string">'s2'</span>)):
+    each.debug(<span class="org-string">''</span>)
+    each.info(<span class="org-string">''</span>)
+    each.warning(<span class="org-string">''</span>)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-8" class="outline-2">
+<h2 id="sec-8">Seperate stdout and stderr: Dispatching Based on Log Level</h2>
+<div class="outline-text-2" id="text-8">
+<p>
+NOTE: this section demonstrates some capabilities of the logging module.
+However, we do not really want to use this convoluted solution in real-world
+project. Log is log, and should go to log file(s). In contrast, stdout and
+stderr are for use interaction and therefore should NOT be part of log system.
+Instead, one may want to write wrapper functions to save stdout and stderr
+messages to log file(s) as well.
+</p>
+
+<p>
+This section discusses in detail how to dispatch logs to different
+destinations/files by log level.
+</p>
+
+<p>
+For example, we want information messages goes to the stdout, error
+messages goes to the stderr, while everything goes to a log file.
+</p>
+
+<ul class="org-ul">
+<li>The "logging.basicConfig" may not applicable any more.
+
+<p>
+This function creates an anonymous handler, which we have little
+control over. Since we are talking about an "advanced" topic now,
+maybe we prefer define more than one handlers explicitly, and define
+their log levels, formatters, filters etc. explicitly as well.
+</p>
+</li>
+
+<li>In this case, the logger's log level is NOTSET while handlers' log
+levels are set respectively.
+
+<ul class="org-ul">
+<li>I do it this way since every handler deals with log messages of
+different log level. Therefore, we have to delegate the
+determination of logging or not to handlers.
+</li>
+
+<li>If we do want to raise the "global log level", we are still free
+to do that by setting the logger's log level.
+</li>
+</ul>
+</li>
+
+<li>In this case, I combined log levels and filters to get logs <b>within
+a range</b> of log level.
+
+<p>
+There is an interesting fact of stdout: we want stdout accept
+messages log levels of which are between logging.INFO and
+logging.WARNING. But, there is no way to set a log level range for
+certain logger (or handler).
+</p>
+</li>
+</ul>
+
+<div class="org-src-container">
+
+<pre class="src src-python"><span class="org-comment-delimiter">#</span><span class="org-comment">!/bin/env python</span>
+<span class="org-comment-delimiter"># </span><span class="org-comment">-*- coding: utf-8 -*-</span>
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">NO need to configure loggers explicitly in modules/subsystems. Just log with</span>
+<span class="org-comment-delimiter"># </span><span class="org-comment">loggers got by logging.getLogger. For instance:</span>
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">In module/subsystem 1, logger = logging.getLogger('s1') or just</span>
+<span class="org-comment-delimiter"># </span><span class="org-comment">logger = logging.getLogger(__name__)</span>
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">In sub module of module 1, logger = logging.getLogger('s1.ss')</span>
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">In module 2, logger = logging.getLogger('s2')</span>
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">In main entrance</span>
+
+<span class="org-keyword">import</span> logging
+<span class="org-keyword">import</span> logging.handlers
+<span class="org-keyword">import</span> sys
+
+<span class="org-keyword">class</span> <span class="org-type">IgnoreHigherLog</span>(logging.Filter):
+
+    <span class="org-keyword">def</span> <span class="org-function-name">__init__</span>(<span class="org-keyword">self</span>, high_level):
+        logging.Filter.__init__(<span class="org-keyword">self</span>)
+        <span class="org-keyword">self</span>.level_to_discard = high_level
+
+    <span class="org-keyword">def</span> <span class="org-function-name">filter</span>(<span class="org-keyword">self</span>, record):
+        <span class="org-keyword">if</span> record.levelno &lt; <span class="org-keyword">self</span>.level_to_discard:
+            <span class="org-keyword">return</span> <span class="org-constant">True</span>
+
+    <span class="org-keyword">def</span> <span class="org-function-name">set_high_level</span>(<span class="org-keyword">self</span>, high_level):
+        <span class="org-keyword">self</span>.level_to_discard = high_level
+
+<span class="org-keyword">def</span> <span class="org-function-name">init_logging</span>():
+    <span class="org-variable-name">formatter</span> = logging.Formatter(
+        fmt=<span class="org-string">'%(asctime)s %(levelname)s %(name)s: %(message)s'</span>,
+        datefmt=<span class="org-string">'%Y-%m-%d %H:%M:%S'</span>)
+
+    <span class="org-variable-name">logfile</span> = logging.handlers.RotatingFileHandler(
+        filename=<span class="org-string">'/tmp/test.log'</span>, mode=<span class="org-string">'w'</span>)
+
+    logfile.setLevel(logging.NOTSET)
+
+    <span class="org-variable-name">stderr</span> = logging.StreamHandler(stream=sys.stderr)
+    stderr.setLevel(logging.WARNING)
+
+    <span class="org-variable-name">stdout</span> = logging.StreamHandler(stream=sys.stdout)
+    stdout.setLevel(logging.INFO)
+    stdout.addFilter(IgnoreHigherLog(logging.WARNING))
+
+    <span class="org-keyword">for</span> handler <span class="org-keyword">in</span> (logfile, stdout, stderr):
+        handler.setFormatter(formatter)
+        logging.getLogger().addHandler(handler)
+
+    <span class="org-comment-delimiter"># </span><span class="org-comment">DO NOT use "basicConfig", which creates an extra stream handler</span>
+    logging.getLogger().setLevel(logging.NOTSET)
+
+    <span class="org-comment-delimiter"># </span><span class="org-comment">Change log level per sub-system</span>
+    logging.getLogger(<span class="org-string">'s1'</span>).setLevel(logging.DEBUG)
+    logging.getLogger(<span class="org-string">'s1'</span>).getChild(<span class="org-string">'ss'</span>).setLevel(
+        logging.getLogger().getEffectiveLevel())
+
+<span class="org-keyword">if</span> <span class="org-builtin">__name__</span> == <span class="org-string">'__main__'</span>:
+    init_logging()
+    <span class="org-comment-delimiter"># </span><span class="org-comment">To show how it works</span>
+    <span class="org-keyword">for</span> each <span class="org-keyword">in</span> (logging.getLogger(<span class="org-string">'s1'</span>), logging.getLogger(<span class="org-string">'s1.ss'</span>),
+                 logging.getLogger(<span class="org-string">'s2'</span>)):
+        each.debug(<span class="org-string">''</span>)
+        each.info(<span class="org-string">''</span>)
+        each.warning(<span class="org-string">''</span>)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-9" class="outline-2">
+<h2 id="sec-9">Sub-System Based Logging</h2>
+<div class="outline-text-2" id="text-9">
+<p>
+A more common case than dispatching based on log level is to dispatch
+logs based on their sources (sub-system/module).
+</p>
+
+<p>
+Code for such need is similar to that for dispatching based on log
+level. But, in this case, we
+</p>
+<ul class="org-ul">
+<li>Bind handlers to different loggers instead of bind all handlers to
+root logger.
+</li>
+<li>All handers leave log level as default ("NOTSET") so that what
+discussed in <a href="#sec-7">Log Level per Sub-System</a> still holds true.
+</li>
+</ul>
+
+<p>
+For code, refer to <a href="#sec-10">Logging for Tracking</a>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-10" class="outline-2">
+<h2 id="sec-10">Logging for Tracking</h2>
+<div class="outline-text-2" id="text-10">
+<p>
+With sub-system based logging ready, one may still want more. For me
+works in telecom industry, it is natural to want the ability to trace
+a partical phone call by printing logs related to that call ID without
+impacting the over all log level.
+</p>
+
+<p>
+This, as far as I can think of, can be achieved this way:
+</p>
+
+<ol class="org-ol">
+<li>Unset (or lower) log level of every logger involved to ensure all
+related log records (along with other log records) are send to
+handlers.
+
+<ul class="org-ul">
+<li>If all non-root loggers are of level "NOTSET", it is good for us:
+changing log level of the root logger will do the job.
+</li>
+</ul>
+</li>
+
+<li>Explicitly set the log level of every handler so that the "actual"
+log level keeps the same.
+
+<ul class="org-ul">
+<li>If all handlers are bound to the root logger, iterate the
+"logging.getLogger().handlers".
+</li>
+</ul>
+</li>
+
+<li>Create a dedicated handler with log level NOTSET (or low enough) so
+that it pass all logs it received to its filters.
+</li>
+
+<li>Add a filter to that handler to filter out records we do not need.
+</li>
+</ol>
+
+<p>
+Note that
+</p>
+<ul class="org-ul">
+<li>This solution also works in sub-system level. Just regard the
+sub-system's logger as if it is the root logger.
+</li>
+<li>If loggers generate logs in an uniform format, it would be very easy
+to impliment a filter. As shown in the sample code.
+</li>
+</ul>
+</div>
+
+<div id="outline-container-sec-10-1" class="outline-3">
+<h3 id="sec-10-1">An Example</h3>
+<div class="outline-text-3" id="text-10-1">
+<div class="org-src-container">
+
+<pre class="src src-python"><span class="org-comment-delimiter">#</span><span class="org-comment">!/usr/bin/python -t</span>
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">NO need to configure loggers explicitly in modules/subsystems. Just log with</span>
+<span class="org-comment-delimiter"># </span><span class="org-comment">loggers got by logging.getLogger. For instance:</span>
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">In module/subsystem 1, logger = logging.getLogger('s1') or just</span>
+<span class="org-comment-delimiter"># </span><span class="org-comment">logger = logging.getLogger(__name__)</span>
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">In sub module of module 1, logger = logging.getLogger('s1.ss')</span>
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">In module 2, logger = logging.getLogger('s2')</span>
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">In main entrance</span>
+<span class="org-keyword">import</span> logging
+<span class="org-keyword">import</span> logging.handlers
+<span class="org-keyword">import</span> sys
+
+
+<span class="org-keyword">class</span> <span class="org-type">MyFilter</span>(logging.Filter):
+    <span class="org-string">'''This class assumes all non-root loggers has level NOTSET'''</span>
+
+    <span class="org-keyword">def</span> <span class="org-function-name">__init__</span>(<span class="org-keyword">self</span>):
+        logging.Filter.__init__(<span class="org-keyword">self</span>)
+        <span class="org-keyword">self</span>.key = <span class="org-constant">None</span>
+        <span class="org-keyword">self</span>.subsys = <span class="org-constant">None</span>
+        <span class="org-keyword">self</span>.is_active = <span class="org-constant">False</span>
+
+    <span class="org-keyword">def</span> <span class="org-function-name">filter</span>(<span class="org-keyword">self</span>, record):
+        <span class="org-keyword">if</span> <span class="org-keyword">not</span> <span class="org-keyword">self</span>.is_active:
+            <span class="org-comment-delimiter"># </span><span class="org-comment">let everything pass</span>
+            <span class="org-keyword">return</span> <span class="org-constant">True</span>
+        <span class="org-comment-delimiter"># </span><span class="org-comment">suppose all logs created by logger.xxx('%s ...', key, ...)</span>
+        <span class="org-keyword">if</span> <span class="org-keyword">self</span>.key != <span class="org-constant">None</span> <span class="org-keyword">and</span> record.args[0] != <span class="org-keyword">self</span>.key:
+            <span class="org-keyword">return</span> <span class="org-constant">False</span>
+        <span class="org-keyword">elif</span> <span class="org-keyword">self</span>.subsys != <span class="org-constant">None</span> <span class="org-keyword">and</span> record.name != <span class="org-keyword">self</span>.subsys:
+            <span class="org-keyword">return</span> <span class="org-constant">False</span>
+        <span class="org-keyword">else</span>:
+            <span class="org-keyword">return</span> <span class="org-constant">True</span>
+
+    <span class="org-keyword">def</span> <span class="org-function-name">activate</span>(<span class="org-keyword">self</span>):
+        <span class="org-keyword">self</span>.is_active = <span class="org-constant">True</span>
+
+    <span class="org-keyword">def</span> <span class="org-function-name">deactivate</span>(<span class="org-keyword">self</span>):
+        <span class="org-keyword">self</span>.is_active = <span class="org-constant">False</span>
+
+    <span class="org-keyword">def</span> <span class="org-function-name">set_target_key</span>(<span class="org-keyword">self</span>, key):
+        <span class="org-keyword">self</span>.key = key
+
+    <span class="org-keyword">def</span> <span class="org-function-name">set_target_subsys</span>(<span class="org-keyword">self</span>, subsys):
+        <span class="org-keyword">self</span>.subsys = subsys
+
+
+<span class="org-keyword">def</span> <span class="org-function-name">init_logging</span>():
+    <span class="org-variable-name">formatter</span> = logging.Formatter(
+        fmt=<span class="org-string">'%(asctime)s %(levelname)s %(name)s: %(message)s'</span>,
+        datefmt=<span class="org-string">'%Y-%m-%d %H:%M:%S'</span>)
+
+    <span class="org-variable-name">handler1</span> = logging.handlers.RotatingFileHandler(filename=<span class="org-string">'/tmp/1.log'</span>)
+    logging.getLogger(<span class="org-string">'s1'</span>).addHandler(handler1)
+
+    <span class="org-variable-name">handler2</span> = logging.handlers.RotatingFileHandler(filename=<span class="org-string">'/tmp/2.log'</span>)
+    logging.getLogger(<span class="org-string">'s2'</span>).addHandler(handler2)
+
+    <span class="org-comment-delimiter"># </span><span class="org-comment">To trace a particular phone call</span>
+    <span class="org-variable-name">tracker</span> = logging.StreamHandler(stream=sys.stdout)
+    <span class="org-variable-name">the_filter</span> = MyFilter()
+    tracker.addFilter(the_filter)
+    logging.getLogger().addHandler(tracker)
+
+    <span class="org-keyword">for</span> one <span class="org-keyword">in</span> (handler1, handler2, tracker):
+        one.setFormatter(formatter)
+
+    <span class="org-keyword">return</span> the_filter
+
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">Usage</span>
+<span class="org-comment-delimiter">##########################</span>
+<span class="org-keyword">def</span> <span class="org-function-name">test_logging</span>():
+    <span class="org-keyword">for</span> each <span class="org-keyword">in</span> (logging.getLogger(<span class="org-string">'s1'</span>),
+                 logging.getLogger(<span class="org-string">'s1.ss'</span>),
+                 logging.getLogger(<span class="org-string">'s2'</span>)):
+        <span class="org-keyword">for</span> i <span class="org-keyword">in</span> <span class="org-builtin">range</span>(1, 3):
+            each.debug(<span class="org-string">'%s'</span>, i)
+            each.info(<span class="org-string">'%s'</span>, i)
+            each.warning(<span class="org-string">'%s'</span>, i)
+
+
+<span class="org-keyword">def</span> <span class="org-function-name">main</span>():
+    <span class="org-variable-name">the_filter</span> = init_logging()
+
+    <span class="org-keyword">print</span> <span class="org-string">'# By default, no trace, root logger controls the "global log level"'</span>
+    logging.getLogger().setLevel(logging.WARNING)
+    test_logging()
+
+    <span class="org-keyword">print</span> <span class="org-string">'# Trace a particular call flow'</span>
+    the_filter.set_target_key(1)
+    the_filter.activate()
+    test_logging()
+
+    <span class="org-keyword">print</span> <span class="org-string">'# Limit the trace within s1 only (no sub-system either)'</span>
+    the_filter.set_target_subsys(<span class="org-string">'s1'</span>)
+    test_logging()
+
+    <span class="org-keyword">print</span> <span class="org-string">'# Deactivate'</span>
+    the_filter.deactivate()
+    test_logging()
+
+<span class="org-keyword">if</span> <span class="org-builtin">__name__</span> == <span class="org-string">'__main__'</span>:
+    main()
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-10-2" class="outline-3">
+<h3 id="sec-10-2">An Example Simpler by Suits Many Cases</h3>
+<div class="outline-text-3" id="text-10-2">
+<p>
+The previous example might be a little bit overwhelming. But in fact,
+many projects are much simpler:
+</p>
+<ul class="org-ul">
+<li>All non-root loggers are of level "NOTSET".
+</li>
+<li>All handlers are with "NOTSET" and are bound to root logger.
+</li>
+<li>When trace turned on, want every log for the target while other
+logs printed based on log level as it is before the trace turned
+on.
+</li>
+</ul>
+
+<p>
+The code can then be much simpler as well.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-python"><span class="org-keyword">import</span> logging
+
+
+<span class="org-keyword">class</span> <span class="org-type">MyFilter</span>(logging.Filter):
+
+    <span class="org-keyword">def</span> <span class="org-function-name">__init__</span>(<span class="org-keyword">self</span>, string):
+        logging.Filter.__init__(<span class="org-keyword">self</span>)
+        <span class="org-keyword">self</span>.<span class="org-builtin">str</span> = string
+        <span class="org-keyword">self</span>.old_level = <span class="org-constant">None</span>
+
+    <span class="org-keyword">def</span> <span class="org-function-name">filter</span>(<span class="org-keyword">self</span>, record):
+        <span class="org-keyword">if</span> <span class="org-keyword">self</span>.<span class="org-builtin">str</span> <span class="org-keyword">in</span> record.msg <span class="org-keyword">or</span> record.levelno &gt;= <span class="org-keyword">self</span>.old_level:
+            <span class="org-keyword">return</span> <span class="org-constant">True</span>
+        <span class="org-keyword">else</span>:
+            <span class="org-keyword">return</span> <span class="org-constant">False</span>
+
+    <span class="org-keyword">def</span> <span class="org-function-name">activate</span>(<span class="org-keyword">self</span>):
+        <span class="org-variable-name">logger</span> = logging.getLogger()
+        <span class="org-keyword">self</span>.old_level = logger.level
+        logger.setLevel(logging.NOTSET)
+        <span class="org-comment-delimiter"># </span><span class="org-comment">filter on non-logger not impact logs from other loggers</span>
+        <span class="org-keyword">for</span> handler <span class="org-keyword">in</span> logger.handlers:
+            handler.addFilter(<span class="org-keyword">self</span>)
+
+    <span class="org-keyword">def</span> <span class="org-function-name">deactivate</span>(<span class="org-keyword">self</span>):
+        <span class="org-variable-name">logger</span> = logging.getLogger()
+        logger.setLevel(<span class="org-keyword">self</span>.old_level)
+        <span class="org-keyword">for</span> handler <span class="org-keyword">in</span> logger.handlers:
+            handler.removeFilter(<span class="org-keyword">self</span>)
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-11" class="outline-2">
+<h2 id="sec-11">Logging in Libraries</h2>
+<div class="outline-text-2" id="text-11">
+<p>
+This should be much the same as that for sub-systems.
+</p>
+
+<ul class="org-ul">
+<li>Every library logger should bind an instance of
+"logging.NullHandler" (i.e. "logging.NullHandler()") in case the
+library's users Add no handler to the root logger or the library
+handler.
+</li>
+
+<li>Do not add any other handler, set log level, or add filter for
+loggers in libraries. Those things should be determined by the
+libraries' users.
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-12" class="outline-2">
+<h2 id="sec-12">Advices</h2>
+<div class="outline-text-2" id="text-12">
+</div><div id="outline-container-sec-12-1" class="outline-3">
+<h3 id="sec-12-1">Always Use Per-Sub-System Loggers</h3>
+<div class="outline-text-3" id="text-12-1">
+<p>
+After discussing several logging scenarios at length, you may find
+that
+</p>
+
+<ul class="org-ul">
+<li>To use sub-system loggers solely need no extra effort. It is as
+simple 'getLogger(subsys_name)' to get the logger and use it. You
+only pay extra effort (configuring the non-root loggers) when you
+need extra features.
+</li>
+
+<li>Using a logger per sub-system does not necessarily complicate the
+control of log. Without extra configuration, we can still control
+logging (log level, destination, filter etc.) as if only root
+logger used.
+</li>
+
+<li>But, using sub-system loggers enables us to achieve finer
+granularity of log control when we have to, with almost trivia
+effort.
+
+<ul class="org-ul">
+<li>Log settings such as log levels, filters, handlers can be easily
+changed in a "central" place.
+</li>
+</ul>
+</li>
+
+<li>It is hard to switch to this strategy (one logger per sub-system)
+if you had not do that in the very beginning. The reason is
+obvious: logging function calls are scattered all around in source
+code.
+</li>
+</ul>
+
+<p>
+Therefore, I would like to suggest:
+</p>
+<blockquote>
+<p>
+Always "define" loggers for every sub-system/module and use them
+instead of the root logger even if using root logger fulfill all your
+needs for the time being.
+</p>
+</blockquote>
+</div>
+</div>
+
+<div id="outline-container-sec-12-2" class="outline-3">
+<h3 id="sec-12-2">"import"-able log settings</h3>
+<div class="outline-text-3" id="text-12-2">
+<ul class="org-ul">
+<li>All non-root logger are get at the beginning of each source file.
+No handler, no log level set. This way configuration of the root
+logger (and that of its handlers) determin the logging behavior of
+the whole system.
+</li>
+<li>Even the "main" module has a non-root logger and logging use that
+instead of using root logger directly.
+</li>
+<li>Put root logger configuration into a function. And in every module:
+<div class="org-src-container">
+
+<pre class="src src-python"><span class="org-keyword">if</span> <span class="org-builtin">__name__</span> == <span class="org-string">'__main__'</span>:
+    util.initlogger()
+    <span class="org-comment-delimiter"># </span><span class="org-comment">...</span>
+</pre>
+</div>
+</li>
+</ul>
+
+<p>
+With this strategy, the logging settings takes effect for every
+module if it is run as the main module. But if it is imported, the
+logging settings is ignored silently instead of changing "global"
+logging settings brutally.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-13" class="outline-2">
+<h2 id="sec-13">Control Logging via Configuration File</h2>
+<div class="outline-text-2" id="text-13">
+<p>
+So far so good! But, wait, isn't it a convention to put configurations
+into configuration files?
+</p>
+
+<p>
+The logging system does provide such ability. In this section, I
+dsicuss two ways to achieve that.
+</p>
+</div>
+
+<div id="outline-container-sec-13-1" class="outline-3">
+<h3 id="sec-13-1">Use dictConfig</h3>
+<div class="outline-text-3" id="text-13-1">
+<p>
+The "logging.config.dictConfig" itself is actually not a method
+dealing with configuration files directly. Instead, it requires a
+python dict object as the first argument.
+</p>
+
+<p>
+A shortcoming that might seem. But, in fact, it enables us chosing
+configuration file format freely. For example, one may read
+configurations from an XML configuration file, convert them into a
+dict and pass it to the "dictConfig".
+</p>
+
+<p>
+At the time of this writing, I found YAML is rather easy to handle.
+With all logging related configurations goes into file "logging.yml",
+the source code remains only one line to load that file besides my
+classes, functions etc.
+</p>
+
+<p>
+The YAML file:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-conf"><span class="org-comment-delimiter"># </span><span class="org-comment">To load, logging.config.dictConfig(yaml.load(open('./conf.yml', 'r')))</span>
+
+version: 1
+
+root:
+    <span class="org-comment-delimiter"># </span><span class="org-comment">NOTE: root logger is NOT under "loggers"</span>
+    handlers: [trace]
+    level: NOTSET
+
+loggers:
+    s1:
+        handlers: [log1]
+    s2:
+        handlers: [log2]
+
+handlers:
+    log1:
+        class: logging.handlers.RotatingFileHandler
+        formatter: mine
+        filename: 1.log
+        level: WARNING
+    log2:
+        class: logging.handlers.RotatingFileHandler
+        formatter: mine
+        filename: 2.log
+        level: INFO
+    trace:
+        class: logging.StreamHandler
+        formatter: mine
+        level: DEBUG
+        filters: [mine]
+
+formatters:
+    mine:
+        format: <span class="org-string">'%(asctime)s %(levelname)-8s %(name)-6s: %(message)s'</span>
+
+filters:
+    mine:
+        (): test.MyFilter
+        key: 1
+        subsys: s1
+</pre>
+</div>
+
+<p>
+One issue of using YAML, though, is that module "yaml" is not a
+standard module. We have to install it ourselves.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-13-2" class="outline-3">
+<h3 id="sec-13-2">Use INI file</h3>
+<div class="outline-text-3" id="text-13-2">
+<p>
+If you can neither install "yaml" etc. nor handcraft <code>xxx_to_dict</code> on
+production hosts to load configuration files (in YAML, or JSON etc.),
+you can try "logging.config.fileConfig".
+</p>
+
+<p>
+A major issue of this measure is: it does not support configuration
+for filters (and no plan to support it).
+</p>
+
+<p>
+Hence, <b>this is not recommended</b>, feel free to skip this section. If
+you can bear with the limitation, read on.
+</p>
+
+<p>
+The code becomes very succinct as well since all information goes
+into the configuration file.
+</p>
+
+<p>
+The configuration is a bit lengthy, in my opinion.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-conf"><span class="org-comment-delimiter"># </span><span class="org-comment">To load, logging.config.fileConfig('./conf.ini')</span>
+
+[<span class="org-type">loggers</span>]
+<span class="org-variable-name">keys</span> = root, subsys1, subsys2, subsubsys
+
+[<span class="org-type">handlers</span>]
+<span class="org-variable-name">keys</span> = log1, log2, trace
+
+[<span class="org-type">formatters</span>]
+<span class="org-variable-name">keys</span> = mine
+
+[<span class="org-type">filters</span>]
+<span class="org-comment-delimiter"># </span><span class="org-comment">this section makes NO sense</span>
+<span class="org-variable-name">keys</span> = mine
+
+[<span class="org-type">logger_root</span>]
+<span class="org-variable-name">level</span> = NOTSET
+<span class="org-variable-name">handlers</span> = trace
+
+[<span class="org-type">logger_subsys1</span>]
+<span class="org-variable-name">qualname</span> = s1
+<span class="org-variable-name">handlers</span> = log1
+
+[<span class="org-type">logger_subsubsys</span>]
+<span class="org-variable-name">qualname</span> = s1.ss
+<span class="org-variable-name">handlers</span> =
+
+[<span class="org-type">logger_subsys2</span>]
+<span class="org-variable-name">qualname</span> = s2
+<span class="org-variable-name">handlers</span> = log2
+
+[<span class="org-type">handler_log1</span>]
+<span class="org-variable-name">class</span> = logging.handlers.RotatingFileHandler
+<span class="org-variable-name">args</span> = (<span class="org-string">'./1.log'</span>, <span class="org-string">'a'</span>)
+<span class="org-variable-name">formatter</span> = mine
+<span class="org-variable-name">level</span> = WARNING
+
+[<span class="org-type">handler_log2</span>]
+<span class="org-variable-name">class</span> = logging.handlers.RotatingFileHandler
+<span class="org-variable-name">args</span> = (<span class="org-string">'./2.log'</span>, <span class="org-string">'a'</span>)
+<span class="org-variable-name">formatter</span> = mine
+<span class="org-variable-name">level</span> = WARNING
+
+[<span class="org-type">handler_trace</span>]
+<span class="org-variable-name">class</span> = logging.StreamHandler
+<span class="org-variable-name">args</span> = (sys.stderr,)              <span class="org-comment-delimiter"># </span><span class="org-comment">the comma is mandatory</span>
+<span class="org-variable-name">formatter</span> = mine
+<span class="org-variable-name">filters</span> = mine <span class="org-comment-delimiter"># </span><span class="org-comment">does NOT work</span>
+
+[<span class="org-type">filter_mine</span>]
+<span class="org-comment-delimiter"># </span><span class="org-comment">filters does NOT work at all</span>
+<span class="org-variable-name">class</span> = logging.Filter
+<span class="org-variable-name">args</span> = (<span class="org-string">'s1'</span>)
+
+[<span class="org-type">formatter_mine</span>]
+<span class="org-variable-name">class</span> = logging.Formatter
+<span class="org-variable-name">format</span> = %(asctime)s %(levelname)-8s %(name)-6s: %(message)s
+<span class="org-variable-name">formatter</span> = mine
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-14" class="outline-2">
+<h2 id="sec-14">Logging from Multiple Threads</h2>
+<div class="outline-text-2" id="text-14">
+<p>
+TODO: but not in a foreseeable future.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-15" class="outline-2">
+<h2 id="sec-15">Misc</h2>
+<div class="outline-text-2" id="text-15">
+</div><div id="outline-container-sec-15-1" class="outline-3">
+<h3 id="sec-15-1">Formatter for High-Resolution Time-Stamp</h3>
+<div class="outline-text-3" id="text-15-1">
+<div class="org-src-container">
+
+<pre class="src src-python"><span class="org-comment-delimiter">#</span><span class="org-comment">!/bin/env python</span>
+<span class="org-comment-delimiter"># </span><span class="org-comment">-*- coding: utf-8 -*-</span>
+
+<span class="org-string">'''High-resolution time based on</span>
+<span class="org-string">http://stackoverflow.com/questions/6290739/python-logging-use-milliseconds-in-time-format'''</span>
+
+<span class="org-keyword">import</span> logging
+<span class="org-keyword">import</span> datetime
+
+
+<span class="org-keyword">class</span> <span class="org-type">MyFormatter</span>(logging.Formatter):
+
+    <span class="org-variable-name">converter</span> = datetime.datetime.fromtimestamp
+
+    <span class="org-keyword">def</span> <span class="org-function-name">formatTime</span>(<span class="org-keyword">self</span>, record, datefmt=<span class="org-constant">None</span>):
+        <span class="org-variable-name">create_time</span> = <span class="org-keyword">self</span>.converter(record.created)
+        <span class="org-keyword">if</span> datefmt:
+            <span class="org-variable-name">stamp</span> = create_time.strftime(datefmt)
+        <span class="org-keyword">else</span>:
+            <span class="org-variable-name">stamp</span> = <span class="org-string">'%s.%03d'</span> % (create_time.strftime(<span class="org-string">'%Y-%m-%d %H:%M:%S'</span>),
+                                 record.msecs)
+        <span class="org-keyword">return</span> stamp
+
+<span class="org-keyword">def</span> <span class="org-function-name">demo</span>():
+    <span class="org-variable-name">formatter</span> = MyFormatter(
+        fmt=<span class="org-string">'%(asctime)s %(levelname)s %(name)s: %(message)s'</span>,
+        datefmt=<span class="org-string">'%Y-%m-%d %H:%M:%S.%f'</span>)
+
+    logging.basicConfig(level=logging.INFO)
+    <span class="org-keyword">for</span> handler <span class="org-keyword">in</span> logging.getLogger().handlers:
+        handler.setFormatter(formatter)
+
+    logging.info(<span class="org-string">'datefmt:%s'</span>, formatter.datefmt)
+
+    <span class="org-variable-name">formatter.datefmt</span> = <span class="org-constant">None</span>
+    logging.info(<span class="org-string">'datefmt:%s'</span>, formatter.datefmt)
+
+
+<span class="org-keyword">if</span> <span class="org-builtin">__name__</span> == <span class="org-string">'__main__'</span>:
+    demo()
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-15-2" class="outline-3">
+<h3 id="sec-15-2">Change Log Configure on the Fly</h3>
+<div class="outline-text-3" id="text-15-2">
+<p>
+Suppose the application runs 7x24. It would be nice if we type some
+commands and then the logging configuration changes without
+restarting the application.
+</p>
+
+<p>
+TODO: but maybe never
+</p>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+
+     <br/>
+     <p>
+     <span class="date">Created: 2015-12-11 Fri 11:38</span> by <span class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</span>
+     </p>
+
+     <!-- DISQUS  -->
+     <div id="disqus_thread"></div>
+     <script type="text/javascript">
+         /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+         var disqus_shortname = 'lgfang'; // required: replace example with your forum shortname
+
+         /* * * DON'T EDIT BELOW THIS LINE * * */
+         (function() {
+             var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+             dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+             (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+         })();
+     </script>
+     <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+     <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+     <!-- google analytic -->
+     <script>
+       (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+       (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+       m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+       })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+       ga('create', 'UA-84711243-1', 'auto');
+       ga('send', 'pageview');
+
+     </script>
+</div>
+</div>
+</body>
+</html>

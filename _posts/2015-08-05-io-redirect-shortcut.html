@@ -1,0 +1,62 @@
+---
+layout: post
+title: Shortcuts to Redirect/Pipe Both stdout and stderr
+tagline:
+categories: computer
+tags: [bash, shell, coding]
+---
+
+<p>
+It is frequently seen in shell scripts that both stdout and stderr are
+redirected or piped to the same destination. Do you know that BASH (and some
+others) has shortcuts for that? Below is cited from BASH manual.
+</p>
+
+<blockquote>
+<p>
+If <code>|&amp;</code> is used, the standard error of COMMAND1 is connected to COMMAND2's
+standard input through the pipe; it is shorthand for <code>2&gt;&amp;1 |</code>. This implicit
+redirection of the standard error is performed after any redirections specified
+by the command.
+</p>
+
+<p>
+&#x2026;
+</p>
+
+<p>
+There are two formats for redirecting standard output and standard error:
+</p>
+<pre class="example">
+&amp;&gt;WORD
+</pre>
+<p>
+and
+</p>
+<pre class="example">
+&gt;&amp;WORD
+</pre>
+<p>
+Of the two forms, the first is preferred. This is semantically equivalent to
+</p>
+<pre class="example">
+&gt;WORD 2&gt;&amp;1
+</pre>
+
+<p>
+&#x2026;
+</p>
+
+<p>
+The format for appending standard output and standard error is:
+</p>
+<pre class="example">
+&amp;&gt;&gt;WORD
+</pre>
+<p>
+This is semantically equivalent to
+</p>
+<pre class="example">
+&gt;&gt;WORD 2&gt;&amp;1
+</pre>
+</blockquote>

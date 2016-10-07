@@ -1,0 +1,258 @@
+---
+layout: post
+title: 我对编程语言的一点看法
+tagline:
+categories: computer
+tags: [python, perl, c++, java, bash, shell, tcl, coding]
+---
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">编程语言重不重要</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+有些人喜欢牛X轰轰的说什么“编程语言都差不多、不重要，重要的是算法和数据结构”。我
+认为这些人要么确实没领会不同语言存在的意义；要不就是为了装13而人云亦云。归根到
+底都是出于无知。
+</p>
+
+<p>
+如今是“史上信息传播最快最广的时代”，如果一种编程语言只是为了复制另一种语言，它
+就根本不会出现。即使出现了，两者中也只有更好的那个才会流传开来。
+</p>
+
+<p>
+算法和数据结构当然很重要，但不能因此就说编程语言不重要。
+</p>
+
+<p>
+各个编程语言之间或多或少地互相借鉴导致它们之间某些方面有些相似也是事实，但这也
+不成为否认编程语言重要性或差异性的依据。
+</p>
+
+<p>
+一个人的语言决定了他/她的思维。对于程序员，编程语言也类似。
+</p>
+
+<p>
+市面上流行的各个编程语言都有它们自己的特点。说起来只有各编程语言语法上的细枝末
+节确实是无关痛痒的。而每个编程语言背后的设计理念和语言特性都是独特而重要的， 而
+且这些是如果你不知道你就 <b>不知道你不知道</b> 。
+</p>
+
+<p>
+举例来说，假设你不清楚C里面"for"循环的具体语法是什么，那你 <b>知道自己不知道</b> ，
+需要的时候你会去查一下手册或教材，然后就了解了；但是如果你根本不知道编程世界里
+还有"for"循环那你根本就不可能利用C语言的这一特性。
+</p>
+
+<p>
+再比如说Python，将一个类的成员函数当成一个对象（object）来操作、使用的具体细节
+不必记住，但是知道在python里任何东西实质上都是对象则是十分重要<sup><a id="fnr.1" name="fnr.1" class="footref" href="#fn.1">1</a></sup>。
+</p>
+
+<p>
+显然 Paul Graham 也认为“所有编程语言其实都一样”的观点是无稽之谈（《黑客与画家》
+第十章的“语言的战争”）：
+</p>
+
+<blockquote>
+<p>
+Other hackers, perhaps from a desire to seem sophisticated, will tell you that
+all languages are basically the same. I’ve programmed in all kinds of
+languages, said the tough old hacker as he eased up to the bar, and it don’t
+matter which you use. What matters is whether you have the right stuff. Or
+something along those lines.
+</p>
+
+<p>
+This is nonsense, of course. There is a world of difference between, say,
+Fortran I and the latest version of Perl—or for that matter between early
+versions of Perl and the latest version of Perl.
+</p>
+</blockquote>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2">C</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+简洁、实用。看看《The C Programming Language》一书的厚度再看看它今天的应用范围
+就知道了。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3">C++</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+我认为用来学习编程不错。因为它所包含的概念太多了，学完这一门语言就理解了很多概
+念。
+</p>
+
+<p>
+C++用好了应该也不错，但不太合适大公司里用。因为“合格”的C++程序员太少而C++又太复
+杂、威力太大。Bajarne Stroustrup自己就说：
+</p>
+
+<blockquote>
+<p>
+C makes it easy to shoot yourself in the foot; C++ makes it harder, but when
+you do it blows your whole leg off.
+</p>
+</blockquote>
+</div>
+</div>
+
+<div id="outline-container-sec-4" class="outline-2">
+<h2 id="sec-4">Java</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+讨厌Java因为它炒作过了头。它或许有可取之处，但决没有吹嘘得那么好。
+</p>
+
+<p>
+刚开始，不停出新版本，忙得不不亦乐乎。可在我看来直到java1.5的时候，java还是个半
+成品：号称纯面向对象，其实就是限制你用别的编程范式；号称垃圾收集，其实严肃的程
+序员根本不能指望它；号称跨平台，其实jvm本身就是个平台；在C++之后崛起却不支持模
+板，看看使用容器的代码吧，恶心的够呛。
+</p>
+
+<p>
+就我有限的了解而言，inteface的引入以及对exception的“checked/unchecked”处理是比
+C++好的地方。
+</p>
+
+<p>
+简言之，java is overrated。
+</p>
+
+<p>
+和我一样， Paul Graham 也不喜欢 Java。参见他的 <a href="http://paulgraham.com/javacover.html">Java Cover</a> 一文。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-5" class="outline-2">
+<h2 id="sec-5">Perl</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+Perl是个很神奇的编程语言。Perl的作者自己很得意，称之为后现代编程语言。我则建议
+如果不是为了维护旧代码就不要去学它。
+</p>
+
+<p>
+薄薄一本《Learning Perl》我看了好几次才看完。因为几乎每一页下面都是数个脚注，每
+个脚注就意味着一个不符合规则的特例。然后我就不愿意看下去了。过一阵子拿起来又因
+为同样的原因放下。对比一下《The C Programming Language》（整本书也没几个脚注）
+就能看出Perl是多么的精神分裂。
+</p>
+
+<p>
+网上有个“Perl是一种邪教”的帖子批判perl，很有意思可以一看。
+</p>
+
+<p>
+再一次引用 Paul Graham 的话（<a href="http://www.paulgraham.com/hp.html">Hackers and Painters</a>）：
+</p>
+<blockquote>
+<p>
+Many a hacker has written a program only to find on returning to it six months
+later that he has no idea how it works. I know several people who’ve sworn off
+Perl after such experiences.
+</p>
+</blockquote>
+
+<p>
+丰富库和历史遗留代码（和人）可能是它现在仍然有市场的原因。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-6" class="outline-2">
+<h2 id="sec-6">Python</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+Python 是我目前最喜欢的语言之一。
+</p>
+
+<p>
+所谓的“ducky type”，“everything is an object”，对函数式编程的部分支持，丰富的库，
+以及完善的文档使得大部分时候编程都很愉快。
+</p>
+
+<p>
+我唯一不喜欢的是用缩进替代括号使得文本编辑器的自动对齐不那么好用了。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-7" class="outline-2">
+<h2 id="sec-7">Shell</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+我认为在Linux下工作的必须多少会点。
+</p>
+
+<p>
+不光可以提高工作效率，而且有助于理解unix的理念。用好了，代码简单优雅高效。
+</p>
+
+<p>
+Raymond在《The Art of Unix Programming》说：
+</p>
+<blockquote>
+<p>
+There is more Unix-nature in one line of shell script than there is in ten
+thousand lines of C.
+</p>
+</blockquote>
+
+<p>
+不过学shell其实主要是学各种工具而不是shell本身。
+</p>
+
+<p>
+另外，复杂的任务还是不要用shell了吧。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-8" class="outline-2">
+<h2 id="sec-8">TCL/Expect</h2>
+<div class="outline-text-2" id="text-8">
+<p>
+对我来说，好像 expect 就是 Tcl 存在的全部意义。不过 Tcl 本身确实是精练的、高度
+一致的语言。语法很简单，几乎几句话就可以说完，但是却可以轻松的扩展。
+</p>
+
+<p>
+数据结构的简单（和shell类似）导致处理复杂任务的时候有点麻烦。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-9" class="outline-2">
+<h2 id="sec-9">结语</h2>
+<div class="outline-text-2" id="text-9">
+<p>
+本人水平有限、见识不够，观点可能偏激且错误。姑且看之。
+</p>
+
+<p>
+很多大牛都发表过对各种编程语言的看法。他们的看法当然比我的更深刻、准确、有说服
+力。感兴趣的自行搜索之。
+</p>
+</div>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" name="fn.1" class="footnum" href="#fnr.1">1</a></sup> <p>好吧，如果只
+  是写写最简单的脚本不知道这个也无所谓</p></div>
+
+
+</div>
+</div>

@@ -1,0 +1,151 @@
+---
+layout: post
+title: How to interpret complex C/C++ declarations
+tagline: by Vikram A Punathambekar
+categories: computer
+tags: [c, c++, coding]
+---
+
+<p>
+This is an excerpt from <span class="underline">How to interpret complex C/C++ declarations</span> by Vikram
+A Punathambekar (<a href="http://www.codeproject.com/cpp/complex_declarations.asp">http://www.codeproject.com/cpp/complex_declarations.asp</a>)
+</p>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">The right-left rule</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+This is a simple rule that allows you to interpret any declaration. It runs as
+follows:
+</p>
+
+<p>
+Start reading the declaration from the innermost parentheses, go right, and
+then go left. When you encounter parentheses, the direction should be
+reversed. Once everything in the parentheses has been parsed, jump out of it.
+Continue till the whole declaration has been parsed.
+</p>
+
+<p>
+One small change to the right-left rule: When you start reading the
+declaration for the first time, you have to start from the identifier, and not
+the innermost parentheses.
+</p>
+
+<p>
+Take the example given in the introduction:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-c"><span class="org-type">int</span> * (* (*<span class="org-variable-name">fp1</span>) (<span class="org-type">int</span>) ) [10];
+</pre>
+</div>
+
+<p>
+This can be interpreted as follows:
+</p>
+
+<ol class="org-ol">
+<li>Start from the variable name &#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014; fp1
+</li>
+<li>Nothing to right but <code>)</code> so go left to find <code>*</code> &#x2014;&#x2014;&#x2014; is a pointer
+</li>
+<li>Jump out of parentheses and encounter <code>(int)</code> &#x2014;&#x2014;&#x2014; to a
+function that takes an int as argument
+</li>
+<li>Go left, find <code>*</code> -&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014; and returns
+a pointer
+</li>
+<li>Jump put of parentheses, go right and hit <code>[10]</code> &#x2014;&#x2014; to an array
+of 10
+</li>
+<li>Go left find <code>*</code> &#x2013;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014; pointers to
+</li>
+<li>Go left again, find <code>int</code> &#x2013;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014; ints.
+</li>
+</ol>
+
+<p>
+Here's another example:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-c"><span class="org-type">int</span> *( *( *<span class="org-function-name">arr</span>[5])())();
+</pre>
+</div>
+
+<ol class="org-ol">
+<li>Start from the variable name &#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014; arr
+</li>
+<li>Go right, find array subscript -&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014; is an array of 5
+</li>
+<li>Go left, find <code>*</code> -&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014; pointers
+</li>
+<li>Jump out of parentheses, go right to find <code>()</code> &#x2013;&#x2014; to functions
+</li>
+<li>Go left, encounter <code>*</code> &#x2013;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014; that return pointers
+</li>
+<li>Jump out, go right, find <code>()</code> -&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014; to functions
+</li>
+<li>Go left, find <code>*</code> -&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014; that return pointers
+</li>
+<li>Continue left, find <code>*</code> <sup><a id="fnr.1" name="fnr.1" class="footref" href="#fn.1">1</a></sup> &#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014;&#x2014; to ints.
+</li>
+</ol>
+</div>
+</div>
+
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2">Further examples</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+Following examples should make it clear:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-c"><span class="org-type">float</span> ( * ( *<span class="org-function-name">b</span>()) [] )();              <span class="org-comment-delimiter">// </span><span class="org-comment">b is a function that returns a</span>
+                                       <span class="org-comment-delimiter">// </span><span class="org-comment">pointer to an array of pointers</span>
+                                       <span class="org-comment-delimiter">// </span><span class="org-comment">to functions returning floats.</span>
+
+<span class="org-type">void</span> * ( *<span class="org-function-name">c</span>) ( <span class="org-type">char</span>, <span class="org-type">int</span> (*)());       <span class="org-comment-delimiter">// </span><span class="org-comment">c is a pointer to a function that takes</span>
+                                       <span class="org-comment-delimiter">// </span><span class="org-comment">two parameters:</span>
+                                       <span class="org-comment-delimiter">//     </span><span class="org-comment">a char and a pointer to a</span>
+                                       <span class="org-comment-delimiter">//     </span><span class="org-comment">function that takes no</span>
+                                       <span class="org-comment-delimiter">//     </span><span class="org-comment">parameters and returns</span>
+                                       <span class="org-comment-delimiter">//     </span><span class="org-comment">an int</span>
+                                       <span class="org-comment-delimiter">// </span><span class="org-comment">and returns a pointer to void.</span>
+
+<span class="org-type">void</span> ** (*<span class="org-function-name">d</span>) (<span class="org-type">int</span> &amp;,
+  <span class="org-type">char</span> **(*)(<span class="org-type">char</span> *, <span class="org-type">char</span> **));        <span class="org-comment-delimiter">// </span><span class="org-comment">d is a pointer to a function that takes</span>
+                                       <span class="org-comment-delimiter">// </span><span class="org-comment">two parameters:</span>
+                                       <span class="org-comment-delimiter">//     </span><span class="org-comment">a reference to an int and a pointer</span>
+                                       <span class="org-comment-delimiter">//     </span><span class="org-comment">to a function that takes two parameters:</span>
+                                       <span class="org-comment-delimiter">//        </span><span class="org-comment">a pointer to a char and a pointer</span>
+                                       <span class="org-comment-delimiter">//        </span><span class="org-comment">to a pointer to a char</span>
+                                       <span class="org-comment-delimiter">//     </span><span class="org-comment">and returns a pointer to a pointer</span>
+                                       <span class="org-comment-delimiter">//     </span><span class="org-comment">to a char</span>
+                                       <span class="org-comment-delimiter">// </span><span class="org-comment">and returns a pointer to a pointer to void</span>
+
+<span class="org-type">float</span> ( * ( * <span class="org-variable-name">e</span>[10])
+    (<span class="org-type">int</span> &amp;) ) [5];                    <span class="org-comment-delimiter">// </span><span class="org-comment">e is an array of 10 pointers to</span>
+                                       <span class="org-comment-delimiter">// </span><span class="org-comment">functions that take a single</span>
+                                       <span class="org-comment-delimiter">// </span><span class="org-comment">reference to an int as an argument</span>
+                                       <span class="org-comment-delimiter">// </span><span class="org-comment">and return pointers to</span>
+                                       <span class="org-comment-delimiter">// </span><span class="org-comment">an array of 5 floats.</span>
+</pre>
+</div>
+</div>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" name="fn.1" class="footnum" href="#fnr.1">1</a></sup> <p>Should be <code>int</code> &#x2013; lgfang</p></div>
+
+
+</div>
+</div>

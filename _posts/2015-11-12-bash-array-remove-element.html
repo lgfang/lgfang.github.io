@@ -1,0 +1,88 @@
+---
+layout: post
+title: Remove Elements from BASH Arrays Correctly
+tagline:
+categories: computer
+tags: [bash, shell, coding]
+---
+
+<p>
+<code>unset arr[2]</code> does not remove the third element in BASH array <code>arr</code> the way you
+might expect: the subscripts of all elements in the array are intact. And, this
+subtle issue might incur big surprises.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-shell-script">$ <span class="org-variable-name">arr</span>=(a b c d)
+
+$ echo ${<span class="org-variable-name">!</span>arr[@]}
+0 1 2 3
+
+$ echo ${<span class="org-variable-name">arr</span>[2]}
+c
+
+$ echo ${<span class="org-variable-name">arr</span>[3]}
+d
+
+$ unset arr[2]
+
+$ echo ${<span class="org-variable-name">!</span>arr[@]}
+0 1 3
+
+$ echo ${<span class="org-variable-name">arr</span>[2]}
+
+
+$ echo ${<span class="org-variable-name">arr</span>[3]}
+d
+</pre>
+</div>
+
+<p>
+Note however, the usual usage of <code>for each</code> works.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-shell-script">$ for each<span class="org-keyword"> in</span> <span class="org-string">"${arr[@]}"</span>; <span class="org-keyword">do </span><span class="org-builtin">echo</span> <span class="org-string">"In arr: $each"</span>; <span class="org-keyword">done</span>
+In arr: a
+In arr: b
+In arr: d
+</pre>
+</div>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">Remove elements from an array based on index</h2>
+<div class="outline-text-2" id="text-1">
+<div class="org-src-container">
+
+<pre class="src src-shell-script"><span class="org-variable-name">arr</span>=(a b c d e)
+<span class="org-variable-name">idx</span>=2
+
+<span class="org-variable-name">arr</span>=(${<span class="org-variable-name">arr</span>[@]:0:$<span class="org-variable-name">idx</span>} ${<span class="org-variable-name">arr</span>[@]:$((idx+1))})
+</pre>
+</div>
+
+<p>
+NOTE: <code>unset arr[idx]</code> does not re-arrange subscripts of elements.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2">Remove elements from an array based on value</h2>
+<div class="outline-text-2" id="text-2">
+<div class="org-src-container">
+
+<pre class="src src-shell-script"><span class="org-variable-name">elem</span>=<span class="org-string">"todel"</span>
+<span class="org-builtin">local</span> <span class="org-variable-name">tmp</span>=()
+
+<span class="org-keyword">for</span> each<span class="org-keyword"> in</span> <span class="org-string">"${arr[@]}"</span>; <span class="org-keyword">do</span>
+    [ <span class="org-string">"$each"</span> != <span class="org-string">"$elem"</span> ] &amp;&amp; <span class="org-variable-name">tmp</span>+=(<span class="org-string">"$each"</span>)
+<span class="org-keyword">done</span>
+
+<span class="org-variable-name">arr</span>=(<span class="org-string">"${tmp[@]}"</span>)
+<span class="org-builtin">unset</span> tmp
+</pre>
+</div>
+</div>
+</div>

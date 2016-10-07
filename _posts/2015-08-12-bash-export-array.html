@@ -1,0 +1,47 @@
+---
+layout: post
+title: Export Array Variables in BASH
+tagline:
+categories: computer
+tags: [bash, shell, coding]
+---
+
+<p>
+In short, we cannot export an BASH array. Exporting not only does no good but
+also may incur issues (trigger a bug of bash?).
+</p>
+
+<pre class="example">
+$ cat lib.sh
+export MY_VAR=("hello:" "world")
+echo -e "In lib.sh:\t ${MY_VAR[@]}"
+
+$ cat test.sh
+#!/bin/bash
+function my_fun {
+    source lib.sh
+    echo -e "In my_fun:\t ${MY_VAR[@]}"
+}
+my_fun
+echo -e "Out my_fun:\t ${MY_VAR[@]}"
+
+$ ./test.sh
+In lib.sh:       hello world
+In my_fun:       hello world
+Out my_fun:      &lt;== MISSING ==&gt;
+</pre>
+
+
+<p>
+Without "export", the code works as expected:
+</p>
+<pre class="example">
+$ cat lib.sh
+MY_VAR=(hello world)
+echo -e "In lib.sh:\t ${MY_VAR[@]}"
+
+$ ./test.sh
+In lib.sh:       hello world
+In my_fun:       hello world
+Out my_fun:      hello world
+</pre>

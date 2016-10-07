@@ -1,0 +1,35 @@
+---
+layout: post
+title: Using Shell Functions in "find"
+tagline:
+categories: computer
+tags: [bash, shell, coding]
+---
+
+<ol class="org-ol">
+<li>You have to export the function since 'find' starts a new shell and if you
+don't export the function it won't be available for the sub-shell.
+</li>
+
+<li>You should call the function with 'bash -c' since your function is not a name
+for an executable binary.
+</li>
+</ol>
+
+<p>
+The script should be something like this:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-shell-script"><span class="org-comment-delimiter">#</span><span class="org-comment">!/bin/</span><span class="org-keyword">bash</span>
+
+<span class="org-keyword">function</span> <span class="org-function-name">mytest</span> {
+    <span class="org-builtin">echo</span> <span class="org-string">"mytest $1"</span>
+}
+
+<span class="org-builtin">export</span> -f mytest
+
+find . -exec bash -c <span class="org-string">"mytest {}"</span> <span class="org-string">\;</span>
+</pre>
+</div>

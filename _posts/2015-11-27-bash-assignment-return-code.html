@@ -1,0 +1,47 @@
+---
+layout: post
+title: Return Code of Assignment
+tagline:
+categories: computer
+tags: [bash, shell, coding]
+---
+
+<p>
+It is very common to use command substitution in the right hand side of
+environment variable assignment. One thing worth noting is that the return value
+of the assignment is the return value of that command. This is quite handy since
+it enables us to write code some like the below. However, the is not the case
+when you "local"/"export" variables and assign values to them in the same line
+since <i>The return status is zero unless 'local' is used outside a function, an
+invalid NAME is supplied, or NAME is a readonly variable.</i> (info "(bash) Bash
+Builtins"). That is, the return code of the command has nothing to do with the
+return code of the whole expression. Run the following code snippet and study
+the result.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-shell-script"><span class="org-comment-delimiter">#</span><span class="org-comment">!/bin/</span><span class="org-keyword">bash</span>
+
+<span class="org-keyword">function</span> <span class="org-function-name">mytest</span> {
+    <span class="org-comment-delimiter"># </span><span class="org-comment">OK</span>
+    <span class="org-variable-name">msg</span>=$(<span class="org-sh-quoted-exec">touch</span> /dir/not/exists 2&gt;&amp;1) || <span class="org-builtin">echo</span> <span class="org-string">"msg: $msg"</span>
+
+    <span class="org-comment-delimiter"># </span><span class="org-comment">OOPS</span>
+    <span class="org-builtin">local</span> <span class="org-variable-name">msg1</span>=$(<span class="org-sh-quoted-exec">touch</span> /dir/not/exists 2&gt;&amp;1) || <span class="org-builtin">echo</span> <span class="org-string">"msg1: $msg1"</span>
+
+    <span class="org-comment-delimiter"># </span><span class="org-comment">OK</span>
+    <span class="org-builtin">local</span> msg2
+    <span class="org-variable-name">msg2</span>=$(<span class="org-sh-quoted-exec">touch</span> /dir/not/exists 2&gt;&amp;1) || <span class="org-builtin">echo</span> <span class="org-string">"msg2: $msg2"</span>
+
+    <span class="org-comment-delimiter"># </span><span class="org-comment">OOPS</span>
+    <span class="org-builtin">export</span> <span class="org-variable-name">msg3</span>=$(<span class="org-sh-quoted-exec">touch</span> /dir/not/exists 2&gt;&amp;1) || <span class="org-builtin">echo</span> <span class="org-string">"msg3: $msg3"</span>
+
+    <span class="org-comment-delimiter"># </span><span class="org-comment">OK</span>
+    <span class="org-builtin">export</span> msg4
+    <span class="org-variable-name">msg4</span>=$(<span class="org-sh-quoted-exec">touch</span> /dir/not/exists 2&gt;&amp;1) || <span class="org-builtin">echo</span> <span class="org-string">"msg4: $msg4"</span>
+}
+
+mytest
+</pre>
+</div>

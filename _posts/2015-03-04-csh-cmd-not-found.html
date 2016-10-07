@@ -1,0 +1,33 @@
+---
+layout: post
+title: When CSH tells you "Command not found", it doesn't always mean that
+categories: computer
+tags: [csh, shell, linux tools]
+---
+
+<p>
+Yesterday, I was working on a newly set-up environment and was blocked for quite
+a while by a small issue. The issue is that when I ran a command (say "mycmd")
+in CSH (I had to), CSH always reported <code>./mycmd: Command not found</code>. But,
+obviously the command was there.
+</p>
+<pre class="example">
+[root@CSH ~]# ./mycmd
+./mycmd: Command not found.
+</pre>
+
+<p>
+At last, I happened to run it in my default shell BASH. Then, I was instantly
+reminded that I am running a 32-bit program on 64-bit platform without dependent
+libraries.
+</p>
+<pre class="example">
+[root@BASH ~]# ./mycmd
+-bash: ./mycmd: /lib/ld-linux.so.2: bad ELF interpreter: No such file or directory
+</pre>
+
+<p>
+What a pity that CSH had given such a misleading information. It seems to me
+that we shall avoid using CSH unless "being forced" to do so. What's your
+opinion?
+</p>

@@ -1,0 +1,69 @@
+---
+layout: post
+title: Variable Expansion between Backticks
+tagline:
+categories: computer
+tags: [perl, bash, shell, coding]
+---
+
+<p>
+I expected that the following script would print a error number. But it actually
+prints 0.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-perl"><span class="org-comment-delimiter">#</span><span class="org-comment">!/usr/bin/perl</span>
+<span class="org-string">`echo hello world`</span>;
+$retval=<span class="org-string">`err-cmd &gt;/dev/null 2&gt;&amp;1;echo $?`</span>;
+<span class="org-cperl-nonoverridable">print</span> (<span class="org-string">"result=$retval"</span>);
+</pre>
+</div>
+
+<p>
+What is wrong? <span class="underline">learning perl sec14.4</span> says:
+</p>
+
+<blockquote>
+<p>
+The value beween backquotes is like the single-argument form of system and is
+interpreted as a doublequoted string, meaning that backslash-escapes and
+variables are expanded appropriately.
+</p>
+</blockquote>
+
+<p>
+When perl interprets the aforementioned script, it will replace the <code>$?</code> with
+return value of the command before it. Since that value is 0 (the return value
+of <code>echo hello world</code>), the script is equivalent to this:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-perl"><span class="org-string">`echo hello world`</span>;
+$retval=<span class="org-string">`err-cmd &gt;/dev/null 2&gt;&amp;1;echo 0`</span>;
+<span class="org-cperl-nonoverridable">print</span> (<span class="org-string">"result=$retval"</span>);
+</pre>
+</div>
+
+<p>
+The fix is straight forward: escape the dollar sign:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-perl">$retval=<span class="org-string">`err-cmd &gt;/dev/null 2&gt;&amp;1;echo \$?`</span>;
+</pre>
+</div>
+
+<p>
+Please note that shell scripts has a similar issue:
+</p>
+<pre class="example">
+$ cat test.sh
+#!/usr/local/bin/bash
+eval "touch /file/not/exist 2&gt;/dev/null; echo $?"
+echo "$(touch /file/not/exist 2&gt;/dev/null) $?"
+
+$ ./test.sh
+0
+ 1
+</pre>

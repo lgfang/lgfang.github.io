@@ -1,0 +1,57 @@
+---
+layout: post
+title: Work Flow for "Git + Gerrit"
+tagline:
+categories: computer
+tags: [git, gerrit, linux tools, work flow]
+---
+
+
+<div class="figure">
+<p><img src="http://lgfang.github.io/images/git-gerrit-workflow.png" alt="git-gerrit-workflow.png" />
+</p>
+</div>
+
+<p>
+Above picture illustrates the basic work flow of software development using
+git + gerrit. Below are some frequently used commands for your reference.
+</p>
+
+<dl class="org-dl">
+<dt> Clone repository </dt><dd>Copying the hook script allows git to create a unique ID
+for each commit. That ID is correlated with gerrit review topics.
+</dd>
+
+<dt> Commit locally </dt><dd>It is highly recommended to run <code>git status</code> and <code>git diff
+                    --cached</code> etc. between <code>git add xxx</code> and <code>git commit</code> to
+ensure nothing committed inadvertantly.
+</dd>
+
+<dt> Review </dt><dd>Run <code>git push origin refs/for/&lt;branch_name&gt;</code> where <code>&lt;branch_name&gt;</code>
+            is your current branch.
+</dd>
+
+<dt> Submit </dt><dd>Click the "submit" button on corresponding gerrit webpage.
+<ul class="org-ul">
+<li>NOTE: You may also need to "cherry-pick" the code change to other branches
+on the same webpage.
+</li>
+</ul>
+</dd>
+
+<dt> Recommit </dt><dd>The key is to keep commit ID intact. Most times, this is done by
+simply git add what we've changed per review and run <code>git commit
+              --amend</code>.
+</dd>
+
+<dt> Update local repository </dt><dd><code>git pull --rebase</code>.
+<ul class="org-ul">
+<li>The option <code>--rebase</code> is the key to pull new code to local <b>without creating
+a "merge &#x2026;" commit</b>.
+</li>
+<li>Actually, you may rebase your code whenever you want (so long as you commit
+all your changes locally).
+</li>
+</ul>
+</dd>
+</dl>

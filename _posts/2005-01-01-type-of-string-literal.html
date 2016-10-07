@@ -1,0 +1,45 @@
+---
+layout: post
+title: Type of String Literals
+tagline:
+categories: computer
+tags: [c++, coding]
+---
+
+<p>
+I had always thought that the type of string literal, i.e. a string enclosed by
+a pair of double quotes, was <code>const char*</code>. But, recently, I noticed a "weird"
+thing: why the following line compiles successfully?
+</p>
+<div class="org-src-container">
+
+<pre class="src src-c"><span class="org-type">char</span>* <span class="org-variable-name">p</span> = <span class="org-string">"this is weird"</span>;
+</pre>
+</div>
+
+<p>
+We cannot assign <code>const T[]</code> to <code>T*</code> as that removes the <code>const</code> modifer.
+Similar, string literals shall not be assigned to <code>char *</code>. At first, I
+suspected it was a bug of compiler. But, changing an other copmiler still get
+the same result. That really confused me until I happened to read the following
+lines in The C++ Programming Language (special edition，5.2.2 String Literals):
+</p>
+
+<blockquote>
+<p>
+The type of a string literal is "array of the appropriate number of const
+characters", so <code>Bohr</code> is of type <code>const char[5]</code>.
+</p>
+
+<p>
+&#x2026;
+</p>
+
+<p>
+A string literal can be assigned to a <code>char*</code>. This is allowed because in
+previous definitions of C and C++ , the type of a string literal was <code>char*</code>.
+Allowing the assignment of a string literal to a <code>char*</code> ensures that millions
+of lines of C and C++ remain valid. It is, however, an error to try to modify a
+string literal through such a pointer;
+</p>
+</blockquote>

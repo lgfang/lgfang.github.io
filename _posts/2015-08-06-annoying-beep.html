@@ -1,0 +1,41 @@
+---
+layout: post
+title: 换掉Win7默认的蜂鸣音
+tagline:
+categories: computer
+tags: [windows, putty]
+---
+
+<p>
+你也受够了Win7的蜂鸣音么？微软不但软件越做越烂连审美也出问题了。Win7自带的蜂鸣音
+实在是烦人，尤其用putty连到服务器上工作时。昨天发现 <b>在Putty配置里指定用PC扬声器
+发beep得到的声音就柔和多了</b> 。受此启发上网一查，Win7系统默认的beep也可以很容易地
+改掉。这样不光是putty，其它程序触发的beep都自动变了。（网上好多人讨厌它啊，微软是
+怎么挑选出来这么讨人厌的声音的？还有，拖延症患者伤不起啊，我竟然忍了它这么久？）。
+</p>
+
+<p>
+最简单粗暴的做法是在控制面板里彻底禁掉beep，但这样系统发beep报错也无从知道了。所
+以我的做法是保留beep但给它换个声音。具体方法是
+</p>
+<ol class="org-ol">
+<li>点击开始菜单
+</li>
+<li>选择 <code>Control Panel</code>
+</li>
+<li>选择 <code>Hardware sound</code>
+</li>
+<li><code>Sound</code> -&gt; <code>Change system sounds</code>
+</li>
+<li>弹出窗口内选择tab页 <code>Sounds</code>
+</li>
+<li>在 <code>Program Events</code> 里找到并点击 <code>Default Beep</code>
+</li>
+<li>更改声音（也可以禁掉）。不过话说找个好听的提示音可真不容易，我最后是下载了<i>这个wav</i>。
+</li>
+</ol>
+
+<p>
+改完之后就立刻生效了。这时beep就不再是从蜂鸣器出来，而是用扬声器播放的。也不知是
+不是这个才是主要因素，反正新的beep不再那么刺耳了。
+</p>

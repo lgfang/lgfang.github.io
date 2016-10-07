@@ -1,0 +1,88 @@
+---
+layout: post
+title: 扫描身份证正反两面到一页
+tagline:
+categories: computer
+tags: [office]
+---
+
+<p>
+把证件扫描成PDF保存在电脑里（建议简单加密一下）需要时就打印出来比每次都复印方便
+多了。可是，虽然可以用公司的复印机很方便地将身份证正反两面复印到一页A4上（复印时
+选择“多张合一”即可），但如何两面 <b>扫描</b> 成一页却一直不得其法。今天终于研究出一个
+方法。有一丁点麻烦，好在毕竟扫描只是一次性的工作。整个过程简单来讲就是把证件正反
+两面扫描成两页A6大小的一个PDF文件，然后再把这个PDF文件两页打印成一页A4的PDF。整
+个过程的关键是扫描的顺序和摆放方位。
+</p>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">扫描证件成PDF</h2>
+<div class="outline-text-2" id="text-1">
+<ol class="org-ol">
+<li>选择扫描发送
+</li>
+
+<li>设置扫描尺寸为竖版A6 （只有竖版可选，否则更简单了）。
+
+
+<div class="figure">
+<p><img src="http://lgfang.github.io/images/./scan2to1-1.png" alt="scan2to1-1.png" />
+</p>
+</div>
+</li>
+
+<li>如下图放置证件到左上角。注意两点：一是先扫描的是 <b>反面</b> ；二是证件不要贴着
+边放因为默认边角两毫米会被裁掉。
+
+
+<div class="figure">
+<p><img src="http://lgfang.github.io/images/./scan2to1-2.png" alt="scan2to1-2.png" />
+</p>
+</div>
+</li>
+
+<li>“启动”扫描。注意：趁第一面扫描还没结束赶紧点击“有下一张原稿”。
+</li>
+
+<li>待第一面扫描完毕，证件翻面再“启动”。
+
+
+<div class="figure">
+<p><img src="http://lgfang.github.io/images/./scan2to1-3.png" alt="scan2to1-3.png" />
+</p>
+</div>
+</li>
+
+<li>最后点击“无下一张原稿”结束扫描回去收email。
+</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2">两页A6的PDF合并成一页A4的</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+打开上一步生成的PDF文件，打印机选“PDF Creator” 并依下图设置。虽然预览图里是横
+版，但实际得到的PDF就是我们想要的竖版。至此大功告成。
+</p>
+
+
+<div class="figure">
+<p><img src="http://lgfang.github.io/images/./scan2to1-4.png" alt="scan2to1-4.png" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3">局限</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+最大的局限就是是A6只有A4的四分之一大小，只能应付驾驶证之类（或稍大一点）的证件。
+比较理想的情况是扫描成两页横版的A5（大小等于A4纸对折）再打印成一页A4。可惜公司
+的打印机驱动不支持Margin为0 （“Page Setup&#x2026;”里设置），两张A5再加上Margin要放
+到一张A4上就必然导致缩放。
+</p>
+</div>
+</div>

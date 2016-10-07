@@ -1,0 +1,72 @@
+---
+layout: post
+title: Invalid Pointers in Disguise
+tagline:
+categories: computer
+tags: [c, c++, coding]
+---
+
+<p>
+Yesterday, a colleague was confronted with a core dump caused by NULL pointer.
+But this case was a little unusual and she was confused. Like her, many people
+know that accessing address 0x0 (NULL pointer) is illegal and causes core dump
+(segment fault). What they do not know is that <b>using</b> NULL pointer does not
+necessarily always cause core dump immediately. Sometimes, there is even no core
+dump. Here is the example illustrates that.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-c"><span class="org-type">void</span> <span class="org-function-name">f2</span>(<span class="org-type">C</span>* <span class="org-variable-name">pc</span>) {
+    <span class="org-comment-delimiter">// </span><span class="org-comment">...</span>
+    expression(pc-&gt;m); <span class="org-comment-delimiter">// </span><span class="org-comment">* &lt;=== the spot when core dump happened</span>
+    <span class="org-comment-delimiter">// </span><span class="org-comment">...</span>
+}
+
+<span class="org-type">void</span> <span class="org-function-name">f1</span>(){
+    <span class="org-comment-delimiter">// </span><span class="org-comment">...</span>
+    f2( &amp;(pa-&gt;pb-&gt;c) ); <span class="org-comment-delimiter">// </span><span class="org-comment">**</span>
+    <span class="org-comment-delimiter">// </span><span class="org-comment">...</span>
+}
+
+<span class="org-keyword">struct</span> <span class="org-type">A</span>{
+    <span class="org-comment-delimiter">// </span><span class="org-comment">...</span>
+    <span class="org-keyword">struct</span> <span class="org-type">B</span>* <span class="org-variable-name">pb</span>;
+    <span class="org-comment-delimiter">// </span><span class="org-comment">...</span>
+};
+
+<span class="org-keyword">struct</span> <span class="org-type">B</span>{
+    <span class="org-comment-delimiter">// </span><span class="org-comment">...</span>
+    <span class="org-type">C</span> <span class="org-variable-name">c</span>;
+    <span class="org-comment-delimiter">// </span><span class="org-comment">...</span>
+}
+</pre>
+</div>
+
+<p>
+The core file shows that the process crashes in function f2. It seems that the
+de-referencing pointer <code>pc</code> caused the core dump. But, the value of <code>pc</code> is not
+NULL but <code>0x38</code>. Instead, <code>pb</code> was NULL. This confused my colleague since she
+thought the process should have cored in f1.
+</p>
+
+<p>
+This is a common misunderstanding. Please note that code like <code>&amp;(p-&gt;m)</code> does not
+access the member <code>m</code> of <code>p</code>. It just only get the address of <code>m</code>. In c
+programming language, this is achieved by adding up the address of <code>p</code> and the
+offset of <code>m</code> within the structure. Therefore, it does not matter if the address
+<code>p</code> is NULL or not. In fact, it is a widely used technique to get the offset of
+structure members as shown below:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-c">(<span class="org-type">int</span>) (&amp;(((<span class="org-type">X</span> *)NULLP)-&gt;Y))
+</pre>
+</div>
+
+<p>
+On the other hand, once we find a pointer points to a very small address (no
+bigger than structure size) we can be pretty sure that NULL pointer is used
+(either intentionally or inadvertently).
+</p>

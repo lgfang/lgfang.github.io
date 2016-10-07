@@ -1,0 +1,1188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>SSH Tips</title>
+<!-- 2015-11-05 Thu 13:23 -->
+<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta  name="generator" content="Org-mode" />
+<meta  name="author" content="Fang Lungang" />
+<link rel="stylesheet" type="text/css" href="../cssjs/lgfang.css" />
+
+<script type="text/javascript" src="../cssjs/org-info.js">
+/**
+ *
+ * @source: ../cssjs/org-info.js
+ *
+ * @licstart  The following is the entire license notice for the
+ *  JavaScript code in ../cssjs/org-info.js.
+ *
+ * Copyright (C) 2012-2013 Free Software Foundation, Inc.
+ *
+ *
+ * The JavaScript code in this tag is free software: you can
+ * redistribute it and/or modify it under the terms of the GNU
+ * General Public License (GNU GPL) as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option)
+ * any later version.  The code is distributed WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+ *
+ * As additional permission under GNU GPL version 3 section 7, you
+ * may distribute non-source (e.g., minimized or compacted) forms of
+ * that code without the copy of the GNU GPL normally required by
+ * section 4, provided you include this license notice and a URL
+ * through which recipients can access the Corresponding Source.
+ *
+ * @licend  The above is the entire license notice
+ * for the JavaScript code in ../cssjs/org-info.js.
+ *
+ */
+</script>
+
+<script type="text/javascript">
+
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+
+<!--/*--><![CDATA[/*><!--*/
+org_html_manager.set("TOC_DEPTH", "1");
+org_html_manager.set("LINK_HOME", "../../index.html");
+org_html_manager.set("LINK_UP", "../index.html");
+org_html_manager.set("LOCAL_TOC", "1");
+org_html_manager.set("VIEW_BUTTONS", "0");
+org_html_manager.set("MOUSE_HINT", "underline");
+org_html_manager.set("FIXED_TOC", "0");
+org_html_manager.set("TOC", "0");
+org_html_manager.set("VIEW", "showall");
+org_html_manager.setup();  // activate after the parameters are set
+/*]]>*///-->
+</script>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div class="container-narrow">
+<div id="content">
+<h1 class="title">SSH Tips</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">Client configuration</a>
+<ul>
+<li><a href="#sec-1-1">Files and file modes</a></li>
+<li><a href="#sec-1-2">An example of <code>~/.ssh/config</code></a></li>
+<li><a href="#sec-1-3">It is a multi-match rather than a single-match.</a></li>
+<li><a href="#sec-1-4">Host alias</a></li>
+<li><a href="#sec-1-5">Default user</a></li>
+<li><a href="#sec-1-6">ControlMaster</a></li>
+<li><a href="#sec-1-7">Keep sessions alive</a></li>
+</ul>
+</li>
+<li><a href="#sec-2">Host key conflict</a>
+<ul>
+<li>
+<ul>
+<li><a href="#sec-2-0-1">What is this</a></li>
+<li><a href="#sec-2-0-2">Solution 1: delete the stored key</a></li>
+<li><a href="#sec-2-0-3">Solution 2: ignore the conflict</a></li>
+<li><a href="#sec-2-0-4">Manipulating keys and fingerprints</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#sec-3">Public-key authentication</a>
+<ul>
+<li><a href="#sec-3-1">Set up</a></li>
+<li><a href="#sec-3-2">Choosing type of keys</a></li>
+<li><a href="#sec-3-3">SSH agent</a></li>
+<li><a href="#sec-3-4">Get public key from prviate key</a></li>
+<li><a href="#sec-3-5">Force Password Authentication</a></li>
+</ul>
+</li>
+<li><a href="#sec-4">SSH scripting</a>
+<ul>
+<li><a href="#sec-4-1">Options for ssh within a script</a></li>
+<li><a href="#sec-4-2">Redirect IO between local and remote machines</a>
+<ul>
+<li><a href="#sec-4-2-1">Use case 1</a></li>
+<li><a href="#sec-4-2-2">Use case 2</a></li>
+<li><a href="#sec-4-2-3">Use case 3</a></li>
+</ul>
+</li>
+<li><a href="#sec-4-3">Force pseudo-tty allocation</a></li>
+<li><a href="#sec-4-4">SSH processes eat stdin</a></li>
+<li><a href="#sec-4-5">Run command on a remote server on background</a></li>
+<li><a href="#sec-4-6">Set up PS1 "before" login</a></li>
+<li><a href="#sec-4-7">SSH remote commands get fewer environment variables</a></li>
+</ul>
+</li>
+<li><a href="#sec-5">X11 Forwarding</a></li>
+<li><a href="#sec-6">Multi-hop</a></li>
+<li><a href="#sec-7">Forced command</a></li>
+<li><a href="#sec-8">sftp jail</a></li>
+<li><a href="#sec-9">Limit bandwidth</a></li>
+<li><a href="#sec-10">Debugging</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">Client configuration</h2>
+<div class="outline-text-2" id="text-1">
+</div><div id="outline-container-sec-1-1" class="outline-3">
+<h3 id="sec-1-1">Files and file modes</h3>
+<div class="outline-text-3" id="text-1-1">
+<ul class="org-ul">
+<li>Per-person directory <code>~/.ssh</code>
+</li>
+<li>Per-person configure file <code>~/.ssh/config</code>
+</li>
+<li>known hosts
+</li>
+<li>authorized keys
+</li>
+<li>private key
+</li>
+<li>File mode (permission):
+<ul class="org-ul">
+<li>The directory and file mode should be correct, which generally means no
+one else can either peek or fake your id.
+</li>
+<li>The file mode of home directory matters as well (? that seemed true once,
+but never reproduced).
+</li>
+<li><b>NOTE</b> If using a private key file <b>owned by others</b> (by <code>-o
+       IdentityFile=/path/to/id_rsa</code>), its file mode doesnot matter.
+</li>
+<li>An example settings:
+<pre class="example">
+$ ls -ld $HOME $HOME/.ssh $HOME/.ssh/*
+drwx------ 23 lgfang typhoon  4096 Feb 18 11:54 /home/lgfang
+drwx------  2 lgfang typhoon  4096 Feb 10 11:23 /home/lgfang/.ssh
+-rw-r--r--  1 lgfang typhoon   402 Dec 14 09:49 /home/lgfang/.ssh/authorized_keys
+-rw-r--r--  1 lgfang typhoon   531 Feb 10 11:23 /home/lgfang/.ssh/config
+-rw-------  1 lgfang typhoon  1675 Dec  2 15:16 /home/lgfang/.ssh/id_rsa
+-rw-r--r--  1 lgfang typhoon   418 Dec  2 15:16 /home/lgfang/.ssh/id_rsa.pub
+-rw-r--r--  1 lgfang typhoon 12510 Feb 10 11:00 /home/lgfang/.ssh/known_hosts
+</pre>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-1-2" class="outline-3">
+<h3 id="sec-1-2">An example of <code>~/.ssh/config</code></h3>
+<div class="outline-text-3" id="text-1-2">
+<p>
+Here is my configuration file. For detailed explanation, read the
+following sections.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-conf-space"><span class="org-variable-name">Host</span> mydesktop
+     <span class="org-variable-name">HostName</span> 192.168.1.101
+     <span class="org-variable-name">User</span> lungangfang
+     <span class="org-comment-delimiter"># </span><span class="org-comment">NOTE: do NOT set "ControlMaster Auto" as default for all</span>
+     <span class="org-variable-name">ControlMaster</span> auto
+
+<span class="org-variable-name">Host</span> vm*
+     <span class="org-variable-name">User</span> root
+     <span class="org-variable-name">IdentityFile</span> ~/.ssh/id_autoit
+     <span class="org-variable-name">StrictHostKeyChecking</span> no
+     <span class="org-variable-name">UserKnownHostsFile</span> /dev/null
+     <span class="org-variable-name">LogLevel</span> ERROR
+
+<span class="org-variable-name">Host</span> *
+     <span class="org-variable-name">Protocol</span> 2,1
+     <span class="org-variable-name">ServerAliveInterval</span> 180
+     <span class="org-variable-name">ForwardX11</span> no
+     <span class="org-variable-name">ControlPath</span> /tmp/%r_ssh_%h_%p
+     <span class="org-variable-name">User</span> lgfang
+     <span class="org-comment-delimiter"># </span><span class="org-comment">Compression yes</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-1-3" class="outline-3">
+<h3 id="sec-1-3">It is a multi-match rather than a single-match.</h3>
+<div class="outline-text-3" id="text-1-3">
+<ul class="org-ul">
+<li>Every entry matches takes effect.
+
+<p>
+For instance, configurations for "host 135.*" and that for "host
+135.252.41.*" both apply to 135.252.41.248.
+</p>
+</li>
+
+<li>The first matched options take effect.
+
+<p>
+If several entries all match and they all contain the option "user", then
+the value in the first matched entry is taken.
+</p>
+
+<p>
+NOTE: Hence, put general options at the of configure file.
+</p>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-1-4" class="outline-3">
+<h3 id="sec-1-4">Host alias</h3>
+<div class="outline-text-3" id="text-1-4">
+<p>
+Do not like entering long, hard-to-remember server IPs? Or, want to hide the
+IP from you scripts?
+</p>
+
+<p>
+You can set up host alias. Refer to my <code>~/.ssh/config</code>
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-1-5" class="outline-3">
+<h3 id="sec-1-5">Default user</h3>
+<div class="outline-text-3" id="text-1-5">
+<p>
+Want to save the key-stikes for user name?
+</p>
+
+<p>
+Setup default user. Refer to my <code>~/.ssh/config</code>
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-1-6" class="outline-3">
+<h3 id="sec-1-6">ControlMaster</h3>
+<div class="outline-text-3" id="text-1-6">
+<p>
+Enter password only once for multiple ssh sessions by "ControlMaster auto".
+</p>
+
+<p>
+For example, assume "Host 135.*" has option "ControlMaster auto". The first
+ssh session to 135.252.41.248 request password entered. After that, so long
+as the session alive, I can ssh that host without entering password again.
+</p>
+
+<p>
+<b>NOTE</b>
+</p>
+<ol class="org-ol">
+<li>"ControlPath" must set as well.
+</li>
+
+<li>Git, rysnc etc. would fail with 'ControlMaster auto'. Therefore, don not
+put "ControlMaster auto" under "Host *"
+</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-sec-1-7" class="outline-3">
+<h3 id="sec-1-7">Keep sessions alive</h3>
+<div class="outline-text-3" id="text-1-7">
+<p>
+It turned out that almost all of us (my teammates and I) overlooked this
+feature while we were suffering from broken sessions :), even though it seems
+we all knew for sure that it must be certain firewall or alike that closes
+sessions being idle for an hour.
+</p>
+
+<p>
+The solution is actually just at hand: have ssh clients send keep-alive
+messages regularly, say, every 180 seconds.
+</p>
+
+<ul class="org-ul">
+<li>If you ssh to a server from certain linux box, edit your SSH config at your
+linux box (the ssh client side) as the following.
+
+<div class="org-src-container">
+
+<pre class="src src-conf-space"><span class="org-comment-delimiter"># </span><span class="org-comment">in either /etc/ssh/ssh_config or ~/.ssh/config</span>
+<span class="org-variable-name">Host</span> *
+     <span class="org-variable-name">ServerAliveInterval</span> 180
+</pre>
+</div>
+
+<p>
+Of course, specifying the option in command line (as in <code>ssh -o
+     ServerAliveInterval=180 remote_host</code>) also works.
+</p>
+</li>
+
+<li>If you are a PuTTY user instead, in the "connection" panel, set seconds
+between keepalives to 180.
+</li>
+</ul>
+
+<p>
+<b>NOTE:</b> quote from <a href="http://the.earth.li/~sgtatham/putty/0.63/htmldoc/Chapter4.html#config-keepalive">here</a>
+</p>
+<blockquote>
+<p>
+Note that keepalives are not always helpful. They help if you have a firewall
+which drops your connection after an idle period; but if the network between
+you and the server suffers from breaks in connectivity then keepalives can
+actually make things worse. If a session is idle, and connectivity is
+temporarily lost between the endpoints, but the connectivity is restored
+before either side tries to send anything, then there will be no problem -
+neither endpoint will notice that anything was wrong. However, if one side
+does send something during the break, it will repeatedly try to re-send, and
+eventually give up and abandon the connection. Then when connectivity is
+restored, the other side will find that the first side doesn't believe there
+is an open connection any more. Keepalives can make this sort of problem
+worse, because they increase the probability that PuTTY will attempt to send
+data during a break in connectivity. (Other types of periodic network activity
+can cause this behaviour; in particular, SSH-2 re-keys can have this effect.
+See section 4.19.2.)
+</p>
+</blockquote>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2">Host key conflict</h2>
+<div class="outline-text-2" id="text-2">
+</div><div id="outline-container-sec-2-0-1" class="outline-4">
+<h4 id="sec-2-0-1">What is this</h4>
+<div class="outline-text-4" id="text-2-0-1">
+<p>
+The remote host (ssh server) sends a host key (The default is
+<code>/etc/ssh/ssh_host_key.pub</code> for protocol version 1, and
+<code>/etc/ssh/ssh_host_rsa_key.pub</code> or <code>/etc/ssh/ssh_host_dsa_key.pub</code> for
+protocol version 2.).
+</p>
+
+<p>
+The ssh client will compare that with the one stored in
+<code>~/.ssh/known_hosts</code>. If they do not match, you'll get an error like the
+following.
+</p>
+
+<pre class="example">
+$ ssh 135.1.2.3
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!     @
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+IT IS POSSIBLE THAT SOMEONE IS DOING SOMETHING NASTY!
+Someone could be eavesdropping on you right now (man-in-the-middle attack)!
+...
+<span id="coderef-info" class="coderef-off">Offending key in /home/lungangfang/.ssh/known_hosts:191</span>
+RSA host key for 135.1.2.3 has changed and you have requested strict checking.
+Host key verification failed.
+</pre>
+</div>
+</div>
+
+<div id="outline-container-sec-2-0-2" class="outline-4">
+<h4 id="sec-2-0-2">Solution 1: delete the stored key</h4>
+<div class="outline-text-4" id="text-2-0-2">
+<p>
+Just delete corresponding entry (as shown in <a href="#coderef-info"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-info');" onmouseout="CodeHighlightOff(this, 'coderef-info');">this line</a>) in <code>known_hosts</code>.
+This is actually a one-liner:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-shell-script">sed -i 191d /home/lungangfang/.ssh/known_hosts
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2-0-3" class="outline-4">
+<h4 id="sec-2-0-3">Solution 2: ignore the conflict</h4>
+<div class="outline-text-4" id="text-2-0-3">
+<div class="org-src-container">
+
+<pre class="src src-shell-script">ssh -o <span class="org-variable-name">StrictHostKeyChecking</span>=no -o <span class="org-variable-name">UserKnownHostsFile</span>=/dev/null 135.1.2.3
+</pre>
+</div>
+
+<p>
+Where:
+</p>
+<dl class="org-dl">
+<dt> StrictHostKeyChecking no </dt><dd>tells ssh client to connect regardless
+of host keys check result.
+</dd>
+<dt> UserKnownHostsFile /dev/null </dt><dd>makes ssh client store host keys
+to nowhere (/dev/null).
+</dd>
+</dl>
+
+<p>
+Since we do not care host keys of labs at all, you may want to put above
+options into corresponding section of <code>~/.ssh/config</code>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-2-0-4" class="outline-4">
+<h4 id="sec-2-0-4">Manipulating keys and fingerprints</h4>
+<div class="outline-text-4" id="text-2-0-4">
+<div class="org-src-container">
+
+<pre class="src src-shell-script"><span class="org-comment-delimiter"># </span><span class="org-comment">Retrieve remote host key of HOST without login it</span>
+ssh-keyscan -t rsa,dsa HOST
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">List fingerprints of every public key in a file</span>
+ssh-keygen -lf ~/.ssh/known_hosts
+ssh-keygen -lf /dev/stdin &lt;&lt;&lt; $(<span class="org-sh-quoted-exec">ssh-keyscan</span> HOST)
+<span class="org-keyword">for</span> each<span class="org-keyword"> in</span> /etc/ssh/ssh_host_*key.pub; <span class="org-keyword">do</span> ssh-keygen -lf $<span class="org-variable-name">each</span>; <span class="org-keyword">done</span>
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">Delete a public key from a file (default ~/.ssh/known_hosts)</span>
+ssh-keygen -R HOST
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3">Public-key authentication</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+Login without entering password.
+</p>
+</div>
+
+<div id="outline-container-sec-3-1" class="outline-3">
+<h3 id="sec-3-1">Set up</h3>
+<div class="outline-text-3" id="text-3-1">
+<ol class="org-ol">
+<li>Server side should have already enabled PubkeyAuthentication.
+
+<p>
+That is usually the case. Otherwise, you'll have to do it youself
+as "root"
+</p>
+
+<ol class="org-ol">
+<li>edit <code>/etc/ssh/sshd_conf</code>
+<div class="org-src-container">
+
+<pre class="src src-conf-space"><span class="org-variable-name">RSAAuthentication</span> yes
+<span class="org-variable-name">PubkeyAuthentication</span> yes
+</pre>
+</div>
+</li>
+
+<li>restart  <code>/etc/init.d/sshd restart</code>
+</li>
+</ol>
+</li>
+
+<li>Check permissions of configuration directory and files on client
+side (refer to <i>*Files</i>).
+</li>
+
+<li>Generate public/private keys
+
+<p>
+For putty, refer to <a href="./putty.html">./putty.html</a>
+</p>
+
+<p>
+To set/clear/change passphrase of private keys
+</p>
+<div class="org-src-container">
+
+<pre class="src src-shell-script">ssh-keygen -p
+</pre>
+</div>
+</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-sec-3-2" class="outline-3">
+<h3 id="sec-3-2">Choosing type of keys</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+Usually, the type of keys just does not matter. The default type is RSA. And,
+some believe it is better than DSA. For more detailed comparison and
+analysis, please turn to google.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-3-3" class="outline-3">
+<h3 id="sec-3-3">SSH agent</h3>
+<div class="outline-text-3" id="text-3-3">
+<p>
+It is kind of a dilemma when using pub-key auth that: if we set passphrase
+for a private key file we will have to re-enter it every time we use that
+private key; on the other hand, if we do not set passphrase everyone has
+access to the private key file, say a nasty administrator, can use it.
+</p>
+
+<p>
+Here is when ssh-agent steps in. Note that ssh-agent bring in a security
+whole as well. For example, when the ssh-agent is running, root may "su" as
+you and take advantage of that agent.
+</p>
+
+<p>
+Hence, based on how paranoid you are, you may choose to:
+</p>
+<ol class="org-ol">
+<li>Do not use ssh-agent at all.
+</li>
+
+<li>Use ssh-agent occasionally and kill it right away.
+</li>
+
+<li>Make ssh-agent a daemon (always running)
+</li>
+</ol>
+
+<p>
+Here are the commands involved:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-shell-script"><span class="org-comment-delimiter"># </span><span class="org-comment">start ssh-keygen, set corresponding env</span>
+<span class="org-builtin">eval</span> $(<span class="org-sh-quoted-exec">ssh-agent</span> -s)            <span class="org-comment-delimiter"># </span><span class="org-comment">for csh, eval `ssh-agent -c`</span>
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">add private keys, will prompted for the passphrase for each key file</span>
+ssh-add
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">ssh as usual, but without entering passphrase</span>
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">stop ssh-agent</span>
+ssh-agent -k
+</pre>
+</div>
+
+<p>
+And a light-weight wrapper
+</p>
+<div class="org-src-container">
+
+<pre class="src src-shell-script"><span class="org-comment-delimiter"># </span><span class="org-comment">get a command-line ready for being copied/pasted to other terminals to access</span>
+<span class="org-comment-delimiter"># </span><span class="org-comment">the ssh-agent</span>
+<span class="org-keyword">function</span> <span class="org-function-name">get_ssh_agent</span> {
+
+    <span class="org-keyword">if</span> [ -z <span class="org-string">"$SSH_AGENT_PID"</span> -o -z <span class="org-string">"$SSH_AUTH_SOCK"</span> ]; <span class="org-keyword">then</span>
+        <span class="org-comment-delimiter"># </span><span class="org-comment">cmd=$(</span><span class="org-sh-quoted-exec">ssh-agent</span><span class="org-comment"> -s)</span>
+        <span class="org-comment-delimiter"># </span><span class="org-comment">eval $cmd</span>
+        <span class="org-comment-delimiter"># </span><span class="org-comment">echo $cmd</span>
+        <span class="org-builtin">echo</span> <span class="org-string">"No ssh agent in this terminal"</span>
+    <span class="org-keyword">else</span>
+        <span class="org-keyword">for</span> each<span class="org-keyword"> in</span> SSH_AGENT_PID SSH_AUTH_SOCK; <span class="org-keyword">do</span>
+            <span class="org-builtin">eval</span> <span class="org-string">"echo export $each=\${$each}"</span>
+        <span class="org-keyword">done</span>
+    <span class="org-keyword">fi</span>
+}
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3-4" class="outline-3">
+<h3 id="sec-3-4">Get public key from prviate key</h3>
+<div class="outline-text-3" id="text-3-4">
+<p>
+This is useful to test if a pair of keys matches.
+</p>
+
+<pre class="example">
+ssh-keygen -y [-f input_keyfile]
+</pre>
+</div>
+</div>
+
+<div id="outline-container-sec-3-5" class="outline-3">
+<h3 id="sec-3-5">Force Password Authentication</h3>
+<div class="outline-text-3" id="text-3-5">
+<p>
+Sometimes, for debugging, we do want password authentication for a
+short period. This can be done without modifying configuration files.
+</p>
+<pre class="example">
+ssh -o PreferredAuthentications=password user@server
+</pre>
+<p>
+For SSH1 connections, try <code>-o RSAAuthentication=no</code>.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-4" class="outline-2">
+<h2 id="sec-4">SSH scripting</h2>
+<div class="outline-text-2" id="text-4">
+</div><div id="outline-container-sec-4-1" class="outline-3">
+<h3 id="sec-4-1">Options for ssh within a script</h3>
+<div class="outline-text-3" id="text-4-1">
+<pre class="example">
+-tt
+-o BatchMode=yes
+-o ConnectTimeout=2
+-o ConnectionAttempts=2
+-o LogLevel=error
+</pre>
+</div>
+</div>
+
+<div id="outline-container-sec-4-2" class="outline-3">
+<h3 id="sec-4-2">Redirect IO between local and remote machines</h3>
+<div class="outline-text-3" id="text-4-2">
+</div><div id="outline-container-sec-4-2-1" class="outline-4">
+<h4 id="sec-4-2-1">Use case 1</h4>
+<div class="outline-text-4" id="text-4-2-1">
+<div class="org-src-container">
+
+<pre class="src src-shell-script"><span class="org-comment-delimiter"># </span><span class="org-comment">Package on remote server and save to local host, need no temporary files</span>
+ssh lgfang@135.1.2.3 <span class="org-string">"tar cvfz - vlcs"</span> &gt; vlcs.tar.gz
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">Upload a number of files in one command, need no temporary files</span>
+tar hcvfz -                     <span class="org-sh-escaped-newline">\</span>
+    .hosts                      <span class="org-sh-escaped-newline">\</span>
+    .tmux.conf                  <span class="org-sh-escaped-newline">\</span>
+    .emacs.d/init.el            <span class="org-sh-escaped-newline">\</span>
+    | ssh lgfang@135.1.2.3 <span class="org-string">"tar xvfz -"</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-4-2-2" class="outline-4">
+<h4 id="sec-4-2-2">Use case 2</h4>
+<div class="outline-text-4" id="text-4-2-2">
+<p>
+The "/backup" directory locates on blade 0-0-2, which is only accessible
+from the "pilot" blade. To download the "docs",
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-shell-script">ssh root@pilot_pub_ip <span class="org-string">'ssh 0-0-2 "tar cvfz - /backup"'</span> <span class="org-sh-escaped-newline">\</span>
+    | tar xvfz -
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-4-2-3" class="outline-4">
+<h4 id="sec-4-2-3">Use case 3</h4>
+<div class="outline-text-4" id="text-4-2-3">
+<p>
+"Deploy" new binary to a virutal blade in openstack.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-shell-script">cat a.jar | ssh me@host <span class="org-string">'ssh root@pilot "cat - &gt;a.jar &amp;&amp; scp ./a.jar 0-0-2:./"'</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-4-3" class="outline-3">
+<h3 id="sec-4-3">Force pseudo-tty allocation</h3>
+<div class="outline-text-3" id="text-4-3">
+<ul class="org-ul">
+<li>"-t" Force pseudo-tty allocation. This can be used to execute arbitrary
+screen-based programs on a remote machine. To name a few:
+
+<ul class="org-ul">
+<li>Run tmux directly
+<pre class="example">
+ssh -t lungangfang@qdbuild2 tmux attach
+</pre>
+</li>
+
+<li>SSH via a machine in the middle
+<pre class="example">
+ssh -t host_middle ssh dest_host
+</pre>
+</li>
+
+<li>Sudo shutdown
+
+<pre class="example">
+$ ssh lgfang@135.1.2.3 sudo shutdown now
+lgfang@135.1.2.3's password:
+stty: standard input: Inappropriate ioctl for device
+sudo: sorry, you must have a tty to run sudo
+
+$ ssh -t lgfang@135.1.2.3 sudo shutdown now
+lgfang@135.1.2.3's password:
+
+Broadcast message from ...
+
+The system is going down for power-off NOW!
+
+Connection to 135.1.2.3 closed.
+</pre>
+</li>
+</ul>
+</li>
+
+<li>"-tt" (Multiple -t options) force tty allocation, even if ssh has no local
+tty. i.e. force tty allocation when calling ssh in a script.
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-4-4" class="outline-3">
+<h3 id="sec-4-4">SSH processes eat stdin</h3>
+<div class="outline-text-3" id="text-4-4">
+<p>
+That is why SSH in a "while read xxx" loop makes the loop run only once. The
+SSH drains the stdin! 
+</p>
+<pre class="example">
+$ seq 1 3 | while read id;do ssh user@10.102.1.98 "echo hi"; done
+hi
+</pre>
+<p>
+Note that while block looped only once.
+</p>
+
+<p>
+There are a couple of solutions:
+</p>
+<ol class="org-ol">
+<li>Redirect ssh within the loop
+
+<pre class="example">
+$ seq 1 3 | while read line;do ssh user@10.102.1.98 "echo hi" &lt;/dev/null; done
+hi
+hi
+hi
+</pre>
+</li>
+
+<li>Use <code>-n</code> option of ssh
+
+<pre class="example">
+$ seq 1 3 | while read line;do ssh -n user@10.102.1.98 "echo hi"; done
+hi
+hi
+hi
+</pre>
+</li>
+
+<li>Read from another file descriptor
+<pre class="example">
+$ seq 1 3 &gt; list.txt
+
+$ while read -u 99 line;do ssh user@10.102.1.98 "echo hi"; done 99&lt;list.txt
+hi
+hi
+hi
+</pre>
+</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-sec-4-5" class="outline-3">
+<h3 id="sec-4-5">Run command on a remote server on background</h3>
+<div class="outline-text-3" id="text-4-5">
+<p>
+Use <code>-f</code>. Note however, this time you needn't (and should not) append "&amp;" to
+the end of your command.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-shell-script">ssh -f -ttq $<span class="org-variable-name">OTHER_SSH_OPTIONS</span> <span class="org-string">"mycmd"</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-4-6" class="outline-3">
+<h3 id="sec-4-6">Set up PS1 "before" login</h3>
+<div class="outline-text-3" id="text-4-6">
+<div class="org-src-container">
+
+<pre class="src src-tcl">spawn ssh -q -o StrictHostKeyChecking=no <span class="org-tcl-escaped-newline">\</span>
+    -o UserKnownHostsFile=/dev/null $<span class="org-variable-name">username</span>@$<span class="org-variable-name">vm</span> <span class="org-tcl-escaped-newline">\</span>
+    -t <span class="org-string">"PS1='AUTOIT ' bash -i"</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-4-7" class="outline-3">
+<h3 id="sec-4-7">SSH remote commands get fewer environment variables</h3>
+<div class="outline-text-3" id="text-4-7">
+<p>
+Please do bear in mind that personal settings (<code>$HOME/.profile</code> etc.) are not
+executed when you run <code>ssh user@remote cmd</code> (because it is run in a
+non-interactive, non-login shell).
+</p>
+
+<p>
+Some of the consequences are:
+</p>
+<ol class="org-ol">
+<li>Your customization of environment variables does not take effect at all.
+</li>
+<li>Some commands fail only when being evoked as ssh remote commands
+</li>
+<li>Some commands behave "strangely" if evoked as ssh remote commands.
+</li>
+</ol>
+
+<p>
+NOTE: Sometimes, it is really hard to link the unexpected output to the
+missing of environment variables.
+</p>
+
+<p>
+Solutions:
+</p>
+<ul class="org-ul">
+<li>On server side:
+<ol class="org-ol">
+<li>Make <code>PermitUserEnvironment=yes</code> in <code>sshd_config</code> (and restart sshd)
+</li>
+<li>Set up environment in <code>$HOME/.ssh/environment</code>.
+</li>
+</ol>
+</li>
+
+<li>Or, "manually" set up env in command line:
+
+<pre class="example">
+ssh -t lungangfang@135.252.41.248 'PATH=/my/path:$PATH; echo $PATH'
+</pre>
+</li>
+
+<li>Or, on server side, set up environment in <code>/etc/profile</code> which always gets
+executed (NOTE: this is not true for KSH).
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-5" class="outline-2">
+<h2 id="sec-5">X11 Forwarding</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+It is way more convenient than "export DISPLAY".
+</p>
+
+<ol class="org-ol">
+<li>Make sure X forwarding allowed by server side ("sshd").
+</li>
+
+<li>Connect with "ForwardX11" enabled
+
+<ul class="org-ul">
+<li>"ssh -X xxx", or
+</li>
+
+<li>In configure file, "ForwardX11 yes"
+</li>
+</ul>
+<p>
+If got error like "error in locking authority file", simply delete
+that file on server (so that it is regenerated). Or, <code>chmod 0600</code>
+it.
+</p>
+</li>
+
+<li>Run "xeyes" or whatever X application to test.
+</li>
+</ol>
+
+<p>
+Seems needn't worry about <code>xhost +</code> and <code>-nolisten tcp</code> etc.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-6" class="outline-2">
+<h2 id="sec-6">Multi-hop</h2>
+<div class="outline-text-2" id="text-6">
+<ul class="org-ul">
+<li>Nested ssh connections
+
+<div class="org-src-container">
+
+<pre class="src src-shell-script">ssh -t 135.1.136.193 ssh 10.102.1.118
+</pre>
+</div>
+
+<ol class="org-ol">
+<li>Simple.
+</li>
+<li>ssh config on the intermidiate host takes effect.
+</li>
+</ol>
+</li>
+
+<li>Tunneling
+
+<p>
+The tunnel can be set either locally (for you only) or on the intermidiate
+server (for everyone)
+</p>
+<div class="org-src-container">
+
+<pre class="src src-shell-script"><span class="org-comment-delimiter"># </span><span class="org-comment">1. set a local tunnel</span>
+ssh -L 8000:target_host:22 intermidiate_user@intermidiate_host
+<span class="org-comment-delimiter"># </span><span class="org-comment">2. connect to 10.102.1.118 via the tunnel</span>
+ssh -p 8000 target_user@localhost
+scp -P 8000 ./test.file target_user@localhost:./
+</pre>
+</div>
+
+<ol class="org-ol">
+<li>You have to set up the tunnel beforehand and keep it open.
+</li>
+<li>scp directly from/to the target host works.
+</li>
+</ol>
+</li>
+
+<li>iptables DNAT
+
+<p>
+You need root privilege to setup iptables rules.
+</p>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-7" class="outline-2">
+<h2 id="sec-7">Forced command</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+This can be done by putting commands into authorized_keys (refer to
+<a href="http://oreilly.com/catalog/sshtdg/chapter/ch08.html">http://oreilly.com/catalog/sshtdg/chapter/ch08.html</a>). For instance:
+</p>
+<pre class="example">
+command="LANG=en_US.UTF-8 tmux -2 attach || tmux -2 new -s foo" ..key..
+</pre>
+
+<p>
+Or, configure it in sshd_config as shown in <a href="#sec-8">sftp jail</a>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-8" class="outline-2">
+<h2 id="sec-8">sftp jail</h2>
+<div class="outline-text-2" id="text-8">
+<p>
+This procedure tested on CentOS6.5.
+</p>
+
+<ol class="org-ol">
+<li>Configure and sshd
+
+<ul class="org-ul">
+<li>Change subsystem sftp to internal-sftp
+</li>
+
+<li>For users in certain group
+
+<ul class="org-ul">
+<li>force command to internal sftp
+</li>
+
+<li>chroot to their home
+</li>
+</ul>
+</li>
+</ul>
+<p>
+Edit <code>/etc/ssh/sshd_config</code>
+</p>
+<div class="org-src-container">
+
+<pre class="src src-conf-space"><span class="org-variable-name">Subsystem</span>     sftp     internal-sftp
+<span class="org-comment-delimiter"># </span><span class="org-comment">NOTE: must put this section to the end of sshd_config. Refer to</span>
+<span class="org-comment-delimiter"># </span><span class="org-comment">description of "Match" in (man "sshd_config") for more.</span>
+<span class="org-variable-name">Match</span> Group sftponly
+<span class="org-variable-name">ChrootDirectory</span> %h
+<span class="org-variable-name">ForceCommand</span> internal-sftp
+<span class="org-variable-name">AllowTcpForwarding</span> no
+</pre>
+</div>
+
+<div class="org-src-container">
+
+<pre class="src src-shell-script">sudo service restart sshd
+</pre>
+</div>
+</li>
+
+<li>Create(setup) accounts
+
+<div class="org-src-container">
+
+<pre class="src src-shell-script">sudo groupadd sftponly
+sudo useradd -g sftponly lgfang
+sudo usermod -s /dev/null lgfang
+<span class="org-comment-delimiter"># </span><span class="org-comment">important ! file owner and permision must be correct</span>
+sudo chown root:root /home/lgfang
+sudo chmod 755 /home/lgfang
+</pre>
+</div>
+</li>
+
+<li>Done. Reference: <a href="http://derek.rule88.com/2011/05/17/simple-jailed-sftp-users-with-centos/">here</a> and <a href="https://bensmann.no/restrict-sftp-users-to-home-folder/">here</a>.
+</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-sec-9" class="outline-2">
+<h2 id="sec-9">Limit bandwidth</h2>
+<div class="outline-text-2" id="text-9">
+<pre class="example">
+scp -l limit you@host:/home/you/* .
+</pre>
+<p>
+where <i>limit</i> is in Kb
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-10" class="outline-2">
+<h2 id="sec-10">Debugging</h2>
+<div class="outline-text-2" id="text-10">
+<ul class="org-ul">
+<li>On client side: <code>ssh -vvv ...</code>
+</li>
+<li>On server side, if don't know where the log goes, start a not-daemonized
+debug-mode sshd on an ad-hoc port:
+<pre class="example">
+sshd -dddp 10222
+</pre>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+
+     <br/>
+     <p>
+     <span class="date">Created: 2015-11-05 Thu 13:23</span> by <span class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</span>
+     </p>
+
+     <!-- DISQUS  -->
+     <div id="disqus_thread"></div>
+     <script type="text/javascript">
+         /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+         var disqus_shortname = 'lgfang'; // required: replace example with your forum shortname
+
+         /* * * DON'T EDIT BELOW THIS LINE * * */
+         (function() {
+             var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+             dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+             (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+         })();
+     </script>
+     <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+     <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+     <!-- google analytic -->
+     <script>
+       (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+       (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+       m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+       })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+       ga('create', 'UA-84711243-1', 'auto');
+       ga('send', 'pageview');
+
+     </script>
+</div>
+</div>
+</body>
+</html>

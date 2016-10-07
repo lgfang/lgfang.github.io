@@ -1,0 +1,65 @@
+---
+layout: post
+title: Rename Files in Batch Mode
+tagline:
+categories: computer
+tags: [shell, linux tools]
+---
+
+<p>
+Once for a while, we need to rename a number of files. This can of course be
+easily done with a trivial shell script (or in Emacs dird mode). However, in
+fact, there is already an even handier command line tool called <code>rename</code> to cope
+with that.
+</p>
+
+<p>
+The usage is simple. To rename string "from" to "to" in file1, file2 etc.,
+simply run
+</p>
+<pre class="example">
+rename from to file1 file2 ...
+</pre>
+
+<p>
+In fact, we do not usually explicitly list every file to be renamed since we
+have file name glob!. Here is an example which renames all html files' extension
+from ".html" to ".htm".
+</p>
+<pre class="example">
+rename html htm *.html
+</pre>
+
+<p>
+Please note that this tool does not only work with suffix. It replaces the
+"from" string in any place in the file names. See the below for an example.
+</p>
+
+<pre class="example">
+$ ls *env*
+smallenv.beg1  smallenv.beg2  smallenv.common  smallenv.proxyg1  smallenv.proxyg2
+$ rename small set *env*
+$ ls *env*
+setenv.beg1  setenv.beg2  setenv.common  setenv.proxyg1  setenv.proxyg2
+</pre>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">Caveat</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+You should be really cautious with "unexpected" occurrence of "from" string in
+file names since "rename" replaces the first and only the first occurrence of
+"from" in the file names. Note that in the following example the file name
+suffix is NOT changed.
+</p>
+<pre class="example">
+$ ls
+how_html_generated.html
+
+$ rename html htm *
+
+$ ls
+how_htm_generated.html
+</pre>
+</div>
+</div>

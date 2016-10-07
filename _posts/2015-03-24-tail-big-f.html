@@ -1,0 +1,29 @@
+---
+layout: post
+title: Use '-F' with 'tail' instead of '-f'
+tagline:
+categories: computer
+tags: [shell, linux tools]
+---
+
+<p>
+For the <code>tail</code>, there is option <code>-f</code> and there is option <code>-F</code>. Which one to use?
+What is the difference? Most of the time, I use <code>-F</code> since it works with log
+rotation etc.
+</p>
+
+<p>
+<code>-F</code> is equivalent to <code>--follow=name --retry</code>. It is useful when log files would
+be renamed or deleted, which is not uncommon in systems with log rotation.
+</p>
+
+<ul class="org-ul">
+<li>This option ensures that we are following the latest log. In contrast, if we
+use <code>tail -f log_file</code>, we will be following that particular file even if it
+is renamed to <code>log_file.1</code> or deleted and hence miss new log messages.
+</li>
+
+<li>Another cool thing about <code>-F</code> is that you can launch the tail command before
+log files are created.
+</li>
+</ul>

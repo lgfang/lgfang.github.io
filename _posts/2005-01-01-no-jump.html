@@ -1,0 +1,48 @@
+---
+layout: post
+title: 不要轻易跳转程序控制流程
+tagline: 少用break、continue与return
+categories: computer
+tags: [coding]
+---
+
+<p>
+最近调试程序时遇到一bug，花了近一天时间才找到原因。而这错误原本是完全可以避免的――如
+果写程序规范一点的话。引起错误的代码逻辑大致如下：
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-c++"><span class="org-keyword">while</span> (<span class="org-constant">true</span>) {
+   isoK = applyResource();
+   <span class="org-keyword">if</span> (isOk) {
+       <span class="org-comment-delimiter">// </span><span class="org-comment">do some job</span>
+       <span class="org-keyword">if</span> (condition) {
+           <span class="org-comment-delimiter">// </span><span class="org-comment">...</span>
+           <span class="org-keyword">break</span>;
+       }
+   }
+
+   <span class="org-keyword">if</span> (something) {
+       <span class="org-comment-delimiter">// </span><span class="org-comment">...</span>
+       <span class="org-keyword">continue</span>
+   }
+
+   <span class="org-comment-delimiter">// </span><span class="org-comment">...</span>
+   releaseResource();
+}
+</pre>
+</div>
+
+<p>
+省略掉大量代码后，bug就比较明显了：程序的本意是每次循环开始时申请资源，退出时释
+放资源，如果进到 <code>break</code> 或 <code>continue</code> 中就会导致流程的跳转从而跳过资源释放，造
+成资源泄露。( <code>applyResource</code> 的设计本身也有问题，另文讨论。）
+</p>
+
+<p>
+总说写程序时尽量避免控制流程的跳转，尽量少用 <code>break</code> 、 <code>continue</code> 和 <code>return</code>
+这些会改变流程的语句，甚至亏也吃了不止一次，可还是有很多人不当回事。不仅是这次，
+我在实际工作中看到、听到的大部分问题如果写代码规范些都完全可以避免；但大家就是继
+续写不规范的代码，还是一如既地出bug。
+</p>

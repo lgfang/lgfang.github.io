@@ -1,0 +1,161 @@
+---
+layout: post
+title: Capture stdout/stderr into Log Files
+tagline:
+categories: computer
+tags: [bash, shell, coding]
+---
+
+<p>
+We want that stdout/stderr messages not only show up on screen but also goes
+into a log file. This request is very reasonable and seems to be trivial at the
+first glance: just a "tee" should do the job. But, you cannot "tee" every source
+line of your script, can you? In this blog, I studied several techniques but
+found no neat solution.
+</p>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">Redirect stdout/stderr to log file</h2>
+<div class="outline-text-2" id="text-1">
+<div class="org-src-container">
+
+<pre class="src src-shell-script"><span class="org-keyword">exec</span> &gt;log_file 2&gt;&amp;1
+
+<span class="org-builtin">echo</span> <span class="org-string">"INFO:blah..."</span>
+<span class="org-builtin">echo</span> <span class="org-string">"ERRO:oops"</span> &gt;&amp;2 <span class="org-comment-delimiter"># </span><span class="org-comment">still add '&gt;&amp;2' so it is easier to maintain/change</span>
+other_commands_or_scripts
+</pre>
+</div>
+
+<p>
+This is simple. One issue (amongest others) is that: nothing show up on
+screen.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2">Nested subshells with "tee"</h2>
+<div class="outline-text-2" id="text-2">
+<div class="org-src-container">
+
+<pre class="src src-shell-script">(
+    (
+        (
+            <span class="org-builtin">echo</span> <span class="org-string">"INFO:$(</span><span class="org-sh-quoted-exec">date</span><span class="org-string">)..."</span>
+            <span class="org-builtin">echo</span> <span class="org-string">"ERRO:$(</span><span class="org-sh-quoted-exec">date</span><span class="org-string">)"</span>  &gt;&amp;2
+            other_commands_scripts
+<span id="coderef-in" class="coderef-off">        ) | tee -a log_file     <span class="org-comment-delimiter">#</span> (in)</span>
+<span id="coderef-mid" class="coderef-off">    ) 2&gt;&amp;1 1&gt;&amp;3 | tee -a log_file <span class="org-comment-delimiter">#</span> (mid)</span>
+<span id="coderef-out" class="coderef-off">) 3&gt;&amp;1 1&gt;&amp;2                   <span class="org-comment-delimiter">#</span> (out)</span>
+</pre>
+</div>
+
+<p>
+This not only is bewildering but also scrambles the order of output since
+stdout and stderr are now dealt with in different sub-shells.
+</p>
+
+<ul class="org-ul">
+<li>During setup
+<ol class="org-ol">
+<li>In <a href="#coderef-out"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-out');" onmouseout="CodeHighlightOff(this, 'coderef-out');">out</a>, fd 3 created and duped to stdout, then stdout redirected to
+stderr.
+</li>
+<li>In <a href="#coderef-mid"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-mid');" onmouseout="CodeHighlightOff(this, 'coderef-mid');">mid</a>, stdout go to fd 3 while stderr redirected to stdout and "tee"-ed
+to log_file.
+</li>
+<li>In <a href="#coderef-in"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-in');" onmouseout="CodeHighlightOff(this, 'coderef-in');">in</a>, stdout piped to "tee".
+</li>
+</ol>
+</li>
+<li>Then, messages travel from inside out
+<ol class="org-ol">
+<li>In <a href="#coderef-in"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-in');" onmouseout="CodeHighlightOff(this, 'coderef-in');">in</a>, info messages copied to log_file
+</li>
+<li>In <a href="#coderef-mid"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-mid');" onmouseout="CodeHighlightOff(this, 'coderef-mid');">mid</a>, info messages sent to fd 3, while error messages sent to fd 1
+and copied to log file. to log_file.
+</li>
+<li>In <a href="#coderef-out"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-out');" onmouseout="CodeHighlightOff(this, 'coderef-out');">out</a>, info messages arrived at fd 3 are print to screen since fd 3 is
+a dup of the default stdout. Error messages arrived at fd 1 are sent to
+the default stderr.
+</li>
+</ol>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3">More file descriptors</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+In some cases, it is an advantage that my messages are separated from others'
+messages.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-shell-script"><span class="org-keyword">exec</span> 3&gt;&amp;1                       <span class="org-comment-delimiter"># </span><span class="org-comment">3: original stdout</span>
+<span class="org-keyword">exec</span> 4&gt;&amp;2                       <span class="org-comment-delimiter"># </span><span class="org-comment">4: original stderr</span>
+<span class="org-keyword">exec</span> &gt;log_file 2&gt;&amp;1             <span class="org-comment-delimiter"># </span><span class="org-comment">stdout/stderr go to log_file</span>
+
+<span class="org-builtin">echo</span> <span class="org-string">"INFO:blah..."</span> &gt;&amp;3
+<span class="org-builtin">echo</span> <span class="org-string">"ERRO:oops"</span> &gt;&amp;4
+other_commands_or_scripts
+</pre>
+</div>
+
+<p>
+Now, my "info" and "error" show up on screen but not log file. Meanwhile,
+others' output goes to log file but not screen.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-4" class="outline-2">
+<h2 id="sec-4">"tee" to file descriptors</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+"tee" is mainly used to copy output to files NOT file descriptors. However,
+after fiddling with it for sometime, I eventually find a couple of ways to
+"tee" a file descriptor.
+</p>
+
+<p>
+One way is this.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-shell-script"><span class="org-keyword">exec</span> 3&gt;&amp;1                       <span class="org-comment-delimiter"># </span><span class="org-comment">3: original stdout</span>
+<span class="org-keyword">exec</span> 4&gt;&amp;2                       <span class="org-comment-delimiter"># </span><span class="org-comment">4: original stderr</span>
+<span class="org-keyword">exec</span> &gt;log_file 2&gt;&amp;1             <span class="org-comment-delimiter"># </span><span class="org-comment">stdout/stderr go to log_file</span>
+
+<span class="org-builtin">echo</span> <span class="org-string">"INFO:blah..."</span> | tee /dev/fd/3
+<span class="org-builtin">echo</span> <span class="org-string">"ERRO:oops"</span> | tee /dev/fd/4
+other_commands_or_scripts
+</pre>
+</div>
+
+<p>
+Note that for ksh, we have to do it a little different since any "exec" fd
+bigger than 2 is "private".
+</p>
+<div class="org-src-container">
+
+<pre class="src src-shell-script">(
+    <span class="org-keyword">exec</span> &gt;log_file 2&gt;&amp;1             <span class="org-comment-delimiter"># </span><span class="org-comment">stdout/stderr go to log_file</span>
+
+    <span class="org-builtin">echo</span> <span class="org-string">"INFO:blah..."</span> | tee /dev/fd/3
+    <span class="org-builtin">echo</span> <span class="org-string">"ERRO:oops"</span> | tee /dev/fd/4
+    other_commands_or_scripts
+) 3&gt;&amp;1 4&gt;&amp;2
+</pre>
+</div>
+
+<p>
+Now my "info" and "error" go to both screen and log file. But, the
+stdout/stderr of other commands/scripts still go to log file only.
+</p>
+</div>
+</div>

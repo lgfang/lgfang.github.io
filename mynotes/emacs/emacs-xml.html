@@ -1,0 +1,794 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>Editing XML in Emacs</title>
+<!-- 2016-04-05 Tue 16:55 -->
+<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta  name="generator" content="Org-mode" />
+<meta  name="author" content="Fang Lungang" />
+<link rel="stylesheet" type="text/css" href="../cssjs/lgfang.css" />
+
+<script type="text/javascript" src="../cssjs/org-info.js">
+/**
+ *
+ * @source: ../cssjs/org-info.js
+ *
+ * @licstart  The following is the entire license notice for the
+ *  JavaScript code in ../cssjs/org-info.js.
+ *
+ * Copyright (C) 2012-2013 Free Software Foundation, Inc.
+ *
+ *
+ * The JavaScript code in this tag is free software: you can
+ * redistribute it and/or modify it under the terms of the GNU
+ * General Public License (GNU GPL) as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option)
+ * any later version.  The code is distributed WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+ *
+ * As additional permission under GNU GPL version 3 section 7, you
+ * may distribute non-source (e.g., minimized or compacted) forms of
+ * that code without the copy of the GNU GPL normally required by
+ * section 4, provided you include this license notice and a URL
+ * through which recipients can access the Corresponding Source.
+ *
+ * @licend  The above is the entire license notice
+ * for the JavaScript code in ../cssjs/org-info.js.
+ *
+ */
+</script>
+
+<script type="text/javascript">
+
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+
+<!--/*--><![CDATA[/*><!--*/
+org_html_manager.set("TOC_DEPTH", "2");
+org_html_manager.set("LINK_HOME", "../../index.html");
+org_html_manager.set("LINK_UP", "../index.html");
+org_html_manager.set("LOCAL_TOC", "0");
+org_html_manager.set("VIEW_BUTTONS", "0");
+org_html_manager.set("MOUSE_HINT", "underline");
+org_html_manager.set("FIXED_TOC", "0");
+org_html_manager.set("TOC", "1");
+org_html_manager.set("VIEW", "showall");
+org_html_manager.setup();  // activate after the parameters are set
+/*]]>*///-->
+</script>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div class="container-narrow">
+<div id="content">
+<h1 class="title">Editing XML in Emacs</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1. Desired Features</a></li>
+<li><a href="#sec-2">2. Navigation facility</a></li>
+<li><a href="#sec-3">3. Folding</a></li>
+<li><a href="#sec-4">4. Validation on the fly</a></li>
+<li><a href="#sec-5">5. Auto complete by nxml-mode</a></li>
+<li><a href="#sec-6">6. Auto complete from "auto-complete"</a></li>
+<li><a href="#sec-7">7. Where am I</a></li>
+<li><a href="#sec-8">8. Configuration mentioned</a>
+<ul>
+<li><a href="#sec-8-1">8.1. Replace xml mode with nxml mode</a></li>
+<li><a href="#sec-8-2">8.2. Setup hide-show</a></li>
+<li><a href="#sec-8-3">8.3. Setup ac-source</a></li>
+</ul>
+</li>
+<li><a href="#sec-9">9. Defining schemas</a>
+<ul>
+<li><a href="#sec-9-1">9.1. A simple example</a></li>
+<li><a href="#sec-9-2">9.2. Tell nxml where to find the schema</a></li>
+<li><a href="#sec-9-3">9.3. Editing rnc file</a></li>
+<li><a href="#sec-9-4">9.4. XSD instead of RNC</a></li>
+</ul>
+</li>
+<li><a href="#sec-10">10. Q&amp;A</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> Desired Features</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+This article describes exactly my Emacs configurations for XML files.
+</p>
+
+<p>
+In addition to basic features like indenting and syntax highlighting,
+your Emacs will get the following abilities after you go through the
+whole procedure here.
+</p>
+
+<ul class="org-ul">
+<li>Easy navigation
+</li>
+<li>Element folding
+</li>
+<li>Validation on the fly
+</li>
+<li>Prompting and auto completion
+</li>
+<li>Support of user-supplied schema
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> Navigation facility</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+Simply <a href="#sec-8-1">use nxml mode to edit xml</a>, then we can:
+</p>
+
+<dl class="org-dl">
+<dt> Forward element </dt><dd><code>C-M n</code>
+</dd>
+<dt> Backward element </dt><dd><code>C-M p</code>
+</dd>
+<dt> UP element </dt><dd><code>C-M u</code>
+</dd>
+<dt> Down element </dt><dd><code>C-M d</code>
+</dd>
+</dl>
+</div>
+</div>
+
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> Folding</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+After a little bit <a href="#sec-8-2">configuration of hide-show</a>. Note that I can just
+right-click mouse to fold/unfold current level.
+</p>
+
+
+<div class="figure">
+<p><img src="./emacs-screen/nxml-1.png" alt="nxml-1.png" width="600" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> Validation on the fly</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+This is a built-in functionality of nxml-mode. Refer to <a href="#sec-9">defining schemas</a> for
+more.
+</p>
+
+<div class="figure">
+<p><img src="./emacs-screen/nxml-3.png" alt="nxml-3.png" width="600" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-5" class="outline-2">
+<h2 id="sec-5"><span class="section-number-2">5</span> Auto complete by nxml-mode</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+This comes with nxml-mode.
+</p>
+
+
+<div class="figure">
+<p><img src="./emacs-screen/nxml-2.png" alt="nxml-2.png" width="600" />
+</p>
+</div>
+
+<p>
+By default,
+</p>
+<dl class="org-dl">
+<dt> <code>C-M-i</code> </dt><dd>completion-at-point
+</dd>
+<dt> <code>C-c /</code> </dt><dd>nxml-finish-element
+</dd>
+</dl>
+</div>
+</div>
+
+<div id="outline-container-sec-6" class="outline-2">
+<h2 id="sec-6"><span class="section-number-2">6</span> Auto complete from "auto-complete"</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+<a href="#sec-8-3">Setup ac-source</a>, you'll get a "fancier" auto completion.
+</p>
+
+
+<div class="figure">
+<p><img src="./emacs-screen/nxml-4.png" alt="nxml-4.png" width="600" />
+</p>
+</div>
+
+
+<div class="figure">
+<p><img src="./emacs-screen/nxml-5.png" alt="nxml-5.png" width="600" />
+</p>
+</div>
+
+
+<div class="figure">
+<p><img src="./emacs-screen/nxml-6.png" alt="nxml-6.png" width="600" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-7" class="outline-2">
+<h2 id="sec-7"><span class="section-number-2">7</span> Where am I</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+To show current xpath in echo area, use the following function
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(<span class="org-keyword">defun</span> <span class="org-function-name">nxml-where</span> ()
+  <span class="org-doc">"Display the hierarchy of XML elements the point is on as a</span>
+<span class="org-doc">path. from http://www.emacswiki.org/emacs/NxmlMode"</span>
+  (interactive)
+  (<span class="org-keyword">let</span> ((path nil))
+    (<span class="org-keyword">save-excursion</span>
+      (<span class="org-keyword">save-restriction</span>
+        (widen)
+        (<span class="org-keyword">while</span>
+            (and (&lt; (point-min) (point)) <span class="org-comment-delimiter">;; </span><span class="org-comment">Doesn't error if point is at</span>
+                                         <span class="org-comment-delimiter">;; </span><span class="org-comment">beginning of buffer</span>
+                 (<span class="org-keyword">condition-case</span> nil
+                     (<span class="org-keyword">progn</span>
+                       (nxml-backward-up-element) <span class="org-comment-delimiter">; </span><span class="org-comment">always returns nil</span>
+                       t)
+                   (<span class="org-warning">error</span> nil)))
+          (setq path (cons (xmltok-start-tag-local-name) path)))
+        (<span class="org-keyword">if</span> (called-interactively-p t)
+            (message <span class="org-string">"/%s"</span> (mapconcat 'identity path <span class="org-string">"/"</span>))
+          (format <span class="org-string">"/%s"</span> (mapconcat 'identity path <span class="org-string">"/"</span>)))))))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-8" class="outline-2">
+<h2 id="sec-8"><span class="section-number-2">8</span> Configuration mentioned</h2>
+<div class="outline-text-2" id="text-8">
+</div><div id="outline-container-sec-8-1" class="outline-3">
+<h3 id="sec-8-1"><span class="section-number-3">8.1</span> Replace xml mode with nxml mode</h3>
+<div class="outline-text-3" id="text-8-1">
+<p>
+The first thing to do is to tell Emacs to use nxml mode instead of xml
+mode when editing XML files.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(add-to-list 'auto-mode-alist
+             (cons (concat <span class="org-string">"\\."</span> (regexp-opt
+                                  '(<span class="org-string">"xml"</span> <span class="org-string">"xsd"</span> <span class="org-string">"sch"</span>
+                                    <span class="org-string">"rng"</span> <span class="org-string">"xslt"</span> <span class="org-string">"svg"</span> <span class="org-string">"rss"</span>) t)
+                           <span class="org-string">"\\'"</span>) 'nxml-mode))
+(<span class="org-keyword">when</span> (&gt; emacs-major-version 21)
+  (setq magic-mode-alist
+        (cons '(<span class="org-string">"&lt;\\?xml "</span> . nxml-mode) magic-mode-alist)))
+(fset 'xml-mode 'nxml-mode)
+(fset 'html-mode 'nxml-mode)
+(<span class="org-keyword">require</span> '<span class="org-constant">rng-loc</span> nil t)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-8-2" class="outline-3">
+<h3 id="sec-8-2"><span class="section-number-3">8.2</span> Setup hide-show</h3>
+<div class="outline-text-3" id="text-8-2">
+<ul class="org-ul">
+<li>Simply configure "hide-show" as the following. Then, the beloved
+hs-minor-mode works in nxml mode.
+
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(add-hook 'nxml-mode-hook (<span class="org-keyword">lambda</span>() (hs-minor-mode 1)))
+
+(add-to-list 'hs-special-modes-alist
+             '(nxml-mode
+               <span class="org-string">"&lt;!--</span><span class="org-string"><span class="org-regexp-grouping-backslash">\\</span></span><span class="org-string"><span class="org-regexp-grouping-construct">|</span></span><span class="org-string">&lt;[</span><span class="org-string"><span class="org-negation-char">^</span></span><span class="org-string">/&gt;]*[</span><span class="org-string"><span class="org-negation-char">^</span></span><span class="org-string">/]&gt;"</span> <span class="org-comment-delimiter">;; </span><span class="org-comment">regexp for start block</span>
+               <span class="org-string">"--&gt;</span><span class="org-string"><span class="org-regexp-grouping-backslash">\\</span></span><span class="org-string"><span class="org-regexp-grouping-construct">|</span></span><span class="org-string">&lt;/[</span><span class="org-string"><span class="org-negation-char">^</span></span><span class="org-string">/&gt;]*[</span><span class="org-string"><span class="org-negation-char">^</span></span><span class="org-string">/]&gt;"</span> <span class="org-comment-delimiter">;; </span><span class="org-comment">regexp for end block</span>
+               <span class="org-string">"&lt;!--"</span>
+               nxml-forward-element
+               nil))
+</pre>
+</div>
+</li>
+
+<li>Key-bindings I prefer
+
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(<span class="org-keyword">defun</span> <span class="org-function-name">lgfang-toggle-level</span> ()
+  <span class="org-doc">"mainly to be used in nxml mode"</span>
+  (interactive) (hs-show-block) (hs-hide-level 1))
+(eval-after-load <span class="org-string">"nxml-mode"</span>
+  '(<span class="org-keyword">progn</span>
+     (define-key nxml-mode-map (kbd <span class="org-string">"M-'"</span>) 'lgfang-toggle-level)
+     (define-key nxml-mode-map [mouse-3] 'lgfang-toggle-level)))
+</pre>
+</div>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-8-3" class="outline-3">
+<h3 id="sec-8-3"><span class="section-number-3">8.3</span> Setup ac-source</h3>
+<div class="outline-text-3" id="text-8-3">
+<p>
+IMHO, the auto-complete interface of nxml is not up to par. And, I
+think the package "Auto Complete" should able to make use the source
+from nxml. And, it does.
+</p>
+
+<ul class="org-ul">
+<li>Download auto-complete-nxml.el from <a href="https://github.com/aki2o/auto-complete-nxml">github</a>.
+</li>
+<li>Load in your configure file.
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(<span class="org-keyword">require</span> '<span class="org-constant">auto-complete-nxml</span> nil t)
+</pre>
+</div>
+</li>
+<li>That is it. The auto-complete have nxml source now, just keep
+typing :).
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-9" class="outline-2">
+<h2 id="sec-9"><span class="section-number-2">9</span> Defining schemas</h2>
+<div class="outline-text-2" id="text-9">
+<p>
+nxml-mode validates XML files using schemas in relaxng compact format. You can
+</p>
+
+<p>
+define your own schemas.
+</p>
+</div>
+<div id="outline-container-sec-9-1" class="outline-3">
+<h3 id="sec-9-1"><span class="section-number-3">9.1</span> A simple example</h3>
+<div class="outline-text-3" id="text-9-1">
+<p>
+Maybe, this example is enough for you to get started to define your own
+schema using rnc (<a href="#sec-9-3">9.3</a>).
+</p>
+<div class="org-src-container">
+
+<pre class="src src-rnc"><span class="org-preprocessor">default namespace</span> <span class="org-function-name">auto</span> = <span class="org-string">"http://my.com/test/automation/0.1"</span> 
+<span class="org-preprocessor">datatypes</span> <span class="org-function-name">xsd</span> = <span class="org-string">"http://www.w3.org/2001/XMLSchema-datatypes"</span>
+<span class="org-preprocessor">namespace</span> <span class="org-function-name">local</span> = <span class="org-string">""</span>
+
+<span class="org-keyword">grammar</span> {
+
+   <span class="org-function-name">start</span> = Job
+
+   <span class="org-function-name">Job</span> = <span class="org-keyword">element</span><span class="org-variable-name"> job </span>{ 
+      <span class="org-keyword">element</span><span class="org-variable-name"> web_server </span>{
+         <span class="org-keyword">attribute</span><span class="org-variable-name"> addr </span>{<span class="org-italic">text</span>}
+      },
+      <span class="org-keyword">element</span><span class="org-variable-name"> login </span>{
+         <span class="org-keyword">attribute</span><span class="org-variable-name"> username </span>{<span class="org-italic">text</span>},
+         <span class="org-keyword">attribute</span><span class="org-variable-name"> password </span>{<span class="org-italic">text</span>}
+      },
+      TestPlan +
+   }
+
+   <span class="org-function-name">TestPlan</span> = <span class="org-keyword">element</span><span class="org-variable-name"> test_plan </span>{
+      <span class="org-keyword">attribute</span><span class="org-variable-name"> name </span>{<span class="org-italic">text</span>},
+      TestCase +
+   }
+
+   <span class="org-function-name">TestCase</span> = <span class="org-keyword">element</span><span class="org-variable-name"> test_case </span>{
+      <span class="org-keyword">attribute</span><span class="org-variable-name"> name </span>{<span class="org-italic">text</span>},
+      <span class="org-keyword">attribute</span><span class="org-variable-name"> desc </span>{<span class="org-italic">text</span>},
+      <span class="org-keyword">attribute</span><span class="org-variable-name"> author </span>{<span class="org-italic">text</span>},
+      <span class="org-keyword">attribute</span><span class="org-variable-name"> feature_id </span>{<span class="org-italic">xsd:positiveInteger</span>},
+      <span class="org-keyword">attribute</span><span class="org-variable-name"> requirement </span>{<span class="org-italic">text</span>},
+      Action+
+   }
+
+   <span class="org-function-name">Action</span> = <span class="org-keyword">element</span><span class="org-variable-name"> action </span>{
+      HealthCheck | Script | Tl1Cmd | Sleep
+   }
+
+   <span class="org-function-name">HealthCheck</span> = <span class="org-keyword">element</span><span class="org-variable-name"> health_check </span>{
+      <span class="org-keyword">attribute</span><span class="org-variable-name"> desc </span>{<span class="org-italic">text</span>}
+   }
+
+   <span class="org-function-name">Script</span> = <span class="org-keyword">element</span><span class="org-variable-name"> script </span>{
+      <span class="org-keyword">attribute</span><span class="org-variable-name"> desc </span>{<span class="org-italic">text</span>},
+      <span class="org-keyword">attribute</span><span class="org-variable-name"> equipment </span>{<span class="org-italic">text</span>},
+      <span class="org-keyword">attribute</span><span class="org-variable-name"> parameter </span>{<span class="org-italic">text</span>}
+   }
+
+   <span class="org-function-name">Tl1Cmd</span> = <span class="org-keyword">element</span><span class="org-variable-name"> tl1cmd </span>{
+      <span class="org-keyword">attribute</span><span class="org-variable-name"> desc </span>{<span class="org-italic">text</span>},
+      <span class="org-keyword">attribute</span><span class="org-variable-name"> tl1_type </span>{ <span class="org-string">"new"</span> | <span class="org-string">"remove"</span> },
+      <span class="org-keyword">attribute</span><span class="org-variable-name"> switch_type </span>{ <span class="org-keyword">list</span> { (<span class="org-italic">token</span> <span class="org-string">"SG"</span> | 
+         <span class="org-italic">token</span> <span class="org-string">"MGC"</span> | <span class="org-italic">token</span> <span class="org-string">"MG"</span>)+ }},
+      <span class="org-keyword">element</span><span class="org-variable-name"> cmd_str </span>{<span class="org-italic">text</span>},
+      <span class="org-keyword">element</span><span class="org-variable-name"> expect </span>{<span class="org-italic">text</span>}
+   }
+
+   <span class="org-function-name">Sleep</span> = <span class="org-keyword">element</span><span class="org-variable-name"> sleep </span>{
+      <span class="org-keyword">attribute</span><span class="org-variable-name"> desc </span>{<span class="org-italic">text</span>},
+      <span class="org-keyword">attribute</span><span class="org-variable-name"> duration </span>{<span class="org-italic">xsd:unsignedShort</span>}
+   }
+
+}
+</pre>
+</div>
+
+<p>
+Corresponding xml is some like this:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-nxml"><span class="org-nxml-processing-instruction-delimiter">&lt;?</span><span class="org-nxml-processing-instruction-target">xml</span> <span class="org-nxml-attribute-local-name">version</span>=<span class="org-nxml-attribute-value-delimiter">"</span><span class="org-nxml-attribute-value">1.0</span><span class="org-nxml-attribute-value-delimiter">"</span> <span class="org-nxml-attribute-local-name">encoding</span>=<span class="org-nxml-attribute-value-delimiter">"</span><span class="org-nxml-attribute-value">utf-8</span><span class="org-nxml-attribute-value-delimiter">"</span><span class="org-nxml-processing-instruction-delimiter">?&gt;</span>
+<span class="org-nxml-tag-delimiter">&lt;</span><span class="org-nxml-element-local-name">job</span> <span class="org-nxml-namespace-attribute-xmlns">xmlns</span>=<span class="org-nxml-namespace-attribute-value-delimiter">"</span><span class="org-nxml-namespace-attribute-value">http://my.com/test/automation/0.1</span><span class="org-nxml-namespace-attribute-value-delimiter">"</span> <span class="org-nxml-tag-delimiter">&gt;</span>
+  <span class="org-nxml-tag-delimiter">&lt;</span><span class="org-nxml-element-local-name">web_server</span> <span class="org-nxml-attribute-local-name">addr</span>=<span class="org-nxml-attribute-value-delimiter">"</span><span class="org-nxml-attribute-value">http://web.my.com/auto.jsp</span><span class="org-nxml-attribute-value-delimiter">"</span> <span class="org-nxml-tag-slash">/</span><span class="org-nxml-tag-delimiter">&gt;</span>
+  <span class="org-nxml-tag-delimiter">&lt;</span><span class="org-nxml-element-local-name">login</span> <span class="org-nxml-attribute-local-name">username</span>=<span class="org-nxml-attribute-value-delimiter">"</span><span class="org-nxml-attribute-value">foobar</span><span class="org-nxml-attribute-value-delimiter">"</span> <span class="org-nxml-attribute-local-name">password</span>=<span class="org-nxml-attribute-value-delimiter">"</span><span class="org-nxml-attribute-value">hello</span><span class="org-nxml-attribute-value-delimiter">"</span><span class="org-nxml-tag-slash">/</span><span class="org-nxml-tag-delimiter">&gt;</span>
+  <span class="org-nxml-tag-delimiter">&lt;</span><span class="org-nxml-element-local-name">test_plan</span> <span class="org-nxml-attribute-local-name">name</span>=<span class="org-nxml-attribute-value-delimiter">"</span><span class="org-nxml-attribute-value">example</span><span class="org-nxml-attribute-value-delimiter">"</span><span class="org-nxml-tag-delimiter">&gt;</span>
+    <span class="org-nxml-tag-delimiter">&lt;</span><span class="org-nxml-element-local-name">test_case</span> <span class="org-nxml-attribute-local-name">name</span>=<span class="org-nxml-attribute-value-delimiter">"</span><span class="org-nxml-attribute-value">atest</span><span class="org-nxml-attribute-value-delimiter">"</span>
+               <span class="org-nxml-attribute-local-name">desc</span>=<span class="org-nxml-attribute-value-delimiter">"</span><span class="org-nxml-attribute-value">NA</span><span class="org-nxml-attribute-value-delimiter">"</span>
+               <span class="org-nxml-attribute-local-name">author</span>=<span class="org-nxml-attribute-value-delimiter">"</span><span class="org-nxml-attribute-value">lungangfang</span><span class="org-nxml-attribute-value-delimiter">"</span>
+               <span class="org-nxml-attribute-local-name">feature_id</span>=<span class="org-nxml-attribute-value-delimiter">"</span><span class="org-nxml-attribute-value">1234</span><span class="org-nxml-attribute-value-delimiter">"</span>
+               <span class="org-nxml-attribute-local-name">requirement</span>=<span class="org-nxml-attribute-value-delimiter">"</span><span class="org-nxml-attribute-value">NA</span><span class="org-nxml-attribute-value-delimiter">"</span><span class="org-nxml-tag-delimiter">&gt;</span>
+      <span class="org-nxml-tag-delimiter">&lt;</span><span class="org-nxml-element-local-name">action</span><span class="org-nxml-tag-delimiter">&gt;</span>
+        <span class="org-nxml-tag-delimiter">&lt;</span><span class="org-nxml-element-local-name">health_check</span> <span class="org-nxml-attribute-local-name">desc</span>=<span class="org-nxml-attribute-value-delimiter">"</span><span class="org-nxml-attribute-value">check before test start</span><span class="org-nxml-attribute-value-delimiter">"</span> <span class="org-nxml-tag-slash">/</span><span class="org-nxml-tag-delimiter">&gt;</span>
+      <span class="org-nxml-tag-delimiter">&lt;</span><span class="org-nxml-tag-slash">/</span><span class="org-nxml-element-local-name">action</span><span class="org-nxml-tag-delimiter">&gt;</span>
+      <span class="org-nxml-tag-delimiter">&lt;</span><span class="org-nxml-element-local-name">action</span><span class="org-nxml-tag-delimiter">&gt;</span>
+        <span class="org-nxml-tag-delimiter">&lt;</span><span class="org-nxml-element-local-name">tl1cmd</span> <span class="org-nxml-attribute-local-name">desc</span>=<span class="org-nxml-attribute-value-delimiter">"</span><span class="org-nxml-attribute-value">run a tl1cmd at first</span><span class="org-nxml-attribute-value-delimiter">"</span>
+                <span class="org-nxml-attribute-local-name">tl1_type</span>=<span class="org-nxml-attribute-value-delimiter">"</span><span class="org-nxml-attribute-value">new</span><span class="org-nxml-attribute-value-delimiter">"</span>
+                <span class="org-nxml-attribute-local-name">switch_type</span>=<span class="org-nxml-attribute-value-delimiter">"</span><span class="org-nxml-attribute-value">MG MGC</span><span class="org-nxml-attribute-value-delimiter">"</span><span class="org-nxml-tag-delimiter">&gt;</span>
+          <span class="org-nxml-tag-delimiter">&lt;</span><span class="org-nxml-element-local-name">cmd_str</span><span class="org-nxml-tag-delimiter">&gt;</span><span class="org-nxml-text">rtrv-info-eqpt;</span><span class="org-nxml-tag-delimiter">&lt;</span><span class="org-nxml-tag-slash">/</span><span class="org-nxml-element-local-name">cmd_str</span><span class="org-nxml-tag-delimiter">&gt;</span>
+          <span class="org-nxml-tag-delimiter">&lt;</span><span class="org-nxml-element-local-name">expect</span><span class="org-nxml-tag-delimiter">&gt;</span><span class="org-nxml-text">COMPLD</span><span class="org-nxml-tag-delimiter">&lt;</span><span class="org-nxml-tag-slash">/</span><span class="org-nxml-element-local-name">expect</span><span class="org-nxml-tag-delimiter">&gt;</span>
+        <span class="org-nxml-tag-delimiter">&lt;</span><span class="org-nxml-tag-slash">/</span><span class="org-nxml-element-local-name">tl1cmd</span><span class="org-nxml-tag-delimiter">&gt;</span>
+     <span class="org-nxml-tag-delimiter">&lt;</span><span class="org-nxml-tag-slash">/</span><span class="org-nxml-element-local-name">action</span><span class="org-nxml-tag-delimiter">&gt;</span>
+      <span class="org-nxml-tag-delimiter">&lt;</span><span class="org-nxml-element-local-name">action</span><span class="org-nxml-tag-delimiter">&gt;</span>
+        <span class="org-nxml-tag-delimiter">&lt;</span><span class="org-nxml-element-local-name">script</span> <span class="org-nxml-attribute-local-name">desc</span>=<span class="org-nxml-attribute-value-delimiter">"</span><span class="org-nxml-attribute-value">the test script</span><span class="org-nxml-attribute-value-delimiter">"</span>
+                <span class="org-nxml-attribute-local-name">equipment</span>=<span class="org-nxml-attribute-value-delimiter">"</span><span class="org-nxml-attribute-value">ISUP-ES</span><span class="org-nxml-attribute-value-delimiter">"</span>
+                <span class="org-nxml-attribute-local-name">parameter</span>=<span class="org-nxml-attribute-value-delimiter">"</span><span class="org-nxml-attribute-value">BASIC_ISUP_SIPT</span><span class="org-nxml-attribute-value-delimiter">"</span> <span class="org-nxml-tag-slash">/</span><span class="org-nxml-tag-delimiter">&gt;</span>
+      <span class="org-nxml-tag-delimiter">&lt;</span><span class="org-nxml-tag-slash">/</span><span class="org-nxml-element-local-name">action</span><span class="org-nxml-tag-delimiter">&gt;</span>
+
+      <span class="org-nxml-tag-delimiter">&lt;</span><span class="org-nxml-element-local-name">action</span><span class="org-nxml-tag-delimiter">&gt;</span>
+      <span class="org-nxml-tag-delimiter">&lt;</span><span class="org-nxml-element-local-name">sleep</span> <span class="org-nxml-attribute-local-name">desc</span>=<span class="org-nxml-attribute-value-delimiter">"</span><span class="org-nxml-attribute-value">wait a minute</span><span class="org-nxml-attribute-value-delimiter">"</span> <span class="org-nxml-attribute-local-name">duration</span>=<span class="org-nxml-attribute-value-delimiter">"</span><span class="org-nxml-attribute-value">60</span><span class="org-nxml-attribute-value-delimiter">"</span> <span class="org-nxml-tag-slash">/</span><span class="org-nxml-tag-delimiter">&gt;</span>
+      <span class="org-nxml-tag-delimiter">&lt;</span><span class="org-nxml-tag-slash">/</span><span class="org-nxml-element-local-name">action</span><span class="org-nxml-tag-delimiter">&gt;</span>
+    <span class="org-nxml-tag-delimiter">&lt;</span><span class="org-nxml-tag-slash">/</span><span class="org-nxml-element-local-name">test_case</span><span class="org-nxml-tag-delimiter">&gt;</span>
+  <span class="org-nxml-tag-delimiter">&lt;</span><span class="org-nxml-tag-slash">/</span><span class="org-nxml-element-local-name">test_plan</span><span class="org-nxml-tag-delimiter">&gt;</span>
+<span class="org-nxml-tag-delimiter">&lt;</span><span class="org-nxml-tag-slash">/</span><span class="org-nxml-element-local-name">job</span><span class="org-nxml-tag-delimiter">&gt;</span>
+</pre>
+</div>
+
+<p>
+For tutorial of relaxng at length, refer to
+<a href="http://relaxng.org/compact-tutorial-20030326.html">http://relaxng.org/compact-tutorial-20030326.html</a>
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(add-to-list 'auto-mode-alist '(<span class="org-string">"\\.rnc\\'"</span> . rnc-mode))
+(autoload 'rnc-mode <span class="org-string">"rnc-mode"</span>)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-9-2" class="outline-3">
+<h3 id="sec-9-2"><span class="section-number-3">9.2</span> Tell nxml where to find the schema</h3>
+<div class="outline-text-3" id="text-9-2">
+<ol class="org-ol">
+<li>rnc goes with xml file. I.e.
+
+<p>
+If you are editing <code>~/project/test.xml</code>, nxml will try to read
+<code>~/project/test.rnc</code> for schema if there is.
+</p>
+</li>
+
+<li>Or, define the mapping in a file
+
+<p>
+Details in (info "(nxml-mode) Schema locating files")
+</p>
+
+<ul class="org-ul">
+<li>setup rng-schema-locating-files
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(add-to-list 'rng-schema-locating-files
+         <span class="org-string">"~/mynotes/emacs/schema-locations.xml"</span>)
+</pre>
+</div>
+</li>
+
+<li>The "schema-locations.xml" looks like this:
+<div class="org-src-container">
+
+<pre class="src src-nxml"><span class="org-nxml-processing-instruction-delimiter">&lt;?</span><span class="org-nxml-processing-instruction-target">xml</span> <span class="org-nxml-attribute-local-name">version</span>=<span class="org-nxml-attribute-value-delimiter">"</span><span class="org-nxml-attribute-value">1.0</span><span class="org-nxml-attribute-value-delimiter">"</span> <span class="org-nxml-attribute-local-name">encoding</span>=<span class="org-nxml-attribute-value-delimiter">"</span><span class="org-nxml-attribute-value">utf-8</span><span class="org-nxml-attribute-value-delimiter">"</span><span class="org-nxml-processing-instruction-delimiter">?&gt;</span>
+
+<span class="org-nxml-comment-delimiter">&lt;!--</span><span class="org-nxml-comment-content"> this file tells emacs nxml mode where to find schema files in</span>
+<span class="org-nxml-comment-content">addition to "standard" ones </span><span class="org-nxml-comment-delimiter">--&gt;</span>
+
+<span class="org-nxml-tag-delimiter">&lt;</span><span class="org-nxml-element-local-name">locatingRules</span> <span class="org-nxml-namespace-attribute-xmlns">xmlns</span>=<span class="org-nxml-namespace-attribute-value-delimiter">"</span><span class="org-nxml-namespace-attribute-value">http://thaiopensource.com/ns/locating-rules/1.0</span><span class="org-nxml-namespace-attribute-value-delimiter">"</span><span class="org-nxml-tag-delimiter">&gt;</span>
+  <span class="org-nxml-comment-delimiter">&lt;!--</span><span class="org-nxml-comment-content"> Make it easier to refer to the rnc multiple times </span><span class="org-nxml-comment-delimiter">--&gt;</span>
+  <span class="org-nxml-tag-delimiter">&lt;</span><span class="org-nxml-element-local-name">typeId</span> <span class="org-nxml-attribute-local-name">id</span>=<span class="org-nxml-attribute-value-delimiter">"</span><span class="org-nxml-attribute-value">my test automation</span><span class="org-nxml-attribute-value-delimiter">"</span>
+          <span class="org-nxml-attribute-local-name">uri</span>=<span class="org-nxml-attribute-value-delimiter">"</span><span class="org-nxml-attribute-value">../coding/examples/snt/schema.rnc</span><span class="org-nxml-attribute-value-delimiter">"</span><span class="org-nxml-tag-slash">/</span><span class="org-nxml-tag-delimiter">&gt;</span>
+  <span class="org-nxml-comment-delimiter">&lt;!--</span><span class="org-nxml-comment-content"> if ns of root node is this, use ... </span><span class="org-nxml-comment-delimiter">--&gt;</span>
+  <span class="org-nxml-tag-delimiter">&lt;</span><span class="org-nxml-element-local-name">namespace</span> <span class="org-nxml-attribute-local-name">ns</span>=<span class="org-nxml-attribute-value-delimiter">"</span><span class="org-nxml-attribute-value">http://my.com/test/automation/0.1</span><span class="org-nxml-attribute-value-delimiter">"</span>
+             <span class="org-nxml-attribute-local-name">typeId</span>=<span class="org-nxml-attribute-value-delimiter">"</span><span class="org-nxml-attribute-value">my test automation</span><span class="org-nxml-attribute-value-delimiter">"</span><span class="org-nxml-tag-slash">/</span><span class="org-nxml-tag-delimiter">&gt;</span>
+
+  <span class="org-nxml-comment-delimiter">&lt;!--</span><span class="org-nxml-comment-content"> if name of root node is this, use ... </span><span class="org-nxml-comment-delimiter">--&gt;</span>
+  <span class="org-nxml-tag-delimiter">&lt;</span><span class="org-nxml-element-local-name">documentElement</span> <span class="org-nxml-attribute-local-name">localName</span>=<span class="org-nxml-attribute-value-delimiter">"</span><span class="org-nxml-attribute-value">site</span><span class="org-nxml-attribute-value-delimiter">"</span>
+                   <span class="org-nxml-attribute-local-name">uri</span>=<span class="org-nxml-attribute-value-delimiter">"</span><span class="org-nxml-attribute-value">../../projects/site-conf.rnc</span><span class="org-nxml-attribute-value-delimiter">"</span><span class="org-nxml-tag-slash">/</span><span class="org-nxml-tag-delimiter">&gt;</span>
+<span class="org-nxml-tag-delimiter">&lt;</span><span class="org-nxml-tag-slash">/</span><span class="org-nxml-element-local-name">locatingRules</span><span class="org-nxml-tag-delimiter">&gt;</span>
+</pre>
+</div>
+</li>
+</ul>
+<p>
+In fact, way 1 works simply because there is already the following
+line in "standard" locating file:
+</p>
+<pre class="example">
+&lt;transformURI fromPattern="*.xml" toPattern="*.rnc"/&gt;
+</pre>
+</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-sec-9-3" class="outline-3">
+<h3 id="sec-9-3"><span class="section-number-3">9.3</span> Editing rnc file</h3>
+<div class="outline-text-3" id="text-9-3">
+<p>
+Here are some facilities for editing "*.rnc", which depends on rnc-mode.el,
+flycheck, jing, trang and "cygpath" I wrote (refer to my init.el). If it
+seems overwhelming to you, just skip this section.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(add-to-list 'auto-mode-alist '(<span class="org-string">"\\.rnc\\'"</span> . rnc-mode))
+(autoload 'rnc-mode <span class="org-string">"rnc-mode"</span>)
+(setq rnc-enable-imenu t
+      rnc-jing-jar-file (expand-file-name
+                         <span class="org-string">"~/.local/libexec/jing-20091111/bin/jing.jar"</span>))
+
+(<span class="org-keyword">when</span> (<span class="org-keyword">require</span> '<span class="org-constant">flycheck</span> nil t)
+  (flycheck-define-checker rnc
+    <span class="org-doc">"Check rnc files using jing.jar</span>
+
+<span class="org-doc">See URL `</span><span class="org-doc"><span class="org-constant">https://github.com/TreeRex/rnc-mode</span></span><span class="org-doc">' and</span>
+<span class="org-doc">`</span><span class="org-doc"><span class="org-constant">http://www.thaiopensource.com/relaxng/jing.html</span></span><span class="org-doc">'"</span>
+    <span class="org-builtin">:command</span> (<span class="org-string">"java"</span> <span class="org-string">"-jar"</span> (eval (cygpath rnc-jing-jar-file)) <span class="org-string">"-c"</span>
+              (eval (cygpath (flycheck-save-buffer-to-temp
+                              #'flycheck-temp-file-system <span class="org-string">"flycheck"</span>))))
+    <span class="org-builtin">:error-patterns</span>
+    ((<span class="org-warning">error</span> line-start (zero-or-more anything) <span class="org-string">":"</span> line <span class="org-string">":"</span>
+            column <span class="org-string">": error:"</span> (message) line-end)) <span class="org-builtin">:modes</span> rnc-mode)
+
+  (add-to-list 'flycheck-checkers 'rnc))
+
+(<span class="org-keyword">defun</span> <span class="org-function-name">rnc2rng</span> ()
+  <span class="org-doc">"convert rnc to rng - lgfang"</span>
+  (interactive)
+  (<span class="org-keyword">let*</span> ((rnc (buffer-file-name))
+         (rng (concat (file-name-sans-extension rnc) <span class="org-string">".rng"</span>)))
+    (call-process <span class="org-string">"java"</span> nil nil nil <span class="org-string">"-jar"</span>
+                  (cygpath
+                   (expand-file-name
+                    <span class="org-string">"~/.local/libexec/trang-20091111/trang.jar"</span>))
+                  (cygpath rnc) (cygpath rng))))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-9-4" class="outline-3">
+<h3 id="sec-9-4"><span class="section-number-3">9.4</span> XSD instead of RNC</h3>
+<div class="outline-text-3" id="text-9-4">
+<p>
+RNC is nice: simple and clear. But we have to deal with XSD as there
+are legacy code as well as other people/applications stick to XSD.
+</p>
+
+<p>
+There are ways (not many) to convert XSD from/to RNC. Here is what I
+tried.
+</p>
+
+<ul class="org-ul">
+<li>From RNC to XSD
+
+<ol class="org-ol">
+<li>Download "trang" from <a href="http://code.google.com/p/jing-trang/">google code</a>
+</li>
+
+<li>Run the following command:
+<pre class="example">
+java -jar trang.jar path/to/your.rnc your.xsd
+</pre>
+</li>
+</ol>
+<p>
+For more details, refer to the manual of trang.
+</p>
+</li>
+
+<li>From XSD to RNC
+
+<p>
+Well, this maybe a little overwhelming. But, anyway, you set it up
+only once.
+</p>
+
+<ol class="org-ol">
+<li>Add Firefox addon "web developer extension" from <a href="https://addons.mozilla.org/en-US/firefox/addon/web-developer/">here</a>.
+</li>
+
+<li>Copy "XSDtoRNG.xsl" to the same directory as your XSD. You can
+get the XSL from from <a href="https://github.com/epiasini/XSDtoRNG">GitHub</a>.
+</li>
+
+<li>Edit your XSD, add the following line
+<pre class="example">
+&lt;?xml-stylesheet type="text/xsl" href="XSDtoRNG.xsl"?&gt;
+</pre>
+</li>
+
+<li>Open your XSD in firefox and "web developer extension" -&gt; "view
+source" -&gt; "view generated source"
+</li>
+
+<li>Save the source to a file, say "tmp.rng".
+</li>
+
+<li>Use "trang" to convert the RNG to RNC:
+<pre class="example">
+jar -jar path/to/trang.jar tmp.rng your.rnc
+</pre>
+</li>
+</ol>
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-10" class="outline-2">
+<h2 id="sec-10"><span class="section-number-2">10</span> Q&amp;A</h2>
+<div class="outline-text-2" id="text-10">
+<p>
+Thanks
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+
+     <br/>
+     <p>
+     <span class="date">Created: 2016-04-05 Tue 16:55</span> by <span class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</span>
+     </p>
+
+     <!-- DISQUS  -->
+     <div id="disqus_thread"></div>
+     <script type="text/javascript">
+         /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+         var disqus_shortname = 'lgfang'; // required: replace example with your forum shortname
+
+         /* * * DON'T EDIT BELOW THIS LINE * * */
+         (function() {
+             var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+             dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+             (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+         })();
+     </script>
+     <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+     <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+     <!-- google analytic -->
+     <script>
+       (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+       (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+       m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+       })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+       ga('create', 'UA-84711243-1', 'auto');
+       ga('send', 'pageview');
+
+     </script>
+</div>
+</div>
+</body>
+</html>

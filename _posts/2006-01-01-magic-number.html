@@ -1,0 +1,123 @@
+---
+layout: post
+title: 魔数、“#!” 与 “bad interpreter”
+tagline:
+categories: computer
+tags: [bash, shell, coding]
+---
+
+<p>
+很多类型的文件其文件起始的几个字节的内容是固定的（或是有意填充，或是本
+就如此）。因此这几个字节的内容也被称为魔数 (magic number，还有别的意思)，
+因为根据这几个字节的内容就可以确定文件类型。例如 FreeBSD 上 ELF 文件的
+magic number 就是文件的前四个字节依次为"7f 45 4c 46"，对应的ascii字符串
+即 "^?ELF"。tar 文件的 magic number 是从第257个字节起为 "ustar"。Unix
+命令 "file" 应该就是利用这个原理工作的。
+</p>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1"><code>#!</code></h2>
+<div class="outline-text-2" id="text-1">
+<p>
+<code>#!</code> 应该也算是一个魔数，当系统（不是 shell）读到文件头两字节的内容为=#!= 时就
+知道该调用指定的程序来解释执行这个脚本。这也解释了为什么 <code>#!=只有在文件的头两
+  个字节才生效，否则被当成普通注释。依我看选择 =#!</code> 还是很有道理的：
+</p>
+
+<ul class="org-ul">
+<li>大部分脚本语言中 '#' 表示注释，这样 <code>#!</code> 这一行就会自动被脚本语言
+的解释器忽略掉。
+</li>
+
+<li>'!' 有执行的意思。
+</li>
+</ul>
+
+<p>
+可以想象，系统遇到 <code>#!</code> 的处理过程肯定是先将 <code>#!</code> 之后的内容按空格分解，然后调
+用 exec 函数中某一种。分解后的得到第一个元素作为可执行程序名传给exec ，剩下的
+和命令行参数都作为参数转给。所以实际上 <code>#!</code> 指定的不必是某个脚本语言解释器，任
+何能正确处理参数的程序都行。
+</p>
+
+<pre class="example">
+$ cat test.sh
+#!/bin/cat
+
+$ ./test.sh
+#!/bin/cat
+
+$ cat hello.txt
+Hello
+
+$ ./test.sh hello.txt
+#!/bin/cat
+Hello
+
+$ cat test1.sh
+#!/bin/ls -l
+
+$ ./test1.sh
+-rwxr-xr-x 1 lungangf 4294967295 14 Mar 22 12:35 ./test1.sh
+</pre>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2">bad interpreter</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+前不久有同事的脚本表面上看完全正确，但运行时却报如下错误（redhat 2.4.21)：
+</p>
+
+<pre class="example">
+$ ./test.sh
+: bad interpreter: No such file or directory
+</pre>
+
+<p>
+我用Emacs打开脚本文件，发现Emacs的mode-line上提示该文件为DOS格式，即换行符实际
+上由回车＋换行组成。把文件转成unix格式后再运行，错误消失。经过多次试验发现在
+solaris和linux上都类似的规律：
+</p>
+
+<p>
+如果脚本指定了脚本解释器（第一行形如“#!/bin/bash”)，脚本的格式（DOS/Unix)必须
+正确；否则，脚本的换行格式无所谓，或者说bash对两种格式都认。
+</p>
+
+<p>
+例如(bad.sh和ok.sh均为DOS格式)：
+</p>
+
+<pre class="example">
+$ cat bad.sh
+#!/bin/bash
+echo "hello1"
+echo "hello2"
+$ ./bad.sh
+: bad interpreter: No such file or directory
+$ cat ok.sh
+echo "ok1"
+echo "ok2"
+$ ./ok.sh
+ok1
+ok2
+</pre>
+
+<p>
+有了之前的铺垫，这个原因就比较清楚了。DOS格式文件的换行实际上是两个字符：回车
+(\r，通常显示成 ^M) + 换行 (\n)，而 Unix 系统把 '\r' 当成一个普通字符处理，所
+以认为要执行的程序是 "/bin/bash^M"，这个自然要报错。如果在行尾加上几个空格，那
+^M 就被当成参数了。在 FreeBSD 上错误提示相对就比较清楚一些：
+</p>
+
+<pre class="example">
+[lgfang@lgfang ~/tmp]$ ./test.sh
+-bash: ./test.sh: /usr/local/bin/bash^M: bad interpreter: No such file
+or directory
+[lgfang@lgfang ~/tmp]$ ./test1.sh
+: No such file or directory
+</pre>
+</div>
+</div>

@@ -1,0 +1,1356 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>Tmux - A Great Terminal Multiplexer</title>
+<!-- 2016-09-18 Sun 18:45 -->
+<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta  name="generator" content="Org-mode" />
+<meta  name="author" content="Fang Lungang" />
+<link rel="stylesheet" type="text/css" href="../cssjs/lgfang.css" />
+
+<script type="text/javascript" src="../cssjs/org-info.js">
+/**
+ *
+ * @source: ../cssjs/org-info.js
+ *
+ * @licstart  The following is the entire license notice for the
+ *  JavaScript code in ../cssjs/org-info.js.
+ *
+ * Copyright (C) 2012-2013 Free Software Foundation, Inc.
+ *
+ *
+ * The JavaScript code in this tag is free software: you can
+ * redistribute it and/or modify it under the terms of the GNU
+ * General Public License (GNU GPL) as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option)
+ * any later version.  The code is distributed WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+ *
+ * As additional permission under GNU GPL version 3 section 7, you
+ * may distribute non-source (e.g., minimized or compacted) forms of
+ * that code without the copy of the GNU GPL normally required by
+ * section 4, provided you include this license notice and a URL
+ * through which recipients can access the Corresponding Source.
+ *
+ * @licend  The above is the entire license notice
+ * for the JavaScript code in ../cssjs/org-info.js.
+ *
+ */
+</script>
+
+<script type="text/javascript">
+
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+
+<!--/*--><![CDATA[/*><!--*/
+org_html_manager.set("TOC_DEPTH", "2");
+org_html_manager.set("LINK_HOME", "../../index.html");
+org_html_manager.set("LINK_UP", "../index.html");
+org_html_manager.set("LOCAL_TOC", "0");
+org_html_manager.set("VIEW_BUTTONS", "0");
+org_html_manager.set("MOUSE_HINT", "underline");
+org_html_manager.set("FIXED_TOC", "0");
+org_html_manager.set("TOC", "1");
+org_html_manager.set("VIEW", "showall");
+org_html_manager.setup();  // activate after the parameters are set
+/*]]>*///-->
+</script>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div class="container-narrow">
+<div id="content">
+<h1 class="title">Tmux - A Great Terminal Multiplexer</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1. About this slides</a></li>
+<li><a href="#sec-2">2. The Itches</a></li>
+<li><a href="#sec-3">3. Why Tmux</a></li>
+<li><a href="#sec-4">4. Why NOT xxx</a>
+<ul>
+<li><a href="#sec-4-1">4.1. Why NOT VNC</a></li>
+<li><a href="#sec-4-2">4.2. Why NOT GNU "screen"</a></li>
+<li><a href="#sec-4-3">4.3. Why NOT secureCRT</a></li>
+</ul>
+</li>
+<li><a href="#sec-5">5. Feature Highlights</a>
+<ul>
+<li><a href="#sec-5-1">5.1. Detach and re-attach</a></li>
+<li><a href="#sec-5-2">5.2. Multiple "tabbed" windows on one connection</a></li>
+<li><a href="#sec-5-3">5.3. Remote share and auto-resize</a></li>
+<li><a href="#sec-5-4">5.4. Split windows at will</a>
+<ul>
+<li><a href="#sec-5-4-1">5.4.1. Real-world example: working with TL1</a></li>
+<li><a href="#sec-5-4-2">5.4.2. Real-world example: upgrade ATCA blades simultaneously</a></li>
+</ul>
+</li>
+<li><a href="#sec-5-5">5.5. Tile windows with preset layouts</a>
+<ul>
+<li><a href="#sec-5-5-1">5.5.1. tiled</a></li>
+<li><a href="#sec-5-5-2">5.5.2. main horizontal</a></li>
+<li><a href="#sec-5-5-3">5.5.3. main vertical</a></li>
+</ul>
+</li>
+<li><a href="#sec-5-6">5.6. Group windows into sessions</a></li>
+<li><a href="#sec-5-7">5.7. Easy to use</a></li>
+<li><a href="#sec-5-8">5.8. Suports scripting</a></li>
+<li><a href="#sec-5-9">5.9. Free (as in "freedom")</a></li>
+</ul>
+</li>
+<li><a href="#sec-6">6. Demo</a></li>
+<li><a href="#sec-7">7. Installation</a>
+<ul>
+<li><a href="#sec-7-1">7.1. The most simple way</a></li>
+<li><a href="#sec-7-2">7.2. The preferred way</a></li>
+<li><a href="#sec-7-3">7.3. Install from source</a></li>
+</ul>
+</li>
+<li><a href="#sec-8">8. Setup</a></li>
+<li><a href="#sec-9">9. Basic operations</a></li>
+<li><a href="#sec-10">10. Enable mouse support</a></li>
+<li><a href="#sec-11">11. Intermediate Usages</a>
+<ul>
+<li><a href="#sec-11-1">11.1. Important concepts</a></li>
+<li><a href="#sec-11-2">11.2. Customization</a></li>
+<li><a href="#sec-11-3">11.3. Eye candy</a></li>
+<li><a href="#sec-11-4">11.4. Windows</a></li>
+<li><a href="#sec-11-5">11.5. Panes</a></li>
+<li><a href="#sec-11-6">11.6. Copy mode</a></li>
+<li><a href="#sec-11-7">11.7. Sessions within tmux client</a></li>
+<li><a href="#sec-11-8">11.8. Run complicated commands</a></li>
+<li><a href="#sec-11-9">11.9. About configuration</a></li>
+</ul>
+</li>
+<li><a href="#sec-12">12. Advanced</a>
+<ul>
+<li><a href="#sec-12-1">12.1. Log screen outputs</a></li>
+<li><a href="#sec-12-2">12.2. Another way</a></li>
+<li><a href="#sec-12-3">12.3. Nesting tmux</a></li>
+<li><a href="#sec-12-4">12.4. Types of hot-keys</a></li>
+<li><a href="#sec-12-5">12.5. Maximize a pane temporary</a></li>
+<li><a href="#sec-12-6">12.6. Command line auto-complete</a></li>
+</ul>
+</li>
+<li><a href="#sec-13">13. Q&amp;A</a></li>
+<li><a href="#sec-14">14. Backup</a>
+<ul>
+<li><a href="#sec-14-1">14.1. Reference card according to my conf</a></li>
+<li><a href="#sec-14-2">14.2. Auto-login and hot-keys</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> About this slides</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+This slides explains why we want to use tmux as well as the basic features and
+configurations of tmux.
+</p>
+
+<p>
+This page is a html slides. To view it in slides mode, press <code>x</code> then click
+mouse to start browsing. For more help, press <code>?</code>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> The Itches</h2>
+<div class="outline-text-2" id="text-2">
+<ul class="org-ul">
+<li>Loosing <b>everything</b> when the connection to a server break
+</li>
+
+<li>Cannot share <b>current</b> terminal with others
+</li>
+
+<li>Drag &amp; drop <b>again and again</b> to tile terminal windows
+</li>
+
+<li>Switching among <b>dozens</b> of terminal windows
+</li>
+
+<li>Unable (or tedious) to open multiple connections
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> Why Tmux</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+A terminal multiplexer capable of
+</p>
+
+<ol class="org-ol">
+<li>tabbed windowing
+</li>
+<li>detach/re-attach
+</li>
+<li>remote-share, pair-working (esp. remote pair-working)
+</li>
+<li>window split and tiling
+</li>
+<li>grouping windows
+</li>
+<li>re-sizing windows
+</li>
+<li>&#x2026;
+</li>
+</ol>
+
+<p>
+Meanwhile, it is
+</p>
+<ol class="org-ol">
+<li>Easy to install &amp; use
+</li>
+<li>Well defined command line interface
+<ul class="org-ul">
+<li>For interactive use and for scripting.
+</li>
+</ul>
+</li>
+<li>Well documented
+</li>
+<li>BSD licensed
+</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-sec-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> Why NOT xxx</h2>
+<div class="outline-text-2" id="text-4">
+</div><div id="outline-container-sec-4-1" class="outline-3">
+<h3 id="sec-4-1"><span class="section-number-3">4.1</span> Why NOT VNC</h3>
+<div class="outline-text-3" id="text-4-1">
+<p>
+The cons of VNC:
+</p>
+<ol class="org-ol">
+<li>Depends on X (GUI environment).
+</li>
+<li>Consume more CPU and network traffic (I think).
+</li>
+<li>Can not resize the desktop (Latest realvnc can).
+</li>
+<li>Does not tile (To be accurate, you can start a tiling WM in VNC.
+Average engineers just don't bother or able to do that).
+</li>
+<li>Non-native windows that response slowly
+</li>
+</ol>
+
+<p>
+The pros of VNC:
+</p>
+<ol class="org-ol">
+<li>Uses dedicated password instead of login/password for sharing
+</li>
+<li>Supports X applications
+</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-sec-4-2" class="outline-3">
+<h3 id="sec-4-2"><span class="section-number-3">4.2</span> Why NOT GNU "screen"</h3>
+<div class="outline-text-3" id="text-4-2">
+<p>
+Tmux is kind of the next-gen of screen. People say tmux is superior
+since it
+</p>
+<ol class="org-ol">
+<li>Is easier to configure.
+</li>
+<li>Is easier to split window and change layout.
+</li>
+<li>Is able to resize window.
+</li>
+<li>Is easier to scripting.
+</li>
+<li>Cleaner architecture, code, document etc.
+</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-sec-4-3" class="outline-3">
+<h3 id="sec-4-3"><span class="section-number-3">4.3</span> Why NOT secureCRT</h3>
+<div class="outline-text-3" id="text-4-3">
+<p>
+I prefer "putty + tmux + to" since, as far as I know, secureCRT
+</p>
+<ol class="org-ol">
+<li>can not detach/attach
+</li>
+<li>can not group windows per projects(or bug/escalation etc.)
+</li>
+<li>can not remote share
+</li>
+<li>can not tile (?)
+</li>
+<li>seems it does not support UTF-8
+</li>
+<li>not convenient if the host list is really long
+</li>
+<li>can not jump to destination host via an intermediate server
+</li>
+<li>your hot-keys is not available other PCs, or after re-install
+</li>
+<li>non-free
+</li>
+</ol>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-5" class="outline-2">
+<h2 id="sec-5"><span class="section-number-2">5</span> Feature Highlights</h2>
+<div class="outline-text-2" id="text-5">
+</div><div id="outline-container-sec-5-1" class="outline-3">
+<h3 id="sec-5-1"><span class="section-number-3">5.1</span> Detach and re-attach</h3>
+<div class="outline-text-3" id="text-5-1">
+<ul class="org-ul">
+<li>Network unstable?
+</li>
+<li>Has to bring laptop home or meeting room?
+</li>
+<li>Laptop crashed?
+</li>
+<li>Mistakenly closed the terminal?
+</li>
+</ul>
+
+<p>
+Does NOT matter! just re-attach.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-5-2" class="outline-3">
+<h3 id="sec-5-2"><span class="section-number-3">5.2</span> Multiple "tabbed" windows on one connection</h3>
+<div class="outline-text-3" id="text-5-2">
+
+<div class="figure">
+<p><img src="./tmux-screen/tmux-basic-layout.png" alt="tmux-basic-layout.png" width="600" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-5-3" class="outline-3">
+<h3 id="sec-5-3"><span class="section-number-3">5.3</span> Remote share and auto-resize</h3>
+<div class="outline-text-3" id="text-5-3">
+
+<div class="figure">
+<p><img src="./tmux-screen/tmux-share.png" alt="tmux-share.png" width="600" />
+</p>
+</div>
+
+<p>
+This is a window auto-resized since my peer's terminal window is smaller than
+mine.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-5-4" class="outline-3">
+<h3 id="sec-5-4"><span class="section-number-3">5.4</span> Split windows at will</h3>
+<div class="outline-text-3" id="text-5-4">
+</div><div id="outline-container-sec-5-4-1" class="outline-4">
+<h4 id="sec-5-4-1"><span class="section-number-4">5.4.1</span> Real-world example: working with TL1</h4>
+<div class="outline-text-4" id="text-5-4-1">
+
+<div class="figure">
+<p><img src="./tmux-screen/tmux-many-window-1.png" alt="tmux-many-window-1.png" width="600" />
+</p>
+</div>
+
+<p>
+One window for each of the following:
+</p>
+<ol class="org-ol">
+<li>Emacs to compose TL1 commands
+</li>
+<li>TL1 session to launch TL1 commands
+</li>
+<li>MYSQL session to inspect DB
+</li>
+<li>Another session to query DB to verify TL1 commands
+</li>
+<li>Misc. tasks
+</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-sec-5-4-2" class="outline-4">
+<h4 id="sec-5-4-2"><span class="section-number-4">5.4.2</span> Real-world example: upgrade ATCA blades simultaneously</h4>
+<div class="outline-text-4" id="text-5-4-2">
+
+<div class="figure">
+<p><img src="./tmux-screen/tmux-many-window-2.png" alt="tmux-many-window-2.png" width="600" />
+</p>
+</div>
+
+<p>
+Each window monitors one blade.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-5-5" class="outline-3">
+<h3 id="sec-5-5"><span class="section-number-3">5.5</span> Tile windows with preset layouts</h3>
+<div class="outline-text-3" id="text-5-5">
+</div><div id="outline-container-sec-5-5-1" class="outline-4">
+<h4 id="sec-5-5-1"><span class="section-number-4">5.5.1</span> tiled</h4>
+<div class="outline-text-4" id="text-5-5-1">
+
+<div class="figure">
+<p><img src="./tmux-screen/tmux-tiled.png" alt="tmux-tiled.png" width="600" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-5-5-2" class="outline-4">
+<h4 id="sec-5-5-2"><span class="section-number-4">5.5.2</span> main horizontal</h4>
+<div class="outline-text-4" id="text-5-5-2">
+
+<div class="figure">
+<p><img src="./tmux-screen/tmux-main-horizontal.png" alt="tmux-main-horizontal.png" width="600" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-5-5-3" class="outline-4">
+<h4 id="sec-5-5-3"><span class="section-number-4">5.5.3</span> main vertical</h4>
+<div class="outline-text-4" id="text-5-5-3">
+
+<div class="figure">
+<p><img src="./tmux-screen/tmux-main-vertical.png" alt="tmux-main-vertical.png" width="600" />
+</p>
+</div>
+
+<p>
+Other layouts not shown in this slides:
+</p>
+<ul class="org-ul">
+<li>even horizontal
+</li>
+<li>even vertical
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-5-6" class="outline-3">
+<h3 id="sec-5-6"><span class="section-number-3">5.6</span> Group windows into sessions</h3>
+<div class="outline-text-3" id="text-5-6">
+
+<div class="figure">
+<p><img src="./tmux-screen/tmux-choose-session.png" alt="tmux-choose-session.png" width="600" />
+</p>
+</div>
+
+<p>
+Focus on what you are working on right now.
+</p>
+
+<p>
+Say, one session per project/work-item. Easily switch among the handful
+windows within current session. Windows in other sessions does not distract
+you.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-5-7" class="outline-3">
+<h3 id="sec-5-7"><span class="section-number-3">5.7</span> Easy to use</h3>
+<div class="outline-text-3" id="text-5-7">
+<ul class="org-ul">
+<li>A simplistic setup procedure (<a href="#sec-8">the section of setup</a>)
+</li>
+<li>A minimal set of hotkeys (<a href="#sec-9">the basic operations</a>)
+</li>
+<li>A nice support of mouse even though it is a CLI (<a href="#sec-10">how to enable mouse
+support</a>)
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-5-8" class="outline-3">
+<h3 id="sec-5-8"><span class="section-number-3">5.8</span> Suports scripting</h3>
+<div class="outline-text-3" id="text-5-8">
+<ul class="org-ul">
+<li>Automatically create or attach to a session
+<div class="org-src-container">
+
+<pre class="src src-shell-script"><span class="org-keyword">function</span> <span class="org-function-name">tg</span> {
+    <span class="org-builtin">local</span> <span class="org-variable-name">session_name</span>=<span class="org-string">"$1"</span>
+
+    <span class="org-keyword">if</span> [ -n <span class="org-string">"$session_name"</span> ]; <span class="org-keyword">then</span>
+        tmux -2 attach -t <span class="org-string">"$session_name"</span> || tmux -2 new -s <span class="org-string">"$session_name"</span>
+    <span class="org-keyword">else</span>
+        tmux -2 attach || tmux -2 new -s <span class="org-string">'misc'</span>
+    <span class="org-keyword">fi</span>
+}
+</pre>
+</div>
+</li>
+
+<li>Retrieve content of the clipboard of tmux in Emacs
+
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp">(<span class="org-keyword">defun</span> <span class="org-function-name">lgfang-get-tmux-copied</span> ()
+  <span class="org-doc">"Get current tmux buffer"</span>
+  (interactive)
+  (call-process <span class="org-string">"tmux"</span> nil t nil <span class="org-string">"show-buffer"</span>))
+</pre>
+</div>
+</li>
+
+<li>A more complicated example can be found <a href="./tmux.html">here</a>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-5-9" class="outline-3">
+<h3 id="sec-5-9"><span class="section-number-3">5.9</span> Free (as in "freedom")</h3>
+<div class="outline-text-3" id="text-5-9">
+<p>
+Last but not least: it is BSD-licensed.
+</p>
+
+<p>
+That means it is free to
+</p>
+<ul class="org-ul">
+<li>Use
+</li>
+<li>Modify
+</li>
+<li>Re-distribute
+</li>
+<li>Or even make profit from it.
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-6" class="outline-2">
+<h2 id="sec-6"><span class="section-number-2">6</span> Demo</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+If scheduled, demonstrate window/pane/attach/session/nesting
+</p>
+<ol class="org-ol">
+<li>Connect to server HOST-A (say, a server hosts UDR virtual machines) which I
+already has at least one tmux session.
+</li>
+<li>Create a demo session with "tg demo"
+</li>
+<li>Create windows/panes and ssh to HOST-B, which is only accessible from
+HOST-A (say the pilot card with 10.* IPs)
+</li>
+<li>Changing layout, rotate panes within the window
+</li>
+<li>Join/swap panes
+</li>
+<li>Share
+</li>
+<li>Disconnect and re-attach
+</li>
+<li>Create a nested tmux session on HOST-B and create windows within it.
+</li>
+<li>Switch between the sessions on host-A
+</li>
+<li>Explain the naming rule "session_name:window_index.pane_index"
+</li>
+<li>Moving windows/panes between sessions
+</li>
+<li>Automatically attach to tmux upon login
+<ul class="org-ul">
+<li>the putty way
+</li>
+<li>the command line way
+</li>
+</ul>
+</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-sec-7" class="outline-2">
+<h2 id="sec-7"><span class="section-number-2">7</span> Installation</h2>
+<div class="outline-text-2" id="text-7">
+</div><div id="outline-container-sec-7-1" class="outline-3">
+<h3 id="sec-7-1"><span class="section-number-3">7.1</span> The most simple way</h3>
+<div class="outline-text-3" id="text-7-1">
+<p>
+Copy a statically-linked "tmux" binary to the server.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-7-2" class="outline-3">
+<h3 id="sec-7-2"><span class="section-number-3">7.2</span> The preferred way</h3>
+<div class="outline-text-3" id="text-7-2">
+<p>
+Most modern linux/unix variants have package manage system like yum/ports
+which download and install tmux for you in a single command.
+</p>
+
+<p>
+For instance, for fedora/rhel
+</p>
+<pre class="example">
+yum install tmux
+</pre>
+</div>
+</div>
+
+<div id="outline-container-sec-7-3" class="outline-3">
+<h3 id="sec-7-3"><span class="section-number-3">7.3</span> Install from source</h3>
+<div class="outline-text-3" id="text-7-3">
+<p>
+Here is how you install tmux from source code in case needed. (NOTE: compile
+a <b>statically linked</b>, <b>32-bit</b> binary for portability)
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-shell-script"><span class="org-comment-delimiter"># </span><span class="org-comment">install libevent if not already</span>
+tar xvfz libevent-1.4.14b-stable.tar.gz
+<span class="org-builtin">cd</span> libevent-1.4.14b-stable
+./configure --prefix=$<span class="org-variable-name">HOME</span>/.local
+make &amp;&amp; make install
+tar xvfz tmux-1.6.tar.gz &amp;&amp; <span class="org-builtin">cd</span> tmux-1.6/
+./configure --enable-static --prefix=$<span class="org-variable-name">HOME</span>/.local <span class="org-sh-escaped-newline">\</span>
+    <span class="org-variable-name">CFLAGS</span>=<span class="org-string">"-I$HOME/.local/include"</span> <span class="org-variable-name">LDFLAGS</span>=<span class="org-string">"-L$HOME/.local/lib"</span>
+make &amp;&amp; make install
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">echo "LD_LIBRARY_PATH=$HOME/.local/bin:$LD_LIBRARY_PATH" &gt;&gt; ~/.bash_profile</span>
+<span class="org-builtin">echo</span> <span class="org-string">"PATH=$HOME/.local/bin:$PATH"</span> &gt;&gt; ~/.bash_profile
+</pre>
+</div>
+
+<p>
+For cygwin, refer to <a href="cygwin.html">here</a>.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-8" class="outline-2">
+<h2 id="sec-8"><span class="section-number-2">8</span> Setup</h2>
+<div class="outline-text-2" id="text-8">
+<ol class="org-ol">
+<li>Server side
+
+<p>
+Make sure your locale is a uft-8 one, such as <code>en_US.utf8</code> or <code>zh_CN.utf8</code>.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-shell-script"><span class="org-comment-delimiter"># </span><span class="org-comment">in your profile</span>
+<span class="org-builtin">export</span> <span class="org-variable-name">LC_CTYPE</span>=zh_CN.utf8 <span class="org-comment-delimiter"># </span><span class="org-comment">or "LC_ALL" if you prefer</span>
+</pre>
+</div>
+</li>
+
+<li>Make sure your terminal emulator
+<ol class="org-ol">
+<li>deals with UTF8 chars correctly.
+</li>
+<li>does not intercept hot-keys sent to tmux.
+</li>
+<li>has a way to NOT send keys to application.
+</li>
+</ol>
+<p>
+Let's take PuTTY for example:
+</p>
+<ul class="org-ul">
+<li><code>Window -&gt; Translation -&gt; Received data...character set</code>: UTF-8
+
+<p>
+Your putty can display UTF-8 characters (the TMUX pane border and the
+Chinese chars).
+</p>
+</li>
+
+<li><code>Terminal -&gt; Keyboard -&gt; The Function keys and keypad</code>: XtermR6
+</li>
+
+<li><code>Window -&gt; Selection -&gt; Shift overrides applications use of mouse</code>.
+
+<p>
+This enables you to copy/paste in your PuTTY as usual except you need to
+hold down <code>&lt;shift&gt;</code> key in the meantime.
+</p>
+
+<p>
+<b>NOTE:</b> refer to <i>copy mode</i> for more sophisticate copy/paste.
+</p>
+</li>
+</ul>
+</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-sec-9" class="outline-2">
+<h2 id="sec-9"><span class="section-number-2">9</span> Basic operations</h2>
+<div class="outline-text-2" id="text-9">
+<p>
+All that you need for your daily work (Note that I bind the prefix key to
+<code>F12</code>):
+</p>
+
+<ol class="org-ol">
+<li>New session :: <code>tmux [new -s session-name]</code>
+</li>
+<li>Attach :: <code>tmux attach [-t session-name]</code>
+</li>
+<li>Detach :: <code>F12 d</code>
+</li>
+<li>New window :: <code>F12 c</code>
+</li>
+<li>Split vertically :: <code>F12 _</code>
+</li>
+<li>Split horizontally :: <code>F12 |</code>
+</li>
+<li>Change layout :: <code>F12 &lt;space&gt;</code>
+</li>
+<li>Kill pane :: <code>F12 x</code> (Use this only when the pane does not
+response)
+</li>
+</ol>
+
+<div class="org-src-container">
+
+<pre class="src src-conf-space"><span class="org-variable-name">set-option</span> -g prefix F12
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-10" class="outline-2">
+<h2 id="sec-10"><span class="section-number-2">10</span> Enable mouse support</h2>
+<div class="outline-text-2" id="text-10">
+<div class="org-src-container">
+
+<pre class="src src-conf-space"><span class="org-variable-name">set-option</span> -g mouse-select-pane on
+<span class="org-variable-name">set-option</span> -g mouse-resize-pane on
+<span class="org-variable-name">set-option</span> -g mouse-select-window on
+<span class="org-variable-name">set-window-option</span> -g mode-mouse on
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-11" class="outline-2">
+<h2 id="sec-11"><span class="section-number-2">11</span> Intermediate Usages</h2>
+<div class="outline-text-2" id="text-11">
+<p>
+You are ready to get started already. However, you may find following
+slides useful.
+</p>
+</div>
+
+<div id="outline-container-sec-11-1" class="outline-3">
+<h3 id="sec-11-1"><span class="section-number-3">11.1</span> Important concepts</h3>
+<div class="outline-text-3" id="text-11-1">
+<ul class="org-ul">
+<li>Server instance
+</li>
+<li>Sessions
+</li>
+<li>Windows
+</li>
+<li>Panes
+</li>
+<li>Handover of key-stokes
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-11-2" class="outline-3">
+<h3 id="sec-11-2"><span class="section-number-3">11.2</span> Customization</h3>
+<div class="outline-text-3" id="text-11-2">
+<p>
+Refer to my <code>~/.tmux.conf</code> at <a href="./tmux.html">./tmux.html</a>.
+</p>
+
+<p>
+Some examples:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-conf-space"><span class="org-comment-delimiter"># </span><span class="org-comment">Emacser can not use default prefix 'C-b' :)</span>
+<span class="org-variable-name">set-option</span> -g prefix F12
+<span class="org-variable-name">bind-key</span> | split-window -h
+<span class="org-variable-name">bind-key</span> _ split-window -v
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-11-3" class="outline-3">
+<h3 id="sec-11-3"><span class="section-number-3">11.3</span> Eye candy</h3>
+<div class="outline-text-3" id="text-11-3">
+
+<div class="figure">
+<p><img src="./tmux-screen/tmux-status-bar.png" alt="tmux-status-bar.png" width="600" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-11-4" class="outline-3">
+<h3 id="sec-11-4"><span class="section-number-3">11.4</span> Windows</h3>
+<div class="outline-text-3" id="text-11-4">
+<ol class="org-ol">
+<li>Select previous working window :: <code>F12 l</code>
+</li>
+<li>Select the N^th window :: <code>F12 N</code>
+</li>
+<li>Select next window (index+1) :: <code>F12 n</code>
+</li>
+<li>Select previous window (index-1) :: <code>F12 p</code>
+</li>
+<li>To rename a window :: =F12 ,= then input new name
+</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-sec-11-5" class="outline-3">
+<h3 id="sec-11-5"><span class="section-number-3">11.5</span> Panes</h3>
+<div class="outline-text-3" id="text-11-5">
+<ol class="org-ol">
+<li>Select pane :: <code>F12 &lt;Tab&gt;/&lt;left&gt;/&lt;right&gt;/&lt;up&gt;/&lt;down&gt;</code>
+</li>
+<li>Swap two adjacent panes :: <code>F12 {</code>
+</li>
+<li>Break current pane to a new window :: <code>F12 !</code>
+</li>
+<li>Join pane y in window x to current window :: <code>F12 j</code> then type in
+<code>x.y</code>
+</li>
+<li>Swap with pane y of window x :: <code>F12 m</code> then type in <code>x.y</code>
+</li>
+<li>Toggle Synchronize mode, i.e. duplicate input (key-stokes) to all
+panes in the same window :: <code>F12 Ctrl-s</code>. Sometimes, this is can
+be handy for testers
+</li>
+</ol>
+
+<div class="org-src-container">
+
+<pre class="src src-conf-space"><span class="org-variable-name">bind-key</span> Tab select-pane -t:.+
+<span class="org-variable-name">bind-key</span> BTab select-pane -t:.-
+<span class="org-variable-name">set-option</span> -g display-time 3000
+<span class="org-variable-name">bind-key</span> j command-prompt <span class="org-string">"join-pane -s '%1'"</span>
+<span class="org-variable-name">bind-key</span> m command-prompt -p <span class="org-string">"move (swap) current pane with: "</span> <span class="org-string">"swap-pane -s %1"</span>
+<span class="org-variable-name">bind-key</span> C-s setw synchronize-panes
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-11-6" class="outline-3">
+<h3 id="sec-11-6"><span class="section-number-3">11.6</span> Copy mode</h3>
+<div class="outline-text-3" id="text-11-6">
+<ol class="org-ol">
+<li><code>F12 [</code> or <code>F12 &lt;PageUp&gt;</code> to enter ``copy mode'', and then view,
+search and copy screen output as described below.
+
+<ul class="org-ul">
+<li>Scroll up/down: <code>&lt;PageUp&gt;</code> / <code>&lt;PageDown&gt;</code>, or Emacs(or vi if you
+configured that way) key bindings, or mouse wheel.
+</li>
+<li>Search, just use Emacs key bindings for search (or that of vi based on
+your configure):
+<ol class="org-ol">
+<li><code>Ctrl-r</code>
+</li>
+<li>Type in string to search
+</li>
+<li><code>Enter</code>
+</li>
+<li>Press <code>n/N</code> for next/previous match
+</li>
+</ol>
+</li>
+<li>Copy: Emacs/vi key bindings
+</li>
+</ul>
+</li>
+
+<li>Paste: <code>F12 ]</code>
+</li>
+
+<li>Show "clip board": <code>F12 =</code>
+</li>
+
+<li>Customize if you want
+<div class="org-src-container">
+
+<pre class="src src-conf-space"><span class="org-variable-name">set-window-option</span> -g mode-keys emacs
+<span class="org-variable-name">set-option</span> -g history-limit 600000
+</pre>
+</div>
+</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-sec-11-7" class="outline-3">
+<h3 id="sec-11-7"><span class="section-number-3">11.7</span> Sessions within tmux client</h3>
+<div class="outline-text-3" id="text-11-7">
+<ol class="org-ol">
+<li>New session :: <code>F12 : new-session -s session_name</code>
+</li>
+<li>Choose(switch) session :: <code>F12 s</code>
+</li>
+<li>Move window among sessions :: <code>F12 : move-window -t session_name</code>
+</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-sec-11-8" class="outline-3">
+<h3 id="sec-11-8"><span class="section-number-3">11.8</span> Run complicated commands</h3>
+<div class="outline-text-3" id="text-11-8">
+<ol class="org-ol">
+<li>Command mode: <code>F12 : source-file .tmux.conf</code>
+</li>
+<li>Command line command: <code>tmux source-file .tmux.conf</code>
+</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-sec-11-9" class="outline-3">
+<h3 id="sec-11-9"><span class="section-number-3">11.9</span> About configuration</h3>
+<div class="outline-text-3" id="text-11-9">
+<ol class="org-ol">
+<li><code>F12 : source-file .tmux.conf</code>
+</li>
+
+<li>"restart" tmux does not make new configure take effect?
+
+<p>
+You just "restarted" a session, not the tmux server.
+</p>
+</li>
+
+<li>What does <code>-g</code> in <code>set-option -g</code> mean?
+
+<p>
+Without <code>-g</code>, the option applies to current session only.
+</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-12" class="outline-2">
+<h2 id="sec-12"><span class="section-number-2">12</span> Advanced</h2>
+<div class="outline-text-2" id="text-12">
+</div><div id="outline-container-sec-12-1" class="outline-3">
+<h3 id="sec-12-1"><span class="section-number-3">12.1</span> Log screen outputs</h3>
+<div class="outline-text-3" id="text-12-1">
+<p>
+When you want screen log of current pane, save it with <code>F12 Ctrl-h</code>
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-conf-space"><span class="org-variable-name">bind-key</span> C-h command-prompt -p <span class="org-string">"save log to:"</span> <span class="org-string">"copy-mode; send-keys 'M-&gt;' C-e C-space 'M-&lt;' C-a C-w; save-buffer %%"</span>
+<span class="org-comment-delimiter"># </span><span class="org-comment"># if "set-window-option -g mode-keys vi", use this one:</span>
+<span class="org-comment-delimiter"># </span><span class="org-comment">bind-key C-h command-prompt -p "save log to:" "copy-mode; send-keys g 'space' G 'enter'; save-buffer %%"</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-12-2" class="outline-3">
+<h3 id="sec-12-2"><span class="section-number-3">12.2</span> Another way</h3>
+<div class="outline-text-3" id="text-12-2">
+<p>
+Though I do not recommend this one, here it is:
+</p>
+<ol class="org-ol">
+<li>Start logging :: <code>F12 h</code>
+</li>
+<li>Stop logging :: <code>F12 H</code>
+</li>
+</ol>
+
+<div class="org-src-container">
+
+<pre class="src src-conf-space"><span class="org-comment-delimiter"># </span><span class="org-comment">for mode-keys emacs</span>
+<span class="org-variable-name">bind-key</span> h pipe-pane <span class="org-string">"cat &gt;&gt;$HOME/#S-#I-#P.log"</span> \; display-message <span class="org-string">"Start logging($HOME/#S-#I-#P.log)"</span>
+<span class="org-variable-name">bind-key</span> H pipe-pane \; display-message <span class="org-string">"Stop logging(#S-#I-#P.log)"</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-12-3" class="outline-3">
+<h3 id="sec-12-3"><span class="section-number-3">12.3</span> Nesting tmux</h3>
+<div class="outline-text-3" id="text-12-3">
+<p>
+There are sometimes when need to nest tmux sessions. For example: Start a
+tmux session on local Linux box. Then, from within that tmux session, ssh to
+a server and run another tmux session.
+</p>
+
+<p>
+To send prefix to
+</p>
+<ol class="org-ol">
+<li>Outer tmux session :: <code>F12</code>
+</li>
+<li>Nested tmux session :: <code>F11</code>
+</li>
+<li>tmux session nested twice :: <code>F11 Ctrl-b</code>
+</li>
+<li>One more layer :: <code>F11 Ctrl-b Ctrl-b</code> (do you really want a nested
+nested nested &#x2026; session?)
+</li>
+</ol>
+
+<div class="org-src-container">
+
+<pre class="src src-conf-space"><span class="org-variable-name">bind-key</span> -n F11 send-prefix
+<span class="org-variable-name">bind-key</span> C-b send-prefix
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-12-4" class="outline-3">
+<h3 id="sec-12-4"><span class="section-number-3">12.4</span> Types of hot-keys</h3>
+<div class="outline-text-3" id="text-12-4">
+<ol class="org-ol">
+<li>Normal (follows the prefix) :: <code>bind-key Tab select-pane -t:.+</code>
+</li>
+<li>Repeatable :: <code>bind-key -r Space next-layout</code>
+</li>
+<li>Without prefix :: <code>bind-key -n F11 send-prefix</code>
+</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-sec-12-5" class="outline-3">
+<h3 id="sec-12-5"><span class="section-number-3">12.5</span> Maximize a pane temporary</h3>
+<div class="outline-text-3" id="text-12-5">
+<p>
+Use cases:
+</p>
+<ol class="org-ol">
+<li>Show more in the pane for a little while
+</li>
+<li>Maximize, copy (drag mouse) and restore
+</li>
+</ol>
+
+<p>
+For latest tmux (version 1.8), already has built-in support. <code>F12 z</code>
+to toggle.
+</p>
+
+<p>
+For older versions, <i>here</i> is a trick :
+</p>
+<div class="org-src-container">
+
+<pre class="src src-conf-space"><span class="org-variable-name">unbind</span> z
+<span class="org-variable-name">bind-key</span> z run <span class="org-string">"if [[ $(tmux list-window) =~ MAX ]]; then \</span>
+<span class="org-string">     tmux last-window;\</span>
+<span class="org-string">     tmux swap-pane -s MAX.0; \</span>
+<span class="org-string">     tmux kill-window -t MAX; \</span>
+<span class="org-string">     else tmux new-window -d -n MAX; \</span>
+<span class="org-string">     tmux swap-pane -s MAX.0; \</span>
+<span class="org-string">     tmux select-window -t MAX;fi"</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-12-6" class="outline-3">
+<h3 id="sec-12-6"><span class="section-number-3">12.6</span> Command line auto-complete</h3>
+<div class="outline-text-3" id="text-12-6">
+<div class="org-src-container">
+
+<pre class="src src-shell-script"><span class="org-keyword">if</span> [ -n <span class="org-string">"$BASH_VERSION"</span> -a -f $<span class="org-variable-name">HOME</span>/.local/bin/bash_completion_tmux.sh ]; <span class="org-keyword">then</span>
+    <span class="org-builtin">source</span> $<span class="org-variable-name">HOME</span>/.local/bin/bash_completion_tmux.sh
+<span class="org-keyword">fi</span>
+<span class="org-comment-delimiter"># </span><span class="org-comment">-n $BASH_VERSION ==&gt; we are in bash</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-13" class="outline-2">
+<h2 id="sec-13"><span class="section-number-2">13</span> Q&amp;A</h2>
+<div class="outline-text-2" id="text-13">
+<p>
+References
+</p>
+<ul class="org-ul">
+<li>The official site: <a href="http://tmux.sourceforge.net/">http://tmux.sourceforge.net/</a>
+</li>
+<li>More tips from me: <a href="./tmux.html">./tmux.html</a>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-14" class="outline-2">
+<h2 id="sec-14"><span class="section-number-2">14</span> Backup</h2>
+<div class="outline-text-2" id="text-14">
+</div><div id="outline-container-sec-14-1" class="outline-3">
+<h3 id="sec-14-1"><span class="section-number-3">14.1</span> Reference card according to my conf</h3>
+<div class="outline-text-3" id="text-14-1">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="left" />
+
+<col  class="left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="left">List Keys</td>
+<td class="left">F12 ?</td>
+</tr>
+
+<tr>
+<td class="left">Detach</td>
+<td class="left">F12 d</td>
+</tr>
+
+<tr>
+<td class="left">New window</td>
+<td class="left">F12 c</td>
+</tr>
+
+<tr>
+<td class="left">Split vertically</td>
+<td class="left">F12 _</td>
+</tr>
+
+<tr>
+<td class="left">Split horizontally</td>
+<td class="left">F12 &vert;</td>
+</tr>
+
+<tr>
+<td class="left">Change layout</td>
+<td class="left">F12 &lt;space&gt;</td>
+</tr>
+
+<tr>
+<td class="left">Kill pane</td>
+<td class="left">F12 x</td>
+</tr>
+
+<tr>
+<td class="left">Select window</td>
+<td class="left">F12 idx</td>
+</tr>
+
+<tr>
+<td class="left">Last window</td>
+<td class="left">F12 l</td>
+</tr>
+
+<tr>
+<td class="left">Rename window</td>
+<td class="left">F12 , new-name</td>
+</tr>
+
+<tr>
+<td class="left">Save log</td>
+<td class="left">F12 Ctrl-h</td>
+</tr>
+
+<tr>
+<td class="left">Select pane</td>
+<td class="left">F12 &lt;Tab&gt;/&lt;left&gt;/&lt;right&gt;/&lt;up&gt;/&lt;down&gt;</td>
+</tr>
+
+<tr>
+<td class="left">Break current pane</td>
+<td class="left">F12 !</td>
+</tr>
+
+<tr>
+<td class="left">Join a pane</td>
+<td class="left">F12 j x.y</td>
+</tr>
+
+<tr>
+<td class="left">Swap two panes</td>
+<td class="left">F12 {</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div id="outline-container-sec-14-2" class="outline-3">
+<h3 id="sec-14-2"><span class="section-number-3">14.2</span> Auto-login and hot-keys</h3>
+<div class="outline-text-3" id="text-14-2">
+<p>
+Some can not live without
+</p>
+<ol class="org-ol">
+<li>auto-login: the emulators remember hostip/username/password.
+</li>
+<li>auto-hotkey: a windows software enable you to define your own
+hotkeys.
+</li>
+</ol>
+
+<p>
+I wrote "to" in expect, which is IMHO more convenient.
+</p>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+
+     <br/>
+     <p>
+     <span class="date">Created: 2016-09-18 Sun 18:45</span> by <span class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</span>
+     </p>
+
+     <!-- DISQUS  -->
+     <div id="disqus_thread"></div>
+     <script type="text/javascript">
+         /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+         var disqus_shortname = 'lgfang'; // required: replace example with your forum shortname
+
+         /* * * DON'T EDIT BELOW THIS LINE * * */
+         (function() {
+             var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+             dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+             (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+         })();
+     </script>
+     <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+     <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+     <!-- google analytic -->
+     <script>
+       (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+       (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+       m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+       })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+       ga('create', 'UA-84711243-1', 'auto');
+       ga('send', 'pageview');
+
+     </script>
+</div>
+</div>
+</body>
+</html>

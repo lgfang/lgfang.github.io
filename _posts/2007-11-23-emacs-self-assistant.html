@@ -1,0 +1,94 @@
+---
+layout: post
+title: 自己寻找答案
+tagline: 使用 Emacs 联机帮助
+categories: computer
+tags: [emacs]
+---
+
+<p>
+向大家介绍一个简单技巧。掌握以后，很多 Emacs 问题自己就能搞定， 不用再求人了。这
+个技巧就是： 利用 Emacs 联机帮助系统的下面几个命令以及 Emacs 的命令自动补齐功能进
+行大胆的猜测就行了。
+</p>
+
+<pre class="example">
+C-h f
+C-h i
+C-h v
+C-h k
+</pre>
+
+<p>
+这个虽然很简单，但非常实用！
+</p>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">例一</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+今天有个朋友知道 Emacs 中怎么设 GDB 断点，但不知道怎么去断点。我也不知道，但是
+很轻易地就查到了。我是怎么查的呢？
+</p>
+
+<ul class="org-ul">
+<li>首先，肯定应该有一个函数对应于去断点的命令，所以应该能用 <code>C-h f</code> 来查看这个函数。
+</li>
+
+<li>其次，因为 Emacs 和 GDB 的接口（mode）名称是 GUD，所以按照 Emacs 命名传统这个
+命令很有可能以 gud 打头。
+</li>
+</ul>
+
+<p>
+因此，
+</p>
+<ol class="org-ol">
+<li>先输入 <code>C-h f gud</code>
+</li>
+
+<li>然后按 &lt;tab&gt; 键，出来一个很长的补齐列表。
+</li>
+
+<li>太长了，我懒得在其中一个个地查找；尝试缩小范围。表示删除的英文单词有
+remove, delete, erase，先试试 remove。于是输入 re 再按 &lt;tab&gt;。
+</li>
+
+<li>这时补齐列表候选项就只剩四个了： <code>gud-read-address</code> <code>gud-refresh</code>
+<code>gud-remove</code> <code>gud-reset</code> 。一眼锁定 <code>gud-remove</code> ，估计就是它了。选中它并回
+车，查看 <code>gud-remove</code> 的帮助。果然就是它。
+</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2">例二</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+再举个栗子：一段代码的格式乱了，想要一键自动对齐。我能想到的相关单词有：align、
+indent和format。于是先 <code>M-x align</code> 然后 &lt;tab&gt;，没发现可疑的命令。再试 <code>M-x
+  indent</code> + &lt;tab&gt;，发现 <code>indent-region</code> 极有可能是想要的。选中它并执行，Emacs 果
+然把代码对齐了，而且还告知我们对应的快捷键
+</p>
+<pre class="example">
+You can run the command `indent-region' with C-M-\
+</pre>
+</div>
+</div>
+
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3">另外一种办法：利用菜单栏 （CLI 下也可以）</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+设置、删除断点这样常用的功能很可能在 GUD 菜单栏里有；而一般只要菜单里有的都会标
+明相应的快捷键。所以另外一种办法就是直接到菜单栏里找。
+</p>
+
+<p>
+这一招对命令行模式启动(<code>emacs -nw</code>)的 Emacs 同样有效。因为在命令行下也可以用快
+捷键调用菜单（menu）的： <code>M-`</code> （其中 <code>`</code> 是&lt;ESC&gt;下面的那个键）。然后根据提示一
+步步输入字母选择菜单即可。
+</p>
+</div>
+</div>

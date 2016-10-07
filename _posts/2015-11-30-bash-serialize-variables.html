@@ -1,0 +1,81 @@
+---
+layout: post
+title: Serialize BASH Environment Variables
+tagline:
+categories: computer
+tags: [bash, shell, coding]
+---
+
+<p>
+Although shell is usually not regarded as a language for "serious" programming,
+there is still needs for saving/loading environment variables between sessions.
+This is not only feasible but also easier than one might think. The idea is, you
+write variables into a file in a "source-able" format and then source that file
+later to load the variables.
+</p>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">The "var=value" way</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+The most straightforward way might be to just write <code>var_name=var_value</code> into
+a file, say "./environ". And then <code>source ./envrion</code> to load it in following
+sessions. For example:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-shell-script"><span class="org-comment-delimiter"># </span><span class="org-comment">To save:</span>
+<span class="org-builtin">echo</span> <span class="org-string">"var='$var'"</span> &gt; ./environ
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">To load</span>
+<span class="org-builtin">source</span> ./environ
+</pre>
+</div>
+
+<p>
+Note that the single quotes around <code>$var</code> are crucial to keep this mechanism
+work in cases when value of <code>var</code> contains white space.
+</p>
+
+<p>
+The biggest problem of this measure, however, is that it does not preserve all
+attributes and hence can only deal with simple variables. For example, it does
+not save "readonly" flags.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2">The "declare -p" way (BASH only) measure</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+In deed, BASH provides <code>declare -p</code>, which makes the serialization of
+environment variables a breeze. It prints variables in a source-able format,
+preserving their attributes. Hence, be they readonly-s, arrays, integers, you just:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-shell-script"><span class="org-builtin">declare</span> -p var1 var2 &gt; ./environ <span class="org-comment-delimiter"># </span><span class="org-comment">NOTE: no '$' before var1, var2</span>
+</pre>
+</div>
+
+<p>
+One caveat for the "declare -p xx", though: if you wrap the <code>source ./environ</code>
+into a function, then all sourced variables are visible within the function
+only because <code>declare</code> by default declares variables as local ones. To
+circumvent this, you may either <code>source</code> out of any function (or in your
+<code>main</code> function) or add <code>-g</code> (which makes corresponding variable global) to
+each line of <code>./environ</code> after exporting. For instance:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-shell-script"><span class="org-builtin">declare</span> -p var1 var2
+sed -i <span class="org-string">'s/^declare\( -g\)*/declare -g/'</span> ./environ
+<span class="org-comment-delimiter"># </span><span class="org-comment">"\( -g\)?" ensure no duplication of "-g"</span>
+</pre>
+</div>
+</div>
+</div>

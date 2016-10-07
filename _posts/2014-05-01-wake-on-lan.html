@@ -1,0 +1,150 @@
+---
+layout: post
+title: Power On Server Remotely (远程开机)
+tagline: Setting up Wake on LAN/WAN
+categories: computer
+tags: [network, linux tools]
+---
+
+<p>
+I have a linux box behind a router in my flat. Usually, it is powered off when I
+am in office. Now and then, however, I would like to power it on and
+download/upload some materials from/to it. This can be achieved by WOL (and DDNS
+if you don't have a fixed IP).
+</p>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">Wake on Lan</h2>
+<div class="outline-text-2" id="text-1">
+<ol class="org-ol">
+<li>On host, ensure BIOS enabled Wake On Lan (WOL).
+
+<p>
+Take Dell Optplex 360 as an example, set it in: BIOS -&gt; Power Management -&gt;
+Remote Wakeup.
+</p>
+</li>
+
+<li>On host, ensure NIC enabled WOL.
+<ul class="org-ul">
+<li>To check
+<pre class="example">
+$ sudo ethtool eth0 | grep Wake
+        Supports Wake-on: g
+        Wake-on: g
+</pre>
+</li>
+
+<li>To enable
+<div class="org-src-container">
+
+<pre class="src src-shell-script">sudo ethtool -s eth0 wol g
+</pre>
+</div>
+<p>
+Where "wol g" -&gt; Wake on MagicPacket.
+</p>
+
+<p>
+If your NIC card supports SecureOn password for MagicPacket ("Supports
+Wake-on:" includes "s"), you can set a password for wol:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-shell-script">sudo ethtool -s eth0 wol s sopass 11:22:33:aa:bb:cc
+</pre>
+</div>
+</li>
+</ul>
+</li>
+
+<li>On client, run <code>wol</code> or whatever tool to send wake-up packets. E.g.
+<div class="org-src-container">
+
+<pre class="src src-shell-script">wol 00:23:ae:98:83:91
+wol --passwd=11-22-33-aa-bb-cc 00:23:ae:98:83:91
+</pre>
+</div>
+</li>
+</ol>
+
+<p>
+NOTE: Eventhough WOL itself is independent of operating systems, it may be
+still inmpacted by OS since OS may put NIC into incorrect state.
+</p>
+<ol class="org-ol">
+<li>Some operating systems will turn off WOL after reboot.
+</li>
+<li>Some operating systems do not "gracefully" shutdown NIC. (In this case, try
+unplugging power cord to reset the NIC.)
+</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2">Wake on Wan</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+This is basically the same as WOL except that WOL magic packets have to
+<b>traverse the WAN</b>, which is solved by DDNS.
+</p>
+
+<ol class="org-ol">
+<li>On host, ensure <i>wake-on-lan</i> configured and works.
+</li>
+
+<li>On router, setup up DDNS <b>if the router has no static public IP</b>.
+</li>
+
+<li>On router, statically allocate an IP to the designated host.
+</li>
+
+<li>On router, create a static ARP entry to the host.
+
+<p>
+This way, even the host isn't on, router still able to send forward packets
+to it.
+</p>
+</li>
+
+<li>On router, create a port forwarding rule (虚拟服务器映射) to map UDP port 9
+to the host.
+
+<p>
+The default UDP port number for WOL is 9, but it doesn't matter at all to
+NIC. That is so long as the packet arrives at the NIC, the NIC will boot
+the host.
+</p>
+
+<p>
+Therefore, the port number needn't be 9. You can reuse any another already
+mapped UDP port so long as it can get WOL magic packets to the host.
+</p>
+</li>
+
+<li>To wake the host
+
+<ul class="org-ul">
+<li>On a command line
+
+<div class="org-src-container">
+
+<pre class="src src-shell-script"><span class="org-comment-delimiter"># </span><span class="org-comment">Linux version of "wol", explicitly specify the port as wol send to UDP port</span>
+<span class="org-comment-delimiter"># </span><span class="org-comment">40000 by default</span>
+wol 00:23:ae:98:83:91 -i your.domain.name -p 9
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">for OS-X, the equivalent command is</span>
+wakeonlan -i your.domain.name 00:23:ae:98:83:91
+</pre>
+</div>
+</li>
+
+<li>Or use web: <a href="http://wakeonlan.me">http://wakeonlan.me</a>, note that this web send packets to UDP port
+9 by default.
+</li>
+</ul>
+</li>
+</ol>
+</div>
+</div>

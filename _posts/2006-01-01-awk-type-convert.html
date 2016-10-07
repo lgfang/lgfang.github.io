@@ -1,0 +1,118 @@
+---
+layout: post
+title: awk里的类型与字符串连接
+tagline: by woodie
+categories: computer
+tags: [awk, shell, coding]
+---
+
+<p>
+本文为woodie在帖子 <a href="http://bbs.chinaunix.net/viewthread.php?tid=289001&pid=5840940&page=2&extra=#pid5840940">awk里面为什么自动加了0</a> 里的发言
+</p>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">背景</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+网友onlyabug预期下面的代码输出结果为"1.2.3.4",但实际结果却是"1.20.30.4"，
+于是提出问题。
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-shell-script"><span class="org-builtin">echo</span> | awk <span class="org-string">'{var=1.2.3.4;print var}'</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2">woodie的回答</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+我们知道，首先，与c/c++，java等相比，awk是一种弱类型语言。你不需要提前声明就可
+以使用变量，变量的类型转换也是隐含的，在某一语境(上下文)下它可能用作数字，在另
+一语境下它可能就用作字符串。
+</p>
+
+<p>
+另外一个需要小心的地方就是awk的字符串连结操作，这个操作没有任何操作符，只要把
+需要连结的串并列写在一起就可以了。
+</p>
+
+<pre class="example">
+$ echo | awk '{a=1.234;var=a" is a number";print var}'
+1.234 is a number
+</pre>
+
+<p>
+这里a首先被转换为字符串，然后与" is number"连接，赋给var。
+</p>
+
+<pre class="example">
+$ echo | awk '{a="1.234kilo";var=a+1;print var}'
+2.234
+</pre>
+
+<p>
+数值语境，a先转换成1.234，然后参与计算。
+</p>
+
+<p>
+这样下面的结果就容易理解了：
+</p>
+<pre class="example">
+$ echo | awk '{var=1.2.3.4;print var}'
+1.20.30.4
+</pre>
+
+<p>
+由于没有引号，这里的语境首先是数字语境，awk先依次取得三个数字："1.2", ".3", 和
+".4"，但是三个数字之间没有任何操作符地并列在一起，awk就认为要进行字符串连接，
+三个数字被转换为字符串后连接了起来，即："1.2" "0.3" "0.4" ==&gt; 1.20.30.4。
+</p>
+
+<p>
+再举几个例子:
+</p>
+
+<pre class="example">
+$  echo |awk '{var=1 2 3 4;print var}'  #equivlent to: "1" "2" "3" "4"
+1234
+
+$  echo |awk '{var=1 2 a 3 4;print var}'  #equivlent to: "1" "2" "" "3" "4"
+1234
+
+$ echo |awk '{a="abc";var=1 2 a 3 4;print var}'  #equivlent to: "1" "2" "abc" "3" "4"
+12abc34
+
+$ echo |awk '{a=2.5;var=1 2 a 3 4;print var}'  #equivlent to: "1" "2" "2.5" "3" "4"
+122.534
+
+$ echo|awk '{var=1 2 3 4 &lt; 2 0 0 4;print var}'  #equivlent to: 1234 &lt; 2004 , that is true
+1
+</pre>
+
+<p>
+另外请注意下面print语句输出时两种不同写法的区别：
+</p>
+
+<pre class="example">
+$ echo "1 2" | awk '{print $1 $2;print $1,$2}'
+12
+1 2
+</pre>
+
+<ul class="org-ul">
+<li>print $1 $2 ==&gt; $1与$2连接后整体输出，
+</li>
+<li>print $1,$2 ==&gt; $1与$2依次输出。
+</li>
+</ul>
+
+<p>
+总之awk的数字和字符串类型转换相当灵活方便，字符串连接尤其容易迷惑人(confusing)，
+但是我们心里必须清楚我们要做什么，别把自己搞糊涂了！
+</p>
+</div>
+</div>

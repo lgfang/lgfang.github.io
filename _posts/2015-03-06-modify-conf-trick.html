@@ -1,0 +1,112 @@
+---
+layout: post
+title: A Trick to Modify Configure Files
+categories: computer
+tags: [bash, shell, coding]
+---
+
+<p>
+Sometimes, we need to update configure files using a shell script (or whatever).
+Simple it might seem, there some triky things:
+</p>
+
+<ol class="org-ol">
+<li>We need to make sure that running the script multiple times is OK. For
+exmple, the script should not append a line to a configure file again and
+again.
+</li>
+
+<li>We need to ensure we can remove <b>our changes</b> from a configure file later.
+This cannot always achieved by saving a copy of the original configure file
+since other applications may also update the configure file and we must not
+overwrite those modifications when we do "restore".
+</li>
+</ol>
+
+<p>
+My solution is basically to "mark" our changes in place so that we can easily
+spot and undo the changes later on.
+</p>
+
+<p>
+Supppose I have a file with the following content:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-conf-space"><span class="org-variable-name">orginal</span> line 1
+<span class="org-variable-name">...</span>
+<span class="org-variable-name">orginal</span> line m
+<span class="org-variable-name">...</span>
+<span class="org-variable-name">orginal</span> line n
+</pre>
+</div>
+
+<p>
+Now, after deleting line m and adding some new lines with my Technique, this
+file will be some like this (Note that I am supposign '#' starts a comment.):
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-conf-space"><span class="org-variable-name">orginal</span> line 1
+<span class="org-variable-name">...</span>
+<span class="org-comment-delimiter">#</span><span class="org-comment">DEL_LGFANG orginal line m</span>
+<span class="org-variable-name">...</span>
+<span class="org-variable-name">orginal</span> line n
+<span class="org-comment-delimiter">#</span><span class="org-comment">BEGIN_LGFANG</span>
+<span class="org-variable-name">New</span> lines are in between
+<span class="org-variable-name">Other</span> applications shall never modify this block
+<span class="org-comment-delimiter">#</span><span class="org-comment">END_LGFANG</span>
+</pre>
+</div>
+
+<p>
+To restore the file, all that we need to do are:
+</p>
+<ol class="org-ol">
+<li>Delete line between <code>#BEGIN_LGFANG</code> and <code>#END_LGFANG</code>.
+</li>
+<li>Remove any leading <code>#DEL_LGFANG</code>
+</li>
+</ol>
+
+<p>
+Below are bash functions which facilitate the work as well as examples of usage.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-shell-script"><span class="org-keyword">function</span> <span class="org-function-name">add</span> {
+    <span class="org-builtin">local</span> <span class="org-variable-name">filename</span>=$<span class="org-variable-name">1</span>
+    <span class="org-builtin">local</span> <span class="org-variable-name">lines</span>=$<span class="org-variable-name">2</span>
+    cat &gt;&gt; $<span class="org-variable-name">filename</span> &lt;&lt;EOF
+<span class="org-sh-heredoc">#BEGIN_LGFANG</span>
+<span class="org-sh-heredoc">$lines</span>
+<span class="org-sh-heredoc">#END_LGFANG</span>
+<span class="org-sh-heredoc">EOF</span>
+}
+
+<span class="org-keyword">function</span> <span class="org-function-name">del</span> {
+    <span class="org-builtin">local</span> <span class="org-variable-name">filename</span>=$<span class="org-variable-name">1</span>
+    <span class="org-builtin">local</span> <span class="org-variable-name">target_line</span>=$<span class="org-variable-name">2</span>
+    sed -i <span class="org-string">"/${target_line}/s/\(#DEL_LGFANG \)*\(.*\)$/#DEL_LGFANG \2/"</span> $<span class="org-variable-name">filename</span>
+}
+
+<span class="org-keyword">function</span> <span class="org-function-name">restore</span> {
+    <span class="org-comment-delimiter"># </span><span class="org-comment">1. delete added</span>
+    <span class="org-comment-delimiter"># </span><span class="org-comment">2. restore deleted (uncomment commented)</span>
+
+    <span class="org-builtin">local</span> <span class="org-variable-name">filename</span>=$<span class="org-variable-name">1</span>
+    sed -i -e <span class="org-string">'/BEGIN_LGFANG/,/END_LGFANG/d'</span> <span class="org-sh-escaped-newline">\</span>
+        -e <span class="org-string">'s/^.*DEL_LGFANG *//'</span> $<span class="org-variable-name">filename</span>
+}
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">Examples</span>
+<span class="org-variable-name">lines</span>=<span class="org-string">'line1</span>
+<span class="org-string">line2'</span>
+
+add test.conf <span class="org-string">"$lines"</span>
+del test.conf todel
+restore test.conf
+</pre>
+</div>

@@ -1,0 +1,43 @@
+---
+layout: post
+title: About Network Time
+tagline:
+categories: computer
+tags: [linux tools, shell, network]
+---
+
+<p>
+Those who work on Linux must already know about NTP (Network Time Protocol) more
+or less. Here are several things I'd like to highlight.
+</p>
+
+<ul class="org-ul">
+<li>ntpd adjust time <b>gradually</b> and almost not observable.
+
+<p>
+Basically you can think of it as ntpd does not change time all at once but
+instead makes every second longer/shorter a little bit. This way, after a
+rather long period, the time will be synced eventually. The reason for
+adopting this methodology is that, in production environment, it is not
+acceptable to adjust time one second (or more) at a time. This is especially
+true for tuning time backward.
+</p>
+</li>
+
+<li>When the time difference is big enough (say 10 seconds, refer to ntp configure
+file for actual value), ntpd will not sync time. In this case, to force ntpd
+update local time according to NTP server regardless the time gap, use <code>ntpd
+  -gq</code>.
+
+<div class="org-src-container">
+
+<pre class="src src-shell-script">service ntp stop
+ntpd -gq
+service ntp start
+</pre>
+</div>
+</li>
+
+<li><code>ntpdate</code> is deprecated, use <code>ntpd</code> instead
+</li>
+</ul>

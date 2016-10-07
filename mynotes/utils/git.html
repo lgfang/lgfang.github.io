@@ -1,0 +1,1130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>Notes and Tips for Git</title>
+<!-- 2016-01-26 Tue 21:19 -->
+<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta  name="generator" content="Org-mode" />
+<meta  name="author" content="Fang Lungang" />
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div class="container-narrow">
+<div id="content">
+<h1 class="title">Notes and Tips for Git</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1. Very helpful documents</a></li>
+<li><a href="#sec-2">2. Configuring git</a>
+<ul>
+<li><a href="#sec-2-1">2.1. Global configure</a></li>
+<li><a href="#sec-2-2">2.2. Repository-wise configuration</a></li>
+<li><a href="#sec-2-3">2.3. Command alias</a></li>
+<li><a href="#sec-2-4">2.4. Remember remote username and password</a></li>
+<li><a href="#sec-2-5">2.5. Ignore files</a></li>
+<li><a href="#sec-2-6">2.6. Git after proxy</a></li>
+</ul>
+</li>
+<li><a href="#sec-3">3. Clone &amp; sync</a>
+<ul>
+<li><a href="#sec-3-1">3.1. About "pull"</a></li>
+<li><a href="#sec-3-2">3.2. Push all branches, tags</a></li>
+<li><a href="#sec-3-3">3.3. Set up a "centralized" git repository</a></li>
+<li><a href="#sec-3-4">3.4. Work with a peer server on which git is privately installed</a></li>
+<li><a href="#sec-3-5">3.5. Clone part of the history</a></li>
+<li><a href="#sec-3-6">3.6. Clone a single branch only</a></li>
+<li><a href="#sec-3-7">3.7. Archive current branch</a></li>
+</ul>
+</li>
+<li><a href="#sec-4">4. Referring certain commit</a></li>
+<li><a href="#sec-5">5. Branch</a>
+<ul>
+<li><a href="#sec-5-1">5.1. Delete</a></li>
+<li><a href="#sec-5-2">5.2. Rename</a></li>
+<li><a href="#sec-5-3">5.3. Branch topology</a></li>
+<li><a href="#sec-5-4">5.4. Switch to another branch without commit current one</a></li>
+</ul>
+</li>
+<li><a href="#sec-6">6. Commit</a>
+<ul>
+<li><a href="#sec-6-1">6.1. To commit changes</a></li>
+<li><a href="#sec-6-2">6.2. Discard local changes</a></li>
+<li><a href="#sec-6-3">6.3. Rollback latest commits</a></li>
+<li><a href="#sec-6-4">6.4. Revert a commit</a></li>
+<li><a href="#sec-6-5">6.5. Stage your changes</a></li>
+<li><a href="#sec-6-6">6.6. Conflict</a></li>
+<li><a href="#sec-6-7">6.7. Stage (and commit) only part of a change</a></li>
+<li><a href="#sec-6-8">6.8. Keep commit history clean</a>
+<ul>
+<li><a href="#sec-6-8-1">6.8.1. Edit commit history</a></li>
+<li><a href="#sec-6-8-2">6.8.2. Rebase and squash</a></li>
+<li><a href="#sec-6-8-3">6.8.3. Merge and squash</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#sec-7">7. History</a>
+<ul>
+<li><a href="#sec-7-1">7.1. Show log selectively</a></li>
+<li><a href="#sec-7-2">7.2. Show summary of changes made</a></li>
+<li><a href="#sec-7-3">7.3. Show detailed changes made by certain commits</a></li>
+<li><a href="#sec-7-4">7.4. View files without checkout</a></li>
+<li><a href="#sec-7-5">7.5. Show differences between two commits</a></li>
+<li><a href="#sec-7-6">7.6. Show what revision and author last modified each line of a file</a></li>
+</ul>
+</li>
+<li><a href="#sec-8">8. Clean up disk space</a></li>
+<li><a href="#sec-9">9. Github</a></li>
+<li><a href="#sec-10">10. Store and distribute configure files using git</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> Very helpful documents</h2>
+<div class="outline-text-2" id="text-1">
+<ul class="org-ul">
+<li>The official document is very well written and an invaluable source.
+<ul class="org-ul">
+<li><a href="http://git-scm.com/book/en/v2">Pro Git</a>
+</li>
+</ul>
+</li>
+
+<li>Especially, understanding the work flows really helps.
+<ul class="org-ul">
+<li><a href="http://git-scm.com/book/en/Git-Branching-Branching-Workflows">Branching workflows</a>
+</li>
+<li><a href="http://git-scm.com/book/en/Distributed-Git-Distributed-Workflows">Distributed workflows</a>
+</li>
+</ul>
+</li>
+
+<li>A very good blog which explains how to use git
+<ul class="org-ul">
+<li><a href="https://sandofsky.com/blog/git-workflow.html">Understanding the Git Workflow</a>
+</li>
+</ul>
+</li>
+
+<li>Branching model
+<ul class="org-ul">
+<li><a href="http://nvie.com/posts/a-successful-git-branching-model/">A successful Git branching model</a>
+</li>
+<li><a href="http://scottchacon.com/2011/08/31/github-flow.html">github flow</a>
+</li>
+</ul>
+</li>
+
+<li>An article illustrates how two-stage commit and reset work.
+<ul class="org-ul">
+<li><a href="http://git-scm.com/blog/2011/07/11/reset.html">Reset Demystified</a>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> Configuring git</h2>
+<div class="outline-text-2" id="text-2">
+</div><div id="outline-container-sec-2-1" class="outline-3">
+<h3 id="sec-2-1"><span class="section-number-3">2.1</span> Global configure</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+<code>$HOME/.gitconfig</code> <a href="https://github.com/lgfang/dotfiles/blob/master/.gitconfig">my global .gitconfig</a>
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-2-2" class="outline-3">
+<h3 id="sec-2-2"><span class="section-number-3">2.2</span> Repository-wise configuration</h3>
+<div class="outline-text-3" id="text-2-2">
+<ul class="org-ul">
+<li>Run <code>git config</code> WITHOUT <code>--global</code>, or
+</li>
+
+<li>Edit <code>path/to/git_repo/.git/config</code> instead of <code>$HOME/.gitconfig</code>.
+</li>
+
+<li>You may want to set the global ones to the most conservative values (or
+leave them empty), for example:
+
+<div class="org-src-container">
+
+<pre class="src src-shell-script"><span class="org-comment-delimiter"># </span><span class="org-comment">global/default</span>
+git config --global user.name <span class="org-string">"lgfang"</span>
+git config --global user.email <span class="org-string">"no-spam@lungang.cn"</span>
+<span class="org-comment-delimiter"># </span><span class="org-comment">project specific/private</span>
+git config user.name <span class="org-string">"myhandle"</span>
+git config user.email <span class="org-string">"mymail@mycompany.com"</span>
+</pre>
+</div>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-2-3" class="outline-3">
+<h3 id="sec-2-3"><span class="section-number-3">2.3</span> Command alias</h3>
+<div class="outline-text-3" id="text-2-3">
+<p>
+In <code>$HOME/.gitcofig</code>, add lines in the "alias" section. For example:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-conf-unix">[<span class="org-type">alias</span>]
+    <span class="org-variable-name">topo</span> = log --graph --pretty=format:<span class="org-string">"%d"</span> --simplify-by-decoration --all
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2-4" class="outline-3">
+<h3 id="sec-2-4"><span class="section-number-3">2.4</span> Remember remote username and password</h3>
+<div class="outline-text-3" id="text-2-4">
+<p>
+For example:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-shell-script">git remote set-url origin https://username@github.com/...
+git config --global credential.helper <span class="org-string">"cache --timeout=3600"</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2-5" class="outline-3">
+<h3 id="sec-2-5"><span class="section-number-3">2.5</span> Ignore files</h3>
+<div class="outline-text-3" id="text-2-5">
+<p>
+Put file name globs (one per line) into <code>path/to/git_repo/.gitignore</code>, for
+instance:
+</p>
+<pre class="example">
+*~
+*.pyc
+</pre>
+
+<p>
+<a href="https://github.com/lgfang/dotfiles/blob/master/.gitignore">my global .gitignore</a>
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-2-6" class="outline-3">
+<h3 id="sec-2-6"><span class="section-number-3">2.6</span> Git after proxy</h3>
+<div class="outline-text-3" id="text-2-6">
+<p>
+To push/fetch a project after a proxy server.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-shell-script"><span class="org-comment-delimiter"># </span><span class="org-comment">Examples of setting proxy</span>
+git config http.proxy http://proxyuser:proxypwd@proxy.server.com:8080
+git config http.proxy localhost:8888
+<span class="org-comment-delimiter"># </span><span class="org-comment">To clear</span>
+git config http.proxy <span class="org-string">""</span>
+</pre>
+</div>
+
+<p>
+I defined two aliases ("hp" and "nohp") for the commands, refer to my
+configure file.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> Clone &amp; sync</h2>
+<div class="outline-text-2" id="text-3">
+</div><div id="outline-container-sec-3-1" class="outline-3">
+<h3 id="sec-3-1"><span class="section-number-3">3.1</span> About "pull"</h3>
+<div class="outline-text-3" id="text-3-1">
+<ul class="org-ul">
+<li>"pull" is basically a combination of "fetch" and "merge". It will download
+all, but only merge current branch.
+</li>
+
+<li>"pull" is NOT recommended, use "fetch" + "rebase" (or the equivalent
+command <code>pull --rebase</code>) instead.
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-3-2" class="outline-3">
+<h3 id="sec-3-2"><span class="section-number-3">3.2</span> Push all branches, tags</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+All branches, tags are <b>NOT</b> pushed by default.
+</p>
+
+<ul class="org-ul">
+<li>For tags
+<div class="org-src-container">
+
+<pre class="src src-shell-script"><span class="org-comment-delimiter"># </span><span class="org-comment">push tag "mytag"</span>
+git push origin mytag
+<span class="org-comment-delimiter"># </span><span class="org-comment">push all tags</span>
+git push --tags
+</pre>
+</div>
+</li>
+
+<li>For branches
+
+<ol class="org-ol">
+<li>"fetch" always retrieve all stuff (both branches and tags) from remote.
+</li>
+
+<li>All "tracking branches" are pushed by default.
+</li>
+
+<li>"fetched" branches are all tracking branches.
+</li>
+
+<li>Locally created branches become tracked ones (and are pushed) by the
+following commands.
+
+<div class="org-src-container">
+
+<pre class="src src-shell-script">git push -u origin branch_name
+<span class="org-comment-delimiter"># </span><span class="org-comment">Or</span>
+git push -u origin --all
+</pre>
+</div>
+</li>
+</ol>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-3-3" class="outline-3">
+<h3 id="sec-3-3"><span class="section-number-3">3.3</span> Set up a "centralized" git repository</h3>
+<div class="outline-text-3" id="text-3-3">
+<p>
+<a href="http://git-scm.com/book/en/Git-on-the-Server-Getting-Git-on-a-Server">http://git-scm.com/book/en/Git-on-the-Server-Getting-Git-on-a-Server</a>
+</p>
+
+<p>
+If a handful of people are working on the same project, chances are that you
+want a git repository on a server which everyone can pull and push.
+</p>
+
+<p>
+The major characteristic of this kind of respositorise is they contain no
+working directory.
+</p>
+
+<p>
+To set up this, just setup a "normal" repository and then clone it with
+'bare'.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-shell-script"><span class="org-builtin">cd</span> ~/tmp/autoit &amp;&amp; git init &amp;&amp; <span class="org-builtin">cd</span> ~/.repo git clone --bare ~/tmp/autoit auto.git
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">later on, others can on the same machine</span>
+git clone file:///lgfang/.repo/auto.git
+<span class="org-comment-delimiter"># </span><span class="org-comment">or, on other machines with ssh to the_host</span>
+git clone login@the_host:///lgfang/.repo/auto.git
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3-4" class="outline-3">
+<h3 id="sec-3-4"><span class="section-number-3">3.4</span> Work with a peer server on which git is privately installed</h3>
+<div class="outline-text-3" id="text-3-4">
+<p>
+It complains "bash: git-upload-pack: command not found" because <a href="ssh.html">There
+is less "env" when running commands remotely using ssh non-interactive
+session.</a>
+</p>
+
+<p>
+Solution given in above link as well.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-3-5" class="outline-3">
+<h3 id="sec-3-5"><span class="section-number-3">3.5</span> Clone part of the history</h3>
+<div class="outline-text-3" id="text-3-5">
+<p>
+Sometimes, we don't care the past of a project. Since each commit creates new
+copies of corresponding files, we want to clone only commits we want so that
+we not only get a cleaner history but also save a little bit disk space. This
+is achieved by <code>--depath N</code>.
+</p>
+<pre class="example">
+git clone --depth 1 &lt;remote repository&gt;
+</pre>
+</div>
+</div>
+
+<div id="outline-container-sec-3-6" class="outline-3">
+<h3 id="sec-3-6"><span class="section-number-3">3.6</span> Clone a single branch only</h3>
+<div class="outline-text-3" id="text-3-6">
+<pre class="example">
+git clone -b branch_name --single-branch &lt;remote repo&gt; &lt;local dir&gt;
+</pre>
+</div>
+</div>
+
+<div id="outline-container-sec-3-7" class="outline-3">
+<h3 id="sec-3-7"><span class="section-number-3">3.7</span> Archive current branch</h3>
+<div class="outline-text-3" id="text-3-7">
+<pre class="example">
+git archive -o archive.zip HEAD
+</pre>
+
+<p>
+This one makes a zip file content of which does not contain ".git" directory.
+Another way is to clone a single branch without history. I.e.
+</p>
+<pre class="example">
+git clone -b branch-name --single-branch --depth 1 &lt;remote repo&gt; &lt;local dir&gt;
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> Referring certain commit</h2>
+<div class="outline-text-2" id="text-4">
+<ol class="org-ol">
+<li>Use the hash code, e.g.
+
+<div class="org-src-container">
+
+<pre class="src src-shell-script">git checkout 31cbd89
+</pre>
+</div>
+
+<p>
+<b>NOTE:</b> you need not enter the full hash string, just enough number of
+leading characters to unambiguously locate the version.
+</p>
+</li>
+
+<li>Use relative position
+
+<div class="org-src-container">
+
+<pre class="src src-shell-script">git checkout HEAD~3
+</pre>
+</div>
+
+<p>
+Above command checkout the snapshot 3 commits ahead of current HEAD.
+</p>
+</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-sec-5" class="outline-2">
+<h2 id="sec-5"><span class="section-number-2">5</span> Branch</h2>
+<div class="outline-text-2" id="text-5">
+</div><div id="outline-container-sec-5-1" class="outline-3">
+<h3 id="sec-5-1"><span class="section-number-3">5.1</span> Delete</h3>
+<div class="outline-text-3" id="text-5-1">
+<p>
+Example:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-shell-script">git branch -d foo
+git push origin --delete foo
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-5-2" class="outline-3">
+<h3 id="sec-5-2"><span class="section-number-3">5.2</span> Rename</h3>
+<div class="outline-text-3" id="text-5-2">
+<p>
+Example:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-shell-script">git branch -m foo bar
+</pre>
+</div>
+
+<p>
+To rename current branch, simply:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-shell-script">git branch -m bar
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-5-3" class="outline-3">
+<h3 id="sec-5-3"><span class="section-number-3">5.3</span> Branch topology</h3>
+<div class="outline-text-3" id="text-5-3">
+<p>
+You may want to create an alias for it.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-shell-script">git log --graph --pretty=format:<span class="org-string">"%d:%h"</span> --simplify-by-decoration --all
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-5-4" class="outline-3">
+<h3 id="sec-5-4"><span class="section-number-3">5.4</span> Switch to another branch without commit current one</h3>
+<div class="outline-text-3" id="text-5-4">
+<p>
+In short, use <code>git stash</code>.
+</p>
+
+<ol class="org-ol">
+<li><code>git stash</code>
+</li>
+<li><code>git co another_branch</code>
+</li>
+<li>do some work there
+</li>
+<li><code>git co master</code>
+</li>
+<li><code>git stash pop</code>
+</li>
+</ol>
+
+<p>
+Or, as a more complex scenario, if both branches use stash, specify
+stash explicitly.
+</p>
+<pre class="example">
+git stash list
+git stash pop stash@{1}
+</pre>
+
+<p>
+Note that, stashing increases size of ".git" as well until a garbage
+collection run (either automatically or manually).
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-6" class="outline-2">
+<h2 id="sec-6"><span class="section-number-2">6</span> Commit</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+NOTE: If the commits already pushed to other repositories, you have to run
+"push" with <code>-f</code>, which is risky. Hence, be really cautious and double check
+before "push".
+</p>
+</div>
+
+<div id="outline-container-sec-6-1" class="outline-3">
+<h3 id="sec-6-1"><span class="section-number-3">6.1</span> To commit changes</h3>
+<div class="outline-text-3" id="text-6-1">
+<ul class="org-ul">
+<li>"add" and "commit"
+
+<div class="org-src-container">
+
+<pre class="src src-shell-script">git add file1 file2
+git add file3
+git commit
+</pre>
+</div>
+</li>
+
+<li>Changes made after <code>git add</code> are NOT committed
+
+<p>
+Hence you usually "add" right before "commit".
+</p>
+</li>
+
+<li>Commit without "add"
+
+<p>
+In fact, For files already being tracked, you can do "add" and "commit" in
+one step. Just run the following command.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-shell-script">git commit file1 file2 ...
+<span class="org-comment-delimiter"># </span><span class="org-comment">Or, use the brave "commit -a"</span>
+</pre>
+</div>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-6-2" class="outline-3">
+<h3 id="sec-6-2"><span class="section-number-3">6.2</span> Discard local changes</h3>
+<div class="outline-text-3" id="text-6-2">
+<p>
+Simply checkout the file again, i.e.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-shell-script">git checkout -- file_name
+</pre>
+</div>
+
+<p>
+If you already run "git add", then you have to "reset" first.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-shell-script">git reset file_name
+<span class="org-comment-delimiter"># </span><span class="org-comment">Or just "git reset"</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-6-3" class="outline-3">
+<h3 id="sec-6-3"><span class="section-number-3">6.3</span> Rollback latest commits</h3>
+<div class="outline-text-3" id="text-6-3">
+<p>
+I.e. delete/undo the latest commits.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-shell-script">git reset --hard HEAD~1
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-6-4" class="outline-3">
+<h3 id="sec-6-4"><span class="section-number-3">6.4</span> Revert a commit</h3>
+<div class="outline-text-3" id="text-6-4">
+<p>
+I.e. undo a previous commit but keep commits newer than it.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-shell-script">git revert HEAD~1
+git revert e0c0698
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-6-5" class="outline-3">
+<h3 id="sec-6-5"><span class="section-number-3">6.5</span> Stage your changes</h3>
+<div class="outline-text-3" id="text-6-5">
+<p>
+With two-stage commit (<code>git add</code>), you can stage your changes without having
+to commit them.
+</p>
+
+<ol class="org-ol">
+<li>You are working on a complicated problem.
+</li>
+
+<li>You make some progress, then you <code>git add</code> to stage your code.
+</li>
+
+<li>You continue and make more changes.
+</li>
+
+<li>You find the changes are inappropriate.
+</li>
+
+<li>You <code>git checkout</code> to discard the inappropriate changes and restart from
+where staged with another try.
+</li>
+
+<li>After several rounds, all done.
+</li>
+
+<li>You commit your code.
+</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-sec-6-6" class="outline-3">
+<h3 id="sec-6-6"><span class="section-number-3">6.6</span> Conflict</h3>
+<div class="outline-text-3" id="text-6-6">
+<p>
+When a conflict happened during pulling, there are some "tricky" things to
+manually fix the conflict and check-in.
+</p>
+
+<ol class="org-ol">
+<li>You cannot <code>git commit a_file_with_conflicts</code>, you have to <code>git add
+      all_files_with_conflicts</code> and then <code>git commit</code>. The rational is that, in
+this case, you should commit all or none in this case.
+</li>
+
+<li>Alternatively, <code>git commit -a</code> should combine those two steps (add and
+commit) for you.
+</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-sec-6-7" class="outline-3">
+<h3 id="sec-6-7"><span class="section-number-3">6.7</span> Stage (and commit) only part of a change</h3>
+<div class="outline-text-3" id="text-6-7">
+<div class="org-src-container">
+
+<pre class="src src-shell-script">git add -p file_name
+</pre>
+</div>
+
+<p>
+Refer to tip 6 of <a href="http://www.sitepoint.com/10-tips-git-next-level/">http://www.sitepoint.com/10-tips-git-next-level/</a>
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-6-8" class="outline-3">
+<h3 id="sec-6-8"><span class="section-number-3">6.8</span> Keep commit history clean</h3>
+<div class="outline-text-3" id="text-6-8">
+</div><div id="outline-container-sec-6-8-1" class="outline-4">
+<h4 id="sec-6-8-1"><span class="section-number-4">6.8.1</span> Edit commit history</h4>
+<div class="outline-text-4" id="text-6-8-1">
+<ul class="org-ul">
+<li>To edit the last commit:
+<div class="org-src-container">
+
+<pre class="src src-shell-script">git commit --amend -m <span class="org-string">'new message'</span>
+git commit --amend --author=<span class="org-string">"lgfang &lt;<a href="mailto:lgfang&#64;xxx.com">lgfang&#64;xxx.com</a>&gt;"</span>
+</pre>
+</div>
+</li>
+
+<li>To edit previous commits
+
+<p>
+For example, to edit the "author" of previous commits:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-shell-script">git rebase -i HEAD~5
+<span class="org-comment-delimiter"># </span><span class="org-comment">Go 5 commits back.</span>
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">In the editor, change "pick" to "edit" for designated commits.</span>
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">Continue to submit</span>
+git rebase --continue
+</pre>
+</div>
+
+<p>
+Other useful actions when of rebase includes:
+</p>
+<ul class="org-ul">
+<li>r, reword = use commit, but edit the commit message
+</li>
+<li>s, squash = use commit, but meld into previous commit
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-6-8-2" class="outline-4">
+<h4 id="sec-6-8-2"><span class="section-number-4">6.8.2</span> Rebase and squash</h4>
+<div class="outline-text-4" id="text-6-8-2">
+<p>
+Based on <a href="http://stackoverflow.com/questions/12865332/remove-old-commit-information-from-a-git-repository-to-save-space">this</a>.
+</p>
+
+<p>
+Here is an example:
+</p>
+
+<ol class="org-ol">
+<li>Find target to rebase
+<pre class="example">
+$ git log --graph --pretty=format:"%d:%h" --all
+*  (HEAD, master):8112e7a
+* :e19ea56
+* :7786ded
+| *  (emacs23):1f98b87
+|/
+* :ff42d6a
+* :eb32bff
+* :0b4df9f
+* :b54c413
+| *  (legacy-emacs):32897c9
+|/
+* :5e53df9
+</pre>
+</li>
+
+<li>Rebase to "combine" serveral commits into one.
+
+<p>
+The git rebase fires an editor with the following content
+</p>
+<pre class="example">
+$ git rebase -i 5e53df9
+pick b54c413 commit log ...
+pick 0b4df9f ...
+pick eb32bff ...
+pick ff42d6a ...
+pick 7786ded ...
+pick e19ea56 ...
+pick 8112e7a ...
+</pre>
+
+<p>
+Edit it, replacing "pick" with "squash" for commits we don't want.
+</p>
+
+<p>
+<b>NOTE:</b> at least the first line should be leaved as "pick".
+</p>
+</li>
+
+<li>After rebase, we got the new topology
+<pre class="example">
+$ git log --graph --pretty=format:"%d:%h" --all
+*  (HEAD, master):87b59a0
+| *  (emacs23):1f98b87
+| * :ff42d6a
+| * :eb32bff
+| * :0b4df9f
+| * :b54c413
+|/
+| *  (legacy-emacs):32897c9
+|/
+* :5e53df9
+</pre>
+</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-sec-6-8-3" class="outline-4">
+<h4 id="sec-6-8-3"><span class="section-number-4">6.8.3</span> Merge and squash</h4>
+<div class="outline-text-4" id="text-6-8-3">
+<p>
+This applicable to picking up commits (merge) from other branches.
+</p>
+
+<p>
+Exerpt from:
+<a href="http://alpha-blog.wanglianghome.org/2010/08/05/git-merge-squash/">http://alpha-blog.wanglianghome.org/2010/08/05/git-merge-squash/</a>
+</p>
+
+<p>
+<b>判断是否使用 squash 选项最根本的标准是</b> ：待合并分支上的历史是否有意义。
+</p>
+
+<p>
+如果在开发分支上提交非常随意，甚至写成微博体，那么一定要使用
+<code>--squash</code> 选项。版本历史记录的应该是代码的发展，而不是开发者在编码时的
+活动。
+</p>
+
+<p>
+<code>--squash</code> 选项的含义是：本地文件内容与不使用该选项的合并结果相同，但是
+不提交、不移动 HEAD，因此需要一条额外的 commit 命令。其效果相当于将
+another 分支上的多个 commit 合并成一个，放在当前分支上，原来的 commit
+历史则没有拿过来。
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-shell-script">git merge --squash another
+git commit -m <span class="org-string">"message here"</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-7" class="outline-2">
+<h2 id="sec-7"><span class="section-number-2">7</span> History</h2>
+<div class="outline-text-2" id="text-7">
+</div><div id="outline-container-sec-7-1" class="outline-3">
+<h3 id="sec-7-1"><span class="section-number-3">7.1</span> Show log selectively</h3>
+<div class="outline-text-3" id="text-7-1">
+<div class="org-src-container">
+
+<pre class="src src-shell-script">git log -3
+git log origin..HEAD            <span class="org-comment-delimiter"># </span><span class="org-comment">show commits not push yet</span>
+git log --author=lgfang
+git log --grep=<span class="org-string">'string in commit message'</span>
+git log --since=2.weeks.ago --until=2.days.ago
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-7-2" class="outline-3">
+<h3 id="sec-7-2"><span class="section-number-3">7.2</span> Show summary of changes made</h3>
+<div class="outline-text-3" id="text-7-2">
+<div class="org-src-container">
+
+<pre class="src src-shell-script">git log --name-status
+git log --name-status -3
+git log --name-status -1 05d6deb
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-7-3" class="outline-3">
+<h3 id="sec-7-3"><span class="section-number-3">7.3</span> Show detailed changes made by certain commits</h3>
+<div class="outline-text-3" id="text-7-3">
+<p>
+You can specify multiple commits at a time.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-shell-script">git show b64dd26
+git show HEAD~3
+git show HEAD~1 HEAD~2
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-7-4" class="outline-3">
+<h3 id="sec-7-4"><span class="section-number-3">7.4</span> View files without checkout</h3>
+<div class="outline-text-3" id="text-7-4">
+<p>
+This works for either another version or another branch.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-shell-script">git show hash#:path/to/that/file/from/root/of/git/repo
+git show branch:path/to/that/file/from/root/of/git/repo
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-7-5" class="outline-3">
+<h3 id="sec-7-5"><span class="section-number-3">7.5</span> Show differences between two commits</h3>
+<div class="outline-text-3" id="text-7-5">
+<p>
+or between certain commits and current status
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-shell-script">git diff HEAD~2
+git diff HEAD~1..HEAD~3
+git diff d151d9d..9a72743
+git diff branch1..branch2 [path/to/afile]
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-7-6" class="outline-3">
+<h3 id="sec-7-6"><span class="section-number-3">7.6</span> Show what revision and author last modified each line of a file</h3>
+<div class="outline-text-3" id="text-7-6">
+<p>
+Like <code>cvs annotate</code>
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-shell-script">git blame file_name
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-8" class="outline-2">
+<h2 id="sec-8"><span class="section-number-2">8</span> Clean up disk space</h2>
+<div class="outline-text-2" id="text-8">
+<p>
+<b>NOTE:</b>
+</p>
+<ol class="org-ol">
+<li>Re-think if the size is really an issue.
+</li>
+<li>Be careful, backup first.
+</li>
+<li>Do this before pushing commits to other repositories.
+</li>
+</ol>
+
+<p>
+Git will run garbage collection once for a while automatically. However, if
+you cannot wait for that, do it manually this way:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-shell-script">rm -rf .git/refs/original/
+git reflog expire --expire=now --all
+git gc --aggressive --prune=now
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-9" class="outline-2">
+<h2 id="sec-9"><span class="section-number-2">9</span> Github</h2>
+<div class="outline-text-2" id="text-9">
+<ul class="org-ul">
+<li>download zip instead of clone
+
+<p>
+For instance, the url for repository of the software "git" is
+<a href="https://github.com/git/git">https://github.com/git/git</a>, to download the source of v1.8.5.4 as a
+zip file, just <a href="https://github.com/git/git/zipball/v1.8.5.4">https://github.com/git/git/zipball/v1.8.5.4</a>
+</p>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-10" class="outline-2">
+<h2 id="sec-10"><span class="section-number-2">10</span> Store and distribute configure files using git</h2>
+<div class="outline-text-2" id="text-10">
+<ul class="org-ul">
+<li>Set up:
+<ol class="org-ol">
+<li>All hosts can be visited via SSH
+</li>
+<li>On one host, say "mylaptop", put configure files (say, .vimrc .bashrc)
+into <code>~/.dotfiles</code>.
+</li>
+<li><code>cd ~/.dotfiles &amp;&amp; git init</code>
+</li>
+<li>On other hosts <code>git clone mylogin@mylaptop:.dotfiles</code>.
+<ul class="org-ul">
+<li>If mylaptop does not turn on SSH service, scp the directory to other
+hosts.
+</li>
+</ul>
+</li>
+</ol>
+</li>
+
+<li>Sync: on other hosts, run <code>git fetch mylogin@mylaptop:.dotfiles</code>.
+<ul class="org-ul">
+<li>If mylaptop disabled SSH service, we can push the changes to other hosts
+on mylaptop instead: <code>git push mylogin@server1:.dotfiles branch</code>
+<ul class="org-ul">
+<li>NOTE: you may want to save the URL for remote repository using <code>git
+        remote add server1 mylogin@server1:./dotfiles</code>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+
+     <br/>
+     <p>
+     <span class="date">Created: 2016-01-26 Tue 21:19</span> by <span class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</span>
+     </p>
+
+     <!-- DISQUS  -->
+     <div id="disqus_thread"></div>
+     <script type="text/javascript">
+         /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+         var disqus_shortname = 'lgfang'; // required: replace example with your forum shortname
+
+         /* * * DON'T EDIT BELOW THIS LINE * * */
+         (function() {
+             var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+             dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+             (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+         })();
+     </script>
+     <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+     <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+     <!-- google analytic -->
+     <script>
+       (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+       (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+       m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+       })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+       ga('create', 'UA-84711243-1', 'auto');
+       ga('send', 'pageview');
+
+     </script>
+</div>
+</div>
+</body>
+</html>

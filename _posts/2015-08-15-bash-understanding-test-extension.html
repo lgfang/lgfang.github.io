@@ -1,0 +1,43 @@
+---
+layout: post
+title: Understanding the design of "[["
+tagline:
+categories: computer
+tags: [bash, shell, coding]
+---
+
+<p>
+The first glance at the following examples may make you think the <code>[</code> works as
+expected while the impelmentation of <code>[[</code> has a bug. However, examining it more
+closely, you will find the later was designed to act that way and it is, in my
+opinion, a better design.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-shell-script">$ ls
+abcd
+
+$ <span class="org-comment-delimiter"># </span><span class="org-comment">WRONG, but returns "expected result"</span>
+$ [ -f abc* ] &amp;&amp; <span class="org-builtin">echo</span> found || <span class="org-builtin">echo</span> not found
+found
+
+$ <span class="org-comment-delimiter"># </span><span class="org-comment">CORRECT, but returns "unexpected result"</span>
+$ [[ -f abc* ]] &amp;&amp; <span class="org-builtin">echo</span> found || <span class="org-builtin">echo</span> not found
+not found
+</pre>
+</div>
+
+<p>
+As for <code>[</code>, it will expand "abc*" according to filename glob, which means the
+resulted expression can be <code>[ -f ]</code> or <code>[ -f abc1 abc2 ... ]</code>. Therefore, even
+though in this case it returns expected expression, it is incorrect. Moreover,
+this kind of errors are hard to reproduce elsewhere (although those who have
+clear understanding of shell expansion can sense the issue at a glimpse).
+</p>
+
+<p>
+In contrast, <code>[[</code> will NOT expand "abc*". Even though it might be
+"counter-intuitive" to many (as they would expect a filename glob expansion), it
+is a better design because it eliminates the aformentioned risk.
+</p>

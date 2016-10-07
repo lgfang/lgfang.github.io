@@ -1,0 +1,72 @@
+---
+layout: post
+title: Illustrate Directory Tree
+tagline: 
+categories: computer
+tags: [bash, shell, linux tools]
+---
+
+
+<div class="figure">
+<p><img src="http://lgfang.github.io/images/./directory-tree-0.jpg" alt="directory-tree-0.jpg" />
+</p>
+</div>
+
+<p>
+When describing a directory hierarchy, it cannot be clearer than showing others
+a picture like this. But to manually "draw" such an ASCII picture can be
+painstaking. This is true especially when doing that in "smart" editors like MS
+word because you have to not only type in every character yourself but also
+fight against the editors' intelligence as they tend to change indentations and
+formats for you.
+</p>
+
+<p>
+Fortunately, there is a tool "tree" that can lift you out. You no longer "draw"
+the picture but rather <b>create a sample hierarchy and then run "tree" to get a
+nice picture</b>. Creating a directory structure can be a breeze in bash. For
+example, here is how I I created the directories for above picture. Quite easy,
+isn't it?
+</p>
+
+
+<div class="figure">
+<p><img src="http://lgfang.github.io/images/./directory-tree-1.jpg" alt="directory-tree-1.jpg" />
+</p>
+</div>
+
+<p>
+Modifying the picture is not only as easy but also very explicit. That is, the
+changes you make are crystal clear to your colleagues. Below is how I would
+propose a change. Without a single word, everyone can tell the changes I suggest
+as they see the commands.
+</p>
+
+
+<div class="figure">
+<p><img src="http://lgfang.github.io/images/./directory-tree-2.jpg" alt="directory-tree-2.jpg" />
+</p>
+</div>
+
+<p>
+One trick I used in the examples is that I created several files names of which
+are literally <code>...</code> and ran "tree" with options <code>-ar</code> so that <code>...</code> are shown,
+at the last of each directory.
+</p>
+
+<p>
+In fact, "tree" is very handy when trying to understand source code structure.
+In such cases, frequently used options include:
+</p>
+<dl class="org-dl">
+<dt> <code>-d</code> </dt><dd>show directories only.
+</dd>
+<dt> <code>-L N</code> </dt><dd>limit recursion depth to N.
+</dd>
+</dl>
+
+<p>
+Another thing to note is that not all linux distributions install "tree" by
+default. You may have to install it (say a rpm dedicated for it) before playing
+it.
+</p>

@@ -1,0 +1,126 @@
+---
+layout: post
+title: What "protected" Really Means
+tagline:
+categories: computer
+tags: [c++, java, coding]
+---
+
+<p>
+The meaning of "protected" seems to be quite simple and straight-forward:
+protected members can be accessed by either the same class or classes derived
+from the class. But in fact, it might be more complicated then you might have
+thought.
+</p>
+
+<p>
+Can you explain the compilation result of the following C++ code, especially the
+two "Base" related functions.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-c++"><span class="org-keyword">class</span> <span class="org-type">Base</span>
+{
+  <span class="org-keyword">protected</span>:
+    <span class="org-type">void</span> <span class="org-function-name">f</span>() <span class="org-keyword">const</span> { cout &lt;&lt; <span class="org-string">"f"</span> &lt;&lt; endl;}
+    <span class="org-keyword">static</span> <span class="org-type">void</span> <span class="org-function-name">sf</span>() { cout &lt;&lt; <span class="org-string">"sf"</span> &lt;&lt; endl;}
+};
+
+<span class="org-keyword">class</span> <span class="org-type">D1</span> :<span class="org-keyword">public</span> <span class="org-type">Base</span>
+{
+};
+
+<span class="org-keyword">class</span> <span class="org-type">D2</span> : <span class="org-keyword">public</span> <span class="org-type">Base</span>
+{
+  <span class="org-keyword">public</span>:
+    <span class="org-type">void</span> <span class="org-function-name">call_self</span>() <span class="org-keyword">const</span>
+    {
+        <span class="org-keyword">this</span>-&gt;f();              <span class="org-comment-delimiter">// </span><span class="org-comment">ok</span>
+    }
+
+    <span class="org-type">void</span> <span class="org-function-name">call_self</span>(<span class="org-keyword">const</span> <span class="org-type">D2</span><span class="org-warning">&amp;</span> <span class="org-variable-name">d2</span>) <span class="org-keyword">const</span>
+    {
+        d2.f();                 <span class="org-comment-delimiter">// </span><span class="org-comment">ok</span>
+    }
+
+    <span class="org-type">void</span> <span class="org-function-name">call_base</span>(<span class="org-keyword">const</span> <span class="org-type">Base</span><span class="org-warning">&amp;</span> <span class="org-variable-name">b</span>) <span class="org-keyword">const</span>
+    {
+        b.f();                  <span class="org-comment-delimiter">// </span><span class="org-comment">error</span>
+    }
+
+    <span class="org-type">void</span> <span class="org-function-name">call_base_sf</span>(<span class="org-keyword">const</span> <span class="org-type">Base</span><span class="org-warning">&amp;</span> <span class="org-variable-name">b</span>) <span class="org-keyword">const</span>
+    {
+        b.sf();                 <span class="org-comment-delimiter">// </span><span class="org-comment">ok</span>
+    }
+
+    <span class="org-type">void</span> <span class="org-function-name">call_d1</span>(<span class="org-keyword">const</span> <span class="org-type">D1</span><span class="org-warning">&amp;</span> <span class="org-variable-name">d1</span>) <span class="org-keyword">const</span>
+    {
+        d1.f();                 <span class="org-comment-delimiter">// </span><span class="org-comment">error</span>
+    }
+
+    <span class="org-type">void</span> <span class="org-function-name">call_d1_sf</span>(<span class="org-keyword">const</span> <span class="org-type">D1</span><span class="org-warning">&amp;</span> <span class="org-variable-name">d1</span>) <span class="org-keyword">const</span>
+    {
+        d1.sf();                <span class="org-comment-delimiter">// </span><span class="org-comment">error</span>
+    }
+
+};
+</pre>
+</div>
+
+<p>
+The following words from The Java Programming Language (3e) (by Ken Arnold et
+al) reveal what "Protected" really means in java. It also holds true for C++.
+</p>
+
+<blockquote>
+<p>
+&#x2026; a protected member can also be accessed from a class through object
+references that are of at least the same type as the class &#x2013; that is,
+references of the class's type or one of its subtypes. &#x2026;
+</p>
+
+<p>
+&#x2026;
+</p>
+
+<p>
+The reasoning behind the restriction is this: Each subclass inherits the
+contract of the superclass and expands that contract in some way. Suppose that
+one subclass, as part of its expanded contract, places some constraints on the
+values of protected member of the superclass. If a different subclass could
+access the protected members of objects of the first subclass then it could
+manipulate them in a way that would break the first subclass's contract &#x2013; and
+this should not be permissible. Protected static members can be accessed in any
+extended class. &#x2026; This is allowed because a subclass can't modify the contract
+of its static members as it can only hide them, not override them &#x2013; hence there
+is no danger of another class violating that contract.
+</p>
+</blockquote>
+
+<p>
+The C++ Programming Language special ed also has some words on this topic:
+</p>
+
+<blockquote>
+<p>
+A derived class can access a base class protected members only for objects of
+its own type.
+</p>
+
+<p>
+&#x2026;
+</p>
+
+<p>
+This prevents subtle errors that would otherwise occur when one derived class
+corrupts data belonging to other derived classes.
+</p>
+</blockquote>
+
+<p>
+Above words give insight into the "protected" mechanism. However, you'd better
+make sure you really need a "protected" member. Generally speaking, "protected"
+is not a good choice. I remember that Bjarne Stroustrup had more words on that
+topic in The Design and Evolution of C++
+</p>

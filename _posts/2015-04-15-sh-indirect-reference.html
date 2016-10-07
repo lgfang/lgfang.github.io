@@ -1,0 +1,151 @@
+---
+layout: post
+title: Indirect Variable Reference
+tagline:
+categories: computer
+tags: [bash, shell, coding]
+---
+
+
+<div class="figure">
+<p><img src="http://lgfang.github.io/images/sh-indirect-reference.png" alt="sh-indirect-reference.png" />
+</p>
+</div>
+
+<p>
+Do you know that both bash and ksh support indirect variable reference (though
+in different ways)? Compared with "eval", this is clearer and conciser. Let me
+illustrate this using an example.
+</p>
+
+<p>
+Suppose we have two variables <code>var1</code> and <code>var2</code>. And, there is also a variable
+<code>ref</code> which refers to either <code>var1</code> or <code>var2</code>. However, the value of <code>ref</code> is
+decided at run time.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-shell-script"><span class="org-variable-name">var1</span>=<span class="org-string">"foo bar"</span>
+<span class="org-variable-name">var2</span>=<span class="org-string">"hello world"</span>
+<span class="org-comment-delimiter"># </span><span class="org-comment">..., after some calculation, we got this:</span>
+<span class="org-variable-name">ref</span>=<span class="org-string">"var2"</span>
+</pre>
+</div>
+
+<p>
+To get the intended value (i.e. "hello world" in this example), the "eval" way
+could be some like this:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-shell-script"><span class="org-variable-name">value</span>=$(<span class="org-sh-quoted-exec">eval</span> <span class="org-string">"echo \$$ref"</span>)   <span class="org-comment-delimiter"># </span><span class="org-comment">value: hello world</span>
+</pre>
+</div>
+
+<p>
+For bash, this code can be simplified using <code>${!ref}</code>
+</p>
+<div class="org-src-container">
+
+<pre class="src src-shell-script"><span class="org-variable-name">value</span>=${<span class="org-variable-name">!</span>ref}                 <span class="org-comment-delimiter"># </span><span class="org-comment">value: hello world</span>
+</pre>
+</div>
+
+<p>
+In contrast, in ksh we define a "name reference" using <code>nameref ref</code>.
+</p>
+<pre class="example">
+$ var1="foo bar"
+
+$ var2="hello world"
+
+$ nameref ref=var2
+
+$ echo $ref
+hello world
+</pre>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">Indirect reference to BASH arrays</h2>
+<div class="outline-text-2" id="text-1">
+<div class="org-src-container">
+
+<pre class="src src-shell-script"><span class="org-variable-name">arr</span>=(a b c d)
+<span class="org-variable-name">array_name</span>=arr
+
+<span class="org-variable-name">ref_to_array</span>=${<span class="org-variable-name">array_name</span>}[@]   <span class="org-comment-delimiter"># </span><span class="org-comment">i.e. ref_to_array=arr[@]</span>
+<span class="org-keyword">for</span> each<span class="org-keyword"> in</span> <span class="org-string">"${!ref_to_array}"</span>; <span class="org-keyword">do  </span><span class="org-builtin">echo</span> $<span class="org-variable-name">each</span>; <span class="org-keyword">done</span>
+
+<span class="org-variable-name">ref_to_second_elem</span>=${<span class="org-variable-name">array_name</span>}[1]
+<span class="org-builtin">echo</span> ${<span class="org-variable-name">!</span>ref_to_second_elem}
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2">KSH Caveats</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+Although it provids some convenience, the name reference mechanism in KSH can
+be tricky. One have to be very clear about what is changing, the reference
+itself or the referred variable? Here are some examples illustrating some
+subtle details.
+</p>
+
+<pre class="example">
+$ read ref          # change the value of var2
+oops
+$ echo $ref
+oops
+$ echo $var2
+oops
+
+$ ref=var1          # change the value of var2
+$ echo $ref
+var1
+$ echo $var2
+var1
+
+$ unset -n ref      # unset the name reference
+$ ref=var2          # assign value to ref, which is a normal var so far
+$ echo $ref
+var2
+$ nameref ref       # making it a reference
+$ echo $ref
+hello world
+
+$ unset -n ref      
+$ var2="hello world"
+$ nameref ref       # declare a name reference
+$ ref=var2          # the first assignment changes reference itself
+$ echo $ref
+hello world
+$ ref=var1          # the second assignment changes the value of referred variable
+$ echo $ref
+var1
+$ echo $var2
+var1
+
+$ ksh --version
+  version         sh (AT&amp;T Research) 93u+ 2012-08-01
+
+$ unset -n ref
+$ read ref          # declare nameref AFTER read, works
+var2
+$ echo $ref
+var2
+$ nameref ref
+$ echo $ref
+hello world
+
+$ unset -n ref      # declare nameref BEFORE read, oops
+$ nameref ref
+$ read ref
+var2
+$ echo $ref
+Segmentation fault (core dumped)
+</pre>
+</div>
+</div>
