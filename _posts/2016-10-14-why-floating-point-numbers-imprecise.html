@@ -1,0 +1,95 @@
+---
+layout: post
+title: Why Floating-Point Numbers are Imprecise
+tagline:
+categories: computer
+tags: [coding]
+---
+
+<pre class="example">
+&gt; 0.1 + 0.2
+0.30000000000000004
+&gt; 0.1 + 1 - 1
+0.10000000000000009
+</pre>
+
+<p>
+This copied from <a href="http://speakingjs.com/es5/ch11.html">Speaking JavaScript</a>, but the discussion is programming language
+irrelevant.
+</p>
+
+<p>
+&#x2014;
+</p>
+
+<p>
+In the decimal system, all fractions are a mantissa m divided by a power of 10:
+<code>m/10e</code>.
+</p>
+
+<p>
+So, in the denominator, there are only tens. That's why 1/3 cannot be expressed
+precisely as a decimal floating-point number—there is no way to get a 3 into the
+denominator. Binary floating-point numbers only have twos in the denominator.
+Let’s examine which decimal floating-point numbers can be represented well as
+binary and which can't. If there are only twos in the denominator, the decimal
+number can be represented:
+</p>
+<pre class="example">
+0.5dec = 5/10 = 1/2 = 0.1bin
+0.75dec = 75/100 = 3/4 = 0.11bin
+0.125dec = 125/1000 = 1/8 = 0.001bin
+</pre>
+
+<p>
+Other fractions cannot be represented precisely, because they have numbers other
+than 2 in the denominator (after prime factorization):
+</p>
+<pre class="example">
+0.1dec = 1/10 = 1/(2x5)
+0.2dec = 2/10 = 1/5
+</pre>
+
+<p>
+You can't normally see that JavaScript doesn't store exactly 0.1 internally. But
+you can make it visible by multiplying it with a high enough power of 10:
+</p>
+<pre class="example">
+&gt; 0.1 * Math.pow(10, 24)
+1.0000000000000001e+23
+</pre>
+
+<p>
+And if you add two imprecisely represented numbers, the result is sometimes
+imprecise enough that the imprecision becomes visible:
+</p>
+<pre class="example">
+&gt; 0.1 + 0.2
+0.30000000000000004
+&gt; 0.1 + 1 - 1
+0.10000000000000009
+</pre>
+
+<p>
+Due to rounding errors, as a best practice you should not compare nonintegers
+directly. Instead, take an upper bound for rounding errors into consideration.
+Such an upper bound is called a machine epsilon. The standard epsilon value for
+double precision is <code>2e−53</code>:
+</p>
+<pre class="example">
+var EPSILON = Math.pow(2, -53);
+function epsEqu(x, y) {
+    return Math.abs(x - y) &lt; EPSILON;
+}
+</pre>
+
+<p>
+<code>epsEqu()</code> ensures correct results where a normal comparison would be
+inadequate:
+</p>
+<pre class="example">
+&gt; 0.1 + 0.2 === 0.3
+false
+&gt; epsEqu(0.1+0.2, 0.3)
+true
+</pre>
