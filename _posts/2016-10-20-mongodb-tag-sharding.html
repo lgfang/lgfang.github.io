@@ -1,0 +1,115 @@
+---
+layout: post
+title: Tag Aware Sharding
+tagline: a use case
+categories: computer
+tags: [MongoDB]
+---
+
+<p>
+Let's assume our database manages a collection of users. Each belongs to certain
+region and we have two data centers, located in one of the regions respectively.
+To avoid high network latency between regions, we shall store user information
+in the nearest data center. Following demo showcases how <a href="https://docs.mongodb.com/manual/core/tag-aware-sharding/">tag aware sharding</a> can
+help in such kind of cases.
+</p>
+
+<p>
+NOTE: In the examples, the order of keys matters.
+</p>
+
+<ol class="org-ol">
+<li>Set up a two-shard cluster one for each data center: "shard01" and "shard02".
+</li>
+
+<li>Tag those two shards
+
+<div class="org-src-container">
+
+<pre class="src src-javascript">sh.addShardTag(<span class="org-string">'shard01'</span>, <span class="org-string">'regionA'</span>);
+sh.addShardTag(<span class="org-string">'shard02'</span>, <span class="org-string">'regionB'</span>);
+</pre>
+</div>
+</li>
+
+<li>Shard collection "users" in database "demo"
+
+<div class="org-src-container">
+
+<pre class="src src-javascript">sh.enableSharding(<span class="org-string">'demo'</span>);
+sh.shardCollection(<span class="org-string">'demo.users'</span>, {home_location:1, user_id: 1});
+</pre>
+</div>
+</li>
+
+<li>Attach home location to corresponding shard tags
+
+<div class="org-src-container">
+
+<pre class="src src-javascript"><span class="org-comment-delimiter">// </span><span class="org-comment">NOTE: the order of members in shard key matters</span>
+sh.addTagRange(<span class="org-string">'demo.users'</span>,
+               {home_location:<span class="org-string">'regionA'</span>, user_id:MinKey},
+               {home_location:<span class="org-string">'regionA'</span>, user_id:MaxKey},
+               <span class="org-string">'regionA'</span>);
+
+sh.addTagRange(<span class="org-string">'demo.users'</span>,
+               {home_location:<span class="org-string">'regionB'</span>, user_id:MinKey},
+               {home_location:<span class="org-string">'regionB'</span>, user_id:MaxKey},
+               <span class="org-string">'regionB'</span>);
+</pre>
+</div>
+</li>
+
+<li>Insert documents of different regions
+
+<div class="org-src-container">
+
+<pre class="src src-javascript">db.users.insert({home_location:<span class="org-string">'regionA'</span>, user_id:1, name:<span class="org-string">'adam'</span>});
+db.users.insert({home_location:<span class="org-string">'regionB'</span>, user_id:2, name:<span class="org-string">'bob'</span>});
+</pre>
+</div>
+</li>
+
+<li>Verify that documents are stored in shards as epxected using either way:
+
+<ul class="org-ul">
+<li>Run the following commands and check output.
+<div class="org-src-container">
+
+<pre class="src src-javascript">sh.status();
+db.users.find({user_id:1}).explain({verbose:1});
+db.users.find({user_id:2}).explain({verbose:1});
+</pre>
+</div>
+</li>
+
+<li>Or, connect to and query on each shard directly.
+</li>
+</ul>
+<p>
+NOTE: If there is already some data before sharding/tagging, we may need to
+wait for some time to allow <a href="https://docs.mongodb.com/manual/sharding/#chunks">chunks</a> migrate to designated shards respectively.
+</p>
+</li>
+
+<li>Move one user to another region
+
+<p>
+Since values of shard keys cannot be changed, we have to delete the user and
+re-insert it with new location info.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-javascript"><span class="org-keyword">var</span> <span class="org-variable-name">adam</span> = db.users.findOneAndDelete({home_location:<span class="org-string">'regionA'</span>, user_id:1});
+adam.home_location = <span class="org-string">'regionB'</span>;
+db.users.insert(adam);
+</pre>
+</div>
+</li>
+</ol>
+
+<p>
+One more thing to bear in mind is that shard configure servers and mongos shall
+also accessible locally.
+</p>
