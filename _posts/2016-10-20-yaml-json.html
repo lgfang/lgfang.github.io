@@ -1,0 +1,27 @@
+---
+layout: post
+title: YAML Versus JSON
+tagline:
+categories: computer
+tags: [mongodb, design]
+---
+
+
+<div class="figure">
+<p><img src="http://lgfang.github.io/images/yaml-json.png" alt="yaml-json.png" width="600" />
+</p>
+</div>
+
+<p>
+<a href="http://yaml.org/">YAML</a> is technically a superset of <a href="http://www.json.org/">JSON</a>. While YAML is more human friendly than
+JSON, JSON is easier and faster to parse. Therefore, it is recommended to use
+YAML for configure files, JSON for APIs. And that is why MongoDB choose YAML for
+configure file while it already has to parse JSON in the first place.
+</p>
+
+<p>
+JSON is much less human editable than YAML. It is also a little less human
+readable than YAML, although it much better than XML. JSON does not support
+comments, which can be really important in configure files. Complex datatypes is
+also a strength of YAML.
+</p>
