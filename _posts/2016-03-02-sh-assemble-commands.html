@@ -1,0 +1,273 @@
+---
+layout: post
+title: Assemble and Run Shell Commands Dynamically
+tagline:
+categories: computer
+tags: [quoting, bash, shell, coding]
+---
+
+<p>
+In a <a href="http://lgfang.github.io/computer/2014/09/07/sh-quotes-escape">previous post</a> I explained that understanding what shell does under the hood
+(i.e. "there are three steps" section) is the key to understand most issues that
+are related with quotes. This blog is to reiterate it, with another scenario.
+</p>
+
+<div id="outline-container-org4915cab" class="outline-2">
+<h2 id="org4915cab">A use case</h2>
+<div class="outline-text-2" id="text-org4915cab">
+<p>
+In shell scripting, it is not uncommon to compose and run commands dynamically like this:
+</p>
+<div class="org-src-container">
+<pre class="src src-shell-script"><span class="linenr">1: </span><span class="org-variable-name">options</span>=<span class="org-string">""</span>
+<span class="linenr">2: </span><span class="org-keyword">if</span> a; <span class="org-keyword">then</span>
+<span class="linenr">3: </span>    <span class="org-variable-name">options</span>+=<span class="org-string">"-a xyz"</span>
+<span class="linenr">4: </span><span class="org-keyword">fi</span>
+<span class="linenr">5: </span>mycmd $<span class="org-variable-name">options</span>
+</pre>
+</div>
+
+<p>
+Though this works in many cases, please be warned that it may fail when
+<code>options</code> is complicated. For exmaple, this is a real-world case we met in our
+project:
+</p>
+<div class="org-src-container">
+<pre class="src src-shell-script"><span class="org-variable-name">base_dn</span>=<span class="org-string">'cn=Request Processors,cn=config'</span>
+<span class="org-variable-name">options</span>=<span class="org-string">"-h localhost -b '$base_dn' 'objectclass=*'"</span>
+<span class="org-variable-name">result</span>=$(<span class="org-sh-quoted-exec">ldapsearch</span> $<span class="org-variable-name">options</span>)
+<span class="org-comment-delimiter"># </span><span class="org-comment">OOPS, error message: The provided search filter contains an invalid attribute</span>
+<span class="org-comment-delimiter"># </span><span class="org-comment">type 'Processors,cn' with invalid character ',' at position 10"</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgea23692" class="outline-2">
+<h2 id="orgea23692">The Three Steps</h2>
+<div class="outline-text-2" id="text-orgea23692">
+<p>
+To understand why sometimes it works sometimes it does not work, it= is
+necessary to really understand the three steps undergone to run a command.
+</p>
+
+<p>
+Any command line you typed in an interactive shell command line or shell
+scripts is dealt with in the following steps:
+</p>
+<ol class="org-ol">
+<li>The shell does expansion and substitution.</li>
+<li>The shell interprets the cooked command line, i.e. evokes designated
+command and feeds it with inputs.</li>
+<li>The command runs and handles the inputs it gets.</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org4b23d65" class="outline-2">
+<h2 id="org4b23d65">A Case Study</h2>
+<div class="outline-text-2" id="text-org4b23d65">
+<p>
+Now, let's examine a made-up case to see how those three steps work. I wrote a
+command <code>demo</code> that accepts an optional argument <code>description</code> and prints
+arguments it receives.
+</p>
+</div>
+
+<div id="outline-container-orgc2e2f67" class="outline-3">
+<h3 id="orgc2e2f67">Normal usage</h3>
+<div class="outline-text-3" id="text-orgc2e2f67">
+<pre class="example">
+$ ./demo --description "hello world"
+Arg 1 -&gt; --description
+Arg 2 -&gt; hello world
+Desc  -&gt; hello world
+</pre>
+
+<ol class="org-ol">
+<li>The shell does expansion and substitution etc.
+
+<ul class="org-ul">
+<li>There is NO expansion and substitution.</li>
+</ul></li>
+
+<li><p>
+The shell interprets the command line
+</p>
+
+<p>
+The shell sees the double quotes, therefore it removes the quotes and
+takes <code>hello world</code> as a literal string. As a result, the shell regards
+the command line as:
+</p>
+<pre class="example">
+demo + --description + hello world
+</pre>
+<p>
+That is command <code>demo</code> plus two arguments (<code>--description</code> and <code>hello
+      world</code>)
+</p></li>
+
+<li><p>
+Command runs
+</p>
+
+<p>
+<code>demo</code> receives two arguments and parse them accordingly as expected.
+</p></li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org64349f2" class="outline-3">
+<h3 id="org64349f2">With Expansion/Substitution</h3>
+<div class="outline-text-3" id="text-org64349f2">
+<pre class="example">
+$ options='--description "hello world"'
+
+$ ./demo $options
+Arg 1 -&gt; --description
+Arg 2 -&gt; "hello
+Arg 3 -&gt; world"
+usage: demo [--description DESCRIPTION]
+demo: error: unrecognized arguments: world"
+</pre>
+
+<ol class="org-ol">
+<li>Expansion and substitution
+
+<ul class="org-ul">
+<li><p>
+It sees <code>$options</code> and replaces it with the value of it, that is string
+<code>--description "hello world"</code>. In this case, since the quotes are the
+<b>result of substitution</b>, they do not have special meaning and are just
+part of the string. Therefore, the command line is actually equivalent
+to this:
+</p>
+<pre class="example">
+./demo --description \"hello world\"
+</pre></li>
+
+<li>The shell does NOT see any quotes.</li>
+</ul></li>
+
+<li><p>
+Interpretation
+</p>
+
+<p>
+Hence, what the shell sees is:
+</p>
+<pre class="example">
+demo + --description + "hello + world"
+</pre>
+<p>
+I.e. command <code>demo</code> with three arguments.
+</p></li>
+
+<li><p>
+Command run
+</p>
+
+<p>
+The <code>demo</code> sees <code>--description</code> and then takes <code>"hello</code> (with quote) as
+the value of description. Then, it sees the unexpected third argument
+<code>world"</code> (with quote) and emits an error.
+</p></li>
+</ol>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org6dd2836" class="outline-2">
+<h2 id="org6dd2836">Solutions</h2>
+<div class="outline-text-2" id="text-org6dd2836">
+</div><div id="outline-container-orgf2b01f6" class="outline-3">
+<h3 id="orgf2b01f6">eval</h3>
+<div class="outline-text-3" id="text-orgf2b01f6">
+<p>
+<b>NOTE</b> In my opinion, compared with <code>eval</code>, using shell array might be a
+better solution.
+</p>
+
+<pre class="example">
+$ options='--description "hello world"'
+
+$ eval "./demo $options"
+Arg 1 -&gt; --description
+Arg 2 -&gt; hello world
+Desc  -&gt; hello world
+</pre>
+
+<p>
+The <code>eval</code> basically goes through the 3-step process one more time.
+</p>
+
+<ol class="org-ol">
+<li>Expansion and substitution
+
+<ul class="org-ul">
+<li>The shell sees a pair of double quotes, hence take everything (after
+expansion and substitution) enclosed by them as a string literal.</li>
+
+<li>It replace <code>$options</code> with value of it.</li>
+</ul></li>
+
+<li><p>
+Interpretation
+</p>
+
+<p>
+The shell sees:
+</p>
+<pre class="example">
+eval + ./demo --description "hello world"
+</pre></li>
+
+<li><p>
+Command run
+</p>
+
+<p>
+"eval" gets one arguments, that is string <code>./demo --description "hello
+      world"</code>. It then goes through the three-step procedure against this
+string, which is basically the same as <a href="#orgc2e2f67">Normal usage</a>.
+</p></li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org0e1df35" class="outline-3">
+<h3 id="org0e1df35">Use shell array</h3>
+<div class="outline-text-3" id="text-org0e1df35">
+<pre class="example">
+$ options=("--description" "hello world")
+
+$ ./demo "${options[@]}"
+Arg 1 -&gt; --description
+Arg 2 -&gt; hello world
+Desc  -&gt; hello world
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org4cd9246" class="outline-2">
+<h2 id="org4cd9246">Quiz</h2>
+<div class="outline-text-2" id="text-org4cd9246">
+<p>
+Write a <code>demo</code> script that prints every and each argument it receives. Then,
+try the following commands and explain the outcome of each command:
+</p>
+<pre class="example">
+# case 1
+options='--description "hello world"'
+./demo "$options"
+
+# case 2,3
+options=("--description" "hello world")
+./demo "${options[*]}"
+./demo ${options[@]}
+</pre>
+</div>
+</div>
