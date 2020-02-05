@@ -1,0 +1,92 @@
+---
+layout: post
+title: Filtering MongoDB log based on client IP
+tagline:
+categories: computer
+tags: [MongoDB]
+---
+
+<p>
+Have you encountered the situation that, when reviewing a mongod log file, you'd
+like to focus on what operations a particular client (identified by its IP
+address) has done but the <code>mongod</code> was so busy that the log file was inundated
+with lots of messages/operations from other clients?
+</p>
+
+<p>
+There is a one-liner to filter MongoDB log files to print the log messages
+related to the connection from the specified IP address(es). For example, the
+following command lists all operations recorded for connections from localhost
+(<code>127.0.0.1</code>):
+</p>
+<pre class="example">
+$ cat mongod.log | gawk '/connection accepted from 127.0.0.1/{open[$9] = 1; print $0}/ NETWORK *\[conn/{conn=gensub(/\[conn([0-9]*)\]/, "#\\1", "g", $4); if(conn in open){print $0; if($5=="end" &amp;&amp; $6=="connection"){delete open[conn]}}}'
+2020-02-03T15:00:58.087+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:63120 #1 (1 connection now open)
+2020-02-03T15:00:58.087+1100 I NETWORK  [conn1] received client metadata from 127.0.0.1:63120 conn1: { driver: { name: "PyMongo", ...
+2020-02-03T15:00:58.090+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:63121 #2 (2 connections now open)
+2020-02-03T15:00:58.090+1100 I NETWORK  [conn2] received client metadata from 127.0.0.1:63121 conn2: { driver: { name: "PyMongo", ...
+2020-02-03T15:00:58.091+1100 I NETWORK  [conn2] end connection 127.0.0.1:63121 (1 connection now open)
+...
+</pre>
+
+<p>
+If you don't like copying/pasting such a long command line, you can put the awk
+part into a file (say <code>ops-per-ip.awk</code>) and run <code>cat mongod.log | gawk -f
+ops-per-ip.awk</code>:
+</p>
+<div class="org-src-container">
+<pre class="src src-awk"><span class="linenr">1: </span><span class="org-string">/connection accepted from 127.0.0.1/</span>{open[$9] = 1; <span class="org-preprocessor">print</span> $0}
+<span class="linenr">2: </span><span class="org-string">/ NETWORK *\[conn/</span>{
+<span class="linenr">3: </span>    conn=<span class="org-preprocessor">gensub</span>(<span class="org-string">/\[conn([0-9]*)\]/</span>, <span class="org-string">"#\\1"</span>, <span class="org-string">"g"</span>, $4)
+<span class="linenr">4: </span>    <span class="org-keyword">if</span>(conn <span class="org-keyword">in</span> open){
+<span class="linenr">5: </span>        <span class="org-preprocessor">print</span> $0;
+<span class="linenr">6: </span>        <span class="org-keyword">if</span>($5==<span class="org-string">"end"</span> &amp;&amp; $6==<span class="org-string">"connection"</span>){<span class="org-keyword">delete</span> open[conn]}
+<span class="linenr">7: </span>    }
+<span class="linenr">8: </span>}
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>Line 1: When a connection from <code>127.0.0.1</code> is accepted, insert the connection
+ID with prefix <code>#</code> (<code>#1234</code> for example) into the array <code>open</code>. The value is
+set to 1 but is actually irrelevant.
+<ul class="org-ul">
+<li>Please note that the source IP does not have to be a single IP address, you
+can using any regexp gawk recognizes. For example: use <code>192.168.99.10[56]</code>
+to track operations launched from <code>192.168.99.105</code> and <code>192.169.99.106</code>. Or,
+use <code>192.168</code> for any IP within the subnet <code>192.168.0.0/16</code>.</li>
+</ul></li>
+<li>Line 2: For other log lines like <code>2020-02-03T15:00:58.087+1100 I NETWORK
+  [conn1234] ...</code>, do the following:
+<ul class="org-ul">
+<li>Line 3: Use regexp function <code>gensub</code> to get the connection ID <code>1234</code> and
+construct the array key, i.e. <code>#1234</code>.</li>
+<li>Line 4: If the key exists in <code>open</code>, then this connection is from the IP
+address of concern. Therefore,
+<ul class="org-ul">
+<li>Line 5: print this log line</li>
+<li>Line 6: remove the key from the array if this line denotes the end of the
+connection (<code>2020-02-03T15:00:58.091+1100 I NETWORK [conn1234] end
+      connection 127.0.0.1:63121...</code>).</li>
+</ul></li>
+</ul></li>
+</ul>
+
+<p>
+In the following example, with the help of this command I am able to easily
+confirm that the client on <code>192.168.99.100</code> tried to connect many times but it
+never tried to authenticate itself and did nothing (or, put it more accurately:
+no operations were recorded).
+</p>
+<pre class="example">
+$ cat mongodb.log | gawk '/connection accepted from 192.168.99.100/{open[$9] = 1; print $0}/ NETWORK *\[conn/{conn=gensub(/\[conn([0-9]*)\]/, "#\\1", "g", $4); if(conn in open){print $0; if($5=="end" &amp;&amp; $6=="connection"){delete open[conn]}}}'
+2020-02-03T02:44:54.343+0000 I NETWORK  [listener] connection accepted from 192.168.99.100:57696 #589430 (108 connections now open)
+2020-02-03T02:44:54.383+0000 I NETWORK  [conn589430] end connection 192.168.99.100:57696 (107 connections now open)
+2020-02-03T02:45:28.393+0000 I NETWORK  [listener] connection accepted from 192.168.99.100:59738 #592519 (107 connections now open)
+2020-02-03T02:45:28.506+0000 I NETWORK  [conn592519] end connection 192.168.99.100:59738 (106 connections now open)
+2020-02-03T02:46:23.470+0000 I NETWORK  [listener] connection accepted from 192.168.99.100:34760 #597520 (107 connections now open)
+2020-02-03T02:46:23.660+0000 I NETWORK  [conn597520] end connection 192.168.99.100:34760 (106 connections now open)
+2020-02-03T02:47:18.420+0000 I NETWORK  [listener] connection accepted from 192.168.99.100:37734 #602492 (107 connections now open)
+2020-02-03T02:47:18.524+0000 I NETWORK  [conn602492] end connection 192.168.99.100:37734 (106 connections now open)
+...
+</pre>
