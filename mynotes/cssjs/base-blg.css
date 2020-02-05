@@ -1,0 +1,7 @@
+/* Not using "base.css" to avoid overwriting some theme related settings */
+.src, .example {
+    font-family: consolas, Monaco, "Lucida Console", "Courier New", Courier, monospace;
+    overflow: auto;
+    white-space: pre;
+    word-wrap: normal; /* Make Safari honor "white-space:pre" */
+}
