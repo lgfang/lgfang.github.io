@@ -1,0 +1,98 @@
+---
+layout: post
+title: Prettify mongod backtrace in mongod log files
+tagline:
+categories: computer
+tags: [MongoDB]
+---
+
+
+<div class="figure">
+<p><img src="http://lgfang.github.io/images/mongod-backtrace.png" alt="mongod-backtrace.png" width="600" />
+</p>
+</div>
+
+<p>
+When you are reviewing a backtrace in a mongod log file which is overwhelming
+like the one shown above, would you like to pretty-print it? If the answer is
+yes, how would you do it? Here is the one-liner I'm using.
+</p>
+
+<pre class="example">
+$ cat mongod.log | sed -n '/BEGIN BACKTRACE/{n;p;}' | jq '.'
+{
+  "backtrace": [
+    {
+      "b": "5606DAE25000",
+      "o": "1679911",
+      "s": "_ZN5mongo15printStackTraceERSo"
+    },
+    {
+      "b": "5606DAE25000",
+      "o": "16791D5"
+    },
+    {
+      "b": "5606DAE25000",
+      "o": "20D37E6",
+      "s": "_ZN10__cxxabiv111__terminateEPFvvE"
+    },
+...
+</pre>
+<p>
+Explanation of the above command:
+</p>
+<ul class="org-ul">
+<li><code>sed -n '/BEGIN BACKTRACE/{n;p;}'</code> : searches for the string "BEGIN BACKTRACE" and print the next line, which is the backtrace.</li>
+<li><code>jq '.'</code> : since the backtrace is a json document, we can <code>jq</code> to handle it and what <code>jq '.'</code> does is pretty print the input.</li>
+</ul>
+
+<p>
+If you are familiar with <a href="https://stedolan.github.io/jq/">jq</a>, you'd already know actually there are much things
+we can do than just format the backtrace. For example, we can print just the
+first 3 frames of each backtrace (in this example, there are two backtraces
+found in the log file):
+</p>
+<pre class="example">
+$ cat mongod.log | sed -n '/BEGIN BACKTRACE/{n;p;}' | jq '.backtrace[0:3]'
+[
+  {
+    "b": "5606DAE25000",
+    "o": "1679911",
+    "s": "_ZN5mongo15printStackTraceERSo"
+  },
+  {
+    "b": "5606DAE25000",
+    "o": "16791D5"
+  },
+  {
+    "b": "5606DAE25000",
+    "o": "20D37E6",
+    "s": "_ZN10__cxxabiv111__terminateEPFvvE"
+  }
+]
+[
+  {
+    "b": "5585CAE09000",
+    "o": "1679911",
+    "s": "_ZN5mongo15printStackTraceERSo"
+  },
+  {
+    "b": "5585CAE09000",
+    "o": "16791D5"
+  },
+  {
+    "b": "5585CAE09000",
+    "o": "20D37E6",
+    "s": "_ZN10__cxxabiv111__terminateEPFvvE"
+  }
+]
+</pre>
+
+<p>
+We can also confirm the <code>mongod</code> version easily:
+</p>
+<pre class="example">
+$ cat mongod.log | sed -n '/BEGIN BACKTRACE/{n;p;}' | jq '.processInfo.mongodbVersion'
+"3.4.1"
+"3.4.1"
+</pre>
