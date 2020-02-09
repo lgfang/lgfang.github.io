@@ -20,7 +20,7 @@ following command lists all operations recorded for connections from localhost
 (<code>127.0.0.1</code>):
 </p>
 <pre class="example">
-$ cat mongod.log | gawk '/connection accepted from 127.0.0.1/{open[$9] = 1; print $0}/ NETWORK *\[conn/{conn=gensub(/\[conn([0-9]*)\]/, "#\\1", "g", $4); if(conn in open){print $0; if($5=="end" &amp;&amp; $6=="connection"){delete open[conn]}}}'
+$ cat mongod.log | gawk '/connection accepted from 127.0.0.1/{open[$9] = 1; print $0}$4~/\[conn/{conn=gensub(/\[conn([0-9]*)\]/, "#\\1", "g", $4); if(conn in open){print $0; if($5=="end" &amp;&amp; $6=="connection"){delete open[conn]}}}'
 2020-02-03T15:00:58.087+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:63120 #1 (1 connection now open)
 2020-02-03T15:00:58.087+1100 I NETWORK  [conn1] received client metadata from 127.0.0.1:63120 conn1: { driver: { name: "PyMongo", ...
 2020-02-03T15:00:58.090+1100 I NETWORK  [listener] connection accepted from 127.0.0.1:63121 #2 (2 connections now open)
@@ -36,7 +36,7 @@ ops-per-ip.awk</code>:
 </p>
 <div class="org-src-container">
 <pre class="src src-awk"><span class="linenr">1: </span><span class="org-string">/connection accepted from 127.0.0.1/</span>{open[$9] = 1; <span class="org-preprocessor">print</span> $0}
-<span class="linenr">2: </span><span class="org-string">/ NETWORK *\[conn/</span>{
+<span class="linenr">2: </span>$4~<span class="org-string">/\[conn/</span>{
 <span class="linenr">3: </span>    conn=<span class="org-preprocessor">gensub</span>(<span class="org-string">/\[conn([0-9]*)\]/</span>, <span class="org-string">"#\\1"</span>, <span class="org-string">"g"</span>, $4)
 <span class="linenr">4: </span>    <span class="org-keyword">if</span>(conn <span class="org-keyword">in</span> open){
 <span class="linenr">5: </span>        <span class="org-preprocessor">print</span> $0;
@@ -79,7 +79,7 @@ never tried to authenticate itself and did nothing (or, put it more accurately:
 no operations were recorded).
 </p>
 <pre class="example">
-$ cat mongodb.log | gawk '/connection accepted from 192.168.99.100/{open[$9] = 1; print $0}/ NETWORK *\[conn/{conn=gensub(/\[conn([0-9]*)\]/, "#\\1", "g", $4); if(conn in open){print $0; if($5=="end" &amp;&amp; $6=="connection"){delete open[conn]}}}'
+$ cat mongodb.log | gawk '/connection accepted from 192.168.99.100/{open[$9] = 1; print $0}$4~/\[conn/{conn=gensub(/\[conn([0-9]*)\]/, "#\\1", "g", $4); if(conn in open){print $0; if($5=="end" &amp;&amp; $6=="connection"){delete open[conn]}}}'
 2020-02-03T02:44:54.343+0000 I NETWORK  [listener] connection accepted from 192.168.99.100:57696 #589430 (108 connections now open)
 2020-02-03T02:44:54.383+0000 I NETWORK  [conn589430] end connection 192.168.99.100:57696 (107 connections now open)
 2020-02-03T02:45:28.393+0000 I NETWORK  [listener] connection accepted from 192.168.99.100:59738 #592519 (107 connections now open)
