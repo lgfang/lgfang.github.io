@@ -130,7 +130,11 @@ they will <b>not</b> ignore SIGINT. As a result:
 the script. However, closing the terminal will <b>not</b> interrupt the script.</li>
 <li>In comparison, if <code>nohup</code> is run in the background (<code>nohup ./test.sh &amp;</code>),
 neither Ctrl-C nor closing terminal would interrupt the script.</li>
-</ul></li>
+</ul>
+<p>
+<b>NOTE</b> If a process registers its own SIGHUP handler, <code>nohup</code> will not
+overwrite the handler to ignore SIGHUP.
+</p></li>
 
 <li><p>
 What if we edit <code>test.sh</code> to <b>execute the Python process in the background</b>
@@ -190,11 +194,6 @@ the test results at all when compared with the previous test?
 </p>
 
 <p>
-This is indeed a very common scenario: the script initialize the environment
-for a child process; spawn the long running child process; and then quit.
-</p>
-
-<p>
 Below is the modified script:
 </p>
 <div class="org-src-container">
@@ -248,9 +247,15 @@ $ ps -eo "pid,ppid,pgid,jobc,command" | egrep -i '(test|python)' | sed 's/ \/.*\
 </pre>
 
 <p>
-The is actually the primary difference and the result is: the interactive
-shell will not send any signal to the child, meaning the child process won't
-be interrupted by Ctrl-c or closing terminal.
+This is actually a very importance difference. Many processes do register
+their own SIGHUP handlers and that defeats the purpose of <code>nohup</code>: upon the
+reception of SIGHUP, these processes will <b>not</b> ignore the signal but instead
+call the registered signal handlers. In this situation, the common practice to
+ensure these processes keep running after corresponding terminals are closed
+is: the parent script spawn the long running process in the background and
+then quit. As shown above, this makes the spawned process a child of the
+<code>init</code> process, meaning the current session will not dispatch SIGINT, SIGHUP
+etc. to it.
 </p></li>
 
 <li><p>
