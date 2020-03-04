@@ -1,0 +1,114 @@
+---
+layout: post
+title: ESPP Tax in the US and Australia
+tagline:
+categories: Finance
+tags: [ESPP]
+---
+
+<p>
+ESPP (Employee Stock Purchase Plan) has become one common method of compensating
+employees nowadays. My employer offers this through <a href="https://en.wikipedia.org/wiki/E-Trade">Etrade</a>. Since it is US based
+but I live in Australia, I discovered a subtle difference in calculating ESPP
+tax between these two countries, which may incur double tax if not handled
+correctly.
+</p>
+
+<p>
+In the US, our ESPP plan is a Qualified Plan, meaning income taxes are deferred
+and are only realized when the shares are sold. And, upon selling these shares,
+the difference between the Grant Date FMV and the Purchase Date FMV will be
+taxed as ordinary income. However, if you the hold the shares longer enough,
+only the amount of discount allotted in the plan (such as 15%) is reported as
+ordinary income. The remainder is classified as a long-term capital gain. Below
+is quoted from <a href="https://www.investopedia.com/articles/stocks/12/employee-stock-purchase-plans.asp">Introduction to Employee Stock Purchase Plans – ESPP</a>:
+</p>
+<blockquote>
+<p>
+ESPPs use holding periods that closely resemble those of other stock option
+plans. For qualified ESPPs, the stock that is not sold until at least a year
+after the purchase date and two years after the offering date will receive
+favorable tax treatment. Stock sales that meet these criteria are known as
+qualifying dispositions, while those that don't meet these criteria are labeled
+as disqualifying dispositions.
+</p>
+
+<p>
+<b>Qualifying Dispositions</b>
+</p>
+
+<p>
+Participants who meet the holding requirements for qualifying dispositions will
+realize two types of taxable income (or losses), but none of it is reported
+until the year of the sale. The amount of discount allotted in the plan (such as
+15%) is reported as ordinary income. The remainder is classified as a long-term
+capital gain.
+</p>
+</blockquote>
+
+<p>
+In comparison, in Australia, our ESPP is a <a href="https://www.ato.gov.au/General/Employee-share-schemes/Employers/Types-of-ESS/Concessional-ESS/Tax-deferred-schemes/">Tax-deferred scheme</a>, meaning the
+difference between the actual purchase price and the Purchase Date FMV will be
+taxed as ordinary income in the year of purchase. The remainder is considered a
+capital gain and get 50% discount of tax if you hold the shares for 1+ years:
+</p>
+<blockquote>
+<p>
+The deferred taxing point for a share or stapled security is the earliest of the
+following:
+</p>
+
+<ul class="org-ul">
+<li>when there is no real risk of forfeiture and the scheme no longer genuinely
+restricts disposal of the share</li>
+</ul>
+<p>
+&#x2026;
+</p>
+</blockquote>
+
+<p>
+To demonstrate the difference, let us assume the following:
+</p>
+<ul class="org-ul">
+<li>Grant Date FMV: $60.00</li>
+<li>Purchase Date FMV: $30.00</li>
+<li>Actual purchase price: $25.50</li>
+<li>Sell (1 year later) price: $80.00</li>
+</ul>
+
+<p>
+In the US:
+</p>
+<ul class="org-ul">
+<li>Taxing point: when you sell the shares
+<ul class="org-ul">
+<li>Ordinary income: ($30.00 - $25.50)</li>
+<li>Capital gain: ($80.00 - $30.00)</li>
+</ul></li>
+</ul>
+
+<p>
+In AU:
+</p>
+<ul class="org-ul">
+<li>Taxing point 1: when the you purchase the shares
+<ul class="org-ul">
+<li>Ordinary income: ($60.00 - $25.50)</li>
+</ul></li>
+<li>Taxing point 2: when the you sell the shares
+<ul class="org-ul">
+<li>Capital gain: ($80.00 - $60.00)</li>
+</ul></li>
+</ul>
+
+<p>
+The thing needs to watch out is: as an Australian tax resident, when lodging tax
+income, remember to use the Purchase Date FMV as the cost basis not the one
+listed in the Etrade portal. Otherwise, the difference between $60.00 and $30.00
+will be taxed twice:
+</p>
+<ul class="org-ul">
+<li>It is firstly taxed upon the purchase as ordinary income, which is correct.</li>
+<li>It is taxed again as capital gain when I sell the shares, which is incorrect.</li>
+</ul>
