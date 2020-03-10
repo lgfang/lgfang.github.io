@@ -1,0 +1,322 @@
+---
+layout: post
+title: 时间，时间戳与时区
+tagline:
+categories: computer
+tags: [timezone]
+---
+
+<div id="outline-container-org59bb918" class="outline-2">
+<h2 id="org59bb918">关于时间的迷惑</h2>
+<div class="outline-text-2" id="text-org59bb918">
+</div><div id="outline-container-org5812cb8" class="outline-3">
+<h3 id="org5812cb8">一个简单的“时间”包含很多假设</h3>
+<div class="outline-text-3" id="text-org5812cb8">
+<p>
+假设我在早上十点钟对一个同事说“我现在很忙，三点钟我再来找你”，几乎所有人都理
+解我的意思。但实际上这个理解基于很多假设：
+</p>
+
+<ol class="org-ol">
+<li>我说的是 “ <b>今天</b> 三点”</li>
+
+<li>我说的是 “今天 <b>下午</b> 三点” ，因为我们正常情况下不在半夜上班</li>
+
+<li>我说的是 “ <b>北京时间</b> 今天下午三点” ，因为我们住在中国</li>
+</ol>
+
+<p>
+没有这些假设，单纯的“三点钟”是不能准确描述一个时刻的
+</p>
+</div>
+</div>
+
+<div id="outline-container-org8a88c66" class="outline-3">
+<h3 id="org8a88c66">同一时刻的不同表示</h3>
+<div class="outline-text-3" id="text-org8a88c66">
+<p>
+现在是下午四点钟，下面哪个时间戳是对的？
+</p>
+<ol class="org-ol">
+<li>4:00 PM</li>
+<li>8:00 AM</li>
+<li>3:00 AM</li>
+</ol>
+
+<p>
+不完整的表述没有意义。加上合适的补充信息就都是 <b>同一时刻</b> 的 <b>不同表
+示</b> 。
+</p>
+
+<ol class="org-ol">
+<li>4:00 PM Beijing time</li>
+<li>8:00 AM UTC time</li>
+<li>3:00 AM US/Eastern time</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org38b97cb" class="outline-3">
+<h3 id="org38b97cb">计算机程序也有约定</h3>
+<div class="outline-text-3" id="text-org38b97cb">
+<pre class="example">
+$ date -d 'Feb 21 08:00:00 2014'
+Fri, Feb 21, 2014  8:00:00 AM
+</pre>
+
+<p>
+date 假定你输入的时间是当前时区的时间，而你也假定 date 打印的是当前时
+区的时间
+</p>
+</div>
+</div>
+
+<div id="outline-container-org32aae22" class="outline-3">
+<h3 id="org32aae22">假定的错位</h3>
+<div class="outline-text-3" id="text-org32aae22">
+<ul class="org-ul">
+<li><p>
+记录的时候用 UTC 时间
+</p>
+
+<pre class="example">
+$ fmt='+%Y-%m-%d %H'; date "$fmt"
+2014-02-21 16
+
+$ date -u "$fmt" &gt; timestamp
+</pre></li>
+
+<li><p>
+读取的时候当作 Beijing 时间
+</p>
+
+<pre class="example">
+$ read t &lt;timestamp; date -d "$t"
+Fri, Feb 21, 2014  8:00:00 AM
+</pre></li>
+
+<li><p>
+更正错误的假定
+</p>
+
+<pre class="example">
+$ read t &lt;timestamp; date -d "$t+0000"
+Fri, Feb 21, 2014  4:00:00 PM
+
+$ read t &lt;timestamp.bak; date -u -d "$t" -R
+Fri, 21 Feb 2014 08:00:00 +0000
+</pre></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgc529f98" class="outline-3">
+<h3 id="orgc529f98">避免歧义</h3>
+<div class="outline-text-3" id="text-orgc529f98">
+<ol class="org-ol">
+<li>显式约定时间戳的时区（通常难以执行）</li>
+</ol>
+
+
+<ol class="org-ol">
+<li><p>
+时间戳里包含时区: <code>2014-02-21 16:00:00+0800</code>
+</p>
+
+<pre class="example">
+$ file /etc/localtime
+/etc/localtime: symbolic link to `../usr/share/zoneinfo/Asia/Shanghai'
+
+$ TZ=UTC date -d '2014-02-21 16:00:00+0800'
+Fri, Feb 21, 2014  8:00:00 AM
+
+$ TZ=Australia/Sydney date -d '2014-02-21 16:00:00+0800'
+Fri Feb 21 19:00:00 AEDT 2014
+
+$ TZ=UTC-11 date -d '2014-02-21 16:00:00+0800' # Note: this Posix "-11" equals to the ISO "+1100"
+Fri Feb 21 19:00:00 UTC 2014
+</pre>
+
+<p>
+NOTE: <a href="https://www.w3.org/TR/NOTE-datetime">Date and Time Formats</a>
+</p></li>
+
+<li><p>
+用相对 "epoch" 的秒
+</p>
+
+<p>
+因为 "epoch" 时刻的描述是完整无歧异的 (1970-01-01 00:00:00+0000)，所
+以“相对它若干秒”的描述也是无歧义的。
+</p>
+<pre class="example">
+$ TZ=Asia/Shanghai date -d @1392969600
+Fri, Feb 21, 2014  4:00:00 PM
+
+$ TZ=UTC date -d @1392969600
+Fri, Feb 21, 2014  8:00:00 AM
+
+$ TZ=US/Eastern date -d @1392969600
+Fri, Feb 21, 2014  3:00:00 AM
+</pre>
+
+<p>
+NOTE: UTC datetime: "UTC datetime" basically refers to a data type. This
+data type is usually a 64-bit integer that represents the number of
+milliseconds since Unix epoch ('1970-01-01 00:00:00+0000').
+</p></li>
+</ol>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org116755d" class="outline-2">
+<h2 id="org116755d">Get a relative date</h2>
+<div class="outline-text-2" id="text-org116755d">
+<p>
+For GNU date
+</p>
+<pre class="example">
+$ date
+Sun, Dec 29, 2013 11:57:54 AM
+
+$ date -d 'last fri'
+Fri, Dec 27, 2013 12:00:00 AM
+
+$ date -d 'next fri'
+Fri, Jan 03, 2014 12:00:00 AM
+
+$ date -d 'Dec 15 07:35:00+0800 2011 1 month ago'
+Tue, Nov 15, 2011  7:35:00 AM
+
+$ date -d '2 week 1 day ago '
+Sat, Jan 11, 2014 12:08:08 PM
+
+$ date -d '2 month' # &lt;-- NOTE how leap month dealt with
+Sat, Mar 01, 2014 12:02:51 PM
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org0a80b00" class="outline-2">
+<h2 id="org0a80b00">Calculate days between two dates</h2>
+<div class="outline-text-2" id="text-org0a80b00">
+<pre class="example">
+$ echo $(( ($(date '+%s') - $(date '+%s' -d '2011-12-15'))/3600/24 ))
+1757
+
+$ date -I -d "@$(($(date '+%s') - 1757*3600*24))"
+2011-12-15
+
+$ date -d '1757 days ago'
+Thu Dec 15 08:49:34 AEDT 2011
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org92f1a26" class="outline-2">
+<h2 id="org92f1a26">Convert between seconds from epoch and date</h2>
+<div class="outline-text-2" id="text-org92f1a26">
+<pre class="example">
+$ date '+%s' -d 'Dec 15 07:35:00 2011'
+1323905700
+
+$ date -d @1323905700
+Thu Dec 15 07:35:00 CST 2011
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgc779e77" class="outline-2">
+<h2 id="orgc779e77">Timezone, Daylight Saving Time, and offset</h2>
+<div class="outline-text-2" id="text-orgc779e77">
+<pre class="example">
+$ date -R
+Sun, 29 Dec 2013 14:31:47 +0800
+
+$ TZ=US/Eastern date +%Z:%z
+EDT:-0400           &lt;=== EDT: Daylight Saving in effect; -0400: offset
+</pre>
+
+<p>
+Note: due to daylight saving, a timezone (zoneinfo) may have different offset
+at different times. Therefore, given a time, please ensure the offset is
+calculated based on that exact point in time as shown below:
+</p>
+<pre class="example">
+$ TZ=Australia/Sydney date -d 2020-04-05T01:00:00 --iso-8601=seconds
+2020-04-05T01:00:00+11:00           &lt;=== Timezone offset: 11 hours
+
+$ TZ=Australia/Sydney date -d 2020-04-05T02:00:00 --iso-8601=seconds
+2020-04-05T02:00:00+10:00           &lt;=== Timezone offset: becomes 10 hours one hours later
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org527641b" class="outline-2">
+<h2 id="org527641b">The same time in another timezone</h2>
+<div class="outline-text-2" id="text-org527641b">
+<p>
+Refer to <a href="#orgc529f98">避免歧义</a>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org2af22c8" class="outline-2">
+<h2 id="org2af22c8">Set timezone</h2>
+<div class="outline-text-2" id="text-org2af22c8">
+<ul class="org-ul">
+<li><p>
+set timezone in Linux:
+</p>
+<pre class="example">
+ls -l /etc/localtime
+</pre>
+<p>
+It should link to (or a copy of) a file in /usr/share/zoneinfo
+</p></li>
+<li><p>
+Or
+</p>
+<pre class="example">
+cat /etc/zoneinfo
+</pre></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgbf227a7" class="outline-2">
+<h2 id="orgbf227a7">Hardware clock</h2>
+<div class="outline-text-2" id="text-orgbf227a7">
+</div><div id="outline-container-org594b510" class="outline-3">
+<h3 id="org594b510">hwclock</h3>
+<div class="outline-text-3" id="text-org594b510">
+<p>
+This is the command we use to operate Hardware clock most of the time.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell-script">/sbin/hwclock --utc --show
+/sbin/hwclock --localtime --show
+/sbin/hwclock --utc --systohc --noadjfile
+/sbin/hwclock --utc --hctosys --noadjfile
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org7323aa4" class="outline-3">
+<h3 id="org7323aa4">Hardware clock set to local/UTC time</h3>
+<div class="outline-text-3" id="text-org7323aa4">
+<pre class="example">
+sed -i 's/UTC=no/UTC=yes/' /etc/default/rcS
+</pre>
+<p>
+Or
+</p>
+<pre class="example">
+echo "UTC=true" &gt; /etc/sysconfig/clock
+</pre>
+</div>
+</div>
+</div>
