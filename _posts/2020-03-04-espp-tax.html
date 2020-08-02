@@ -16,12 +16,12 @@ correctly.
 
 <p>
 In the US, our ESPP plan is a Qualified Plan, meaning income taxes are deferred
-and are only realized when the shares are sold. And, upon selling these shares,
-the difference between the Grant Date FMV and the Purchase Date FMV will be
-taxed as ordinary income. However, if you the hold the shares longer enough,
-only the amount of discount allotted in the plan (such as 15%) is reported as
-ordinary income. The remainder is classified as a long-term capital gain. Below
-is quoted from <a href="https://www.investopedia.com/articles/stocks/12/employee-stock-purchase-plans.asp">Introduction to Employee Stock Purchase Plans – ESPP</a>:
+and only realized when the shares are sold. And, upon selling these shares, the
+difference between the Grant Date FMV and the Purchase Date FMV will be taxed as
+ordinary income. However, if you the hold the shares longer enough, only the
+amount of discount allotted in the plan (such as 15%) is reported as ordinary
+income. The remainder is classified as a long-term capital gain. Below is quoted
+from <a href="https://www.investopedia.com/articles/stocks/12/employee-stock-purchase-plans.asp">Introduction to Employee Stock Purchase Plans – ESPP</a>:
 </p>
 <blockquote>
 <p>
@@ -71,10 +71,10 @@ restricts disposal of the share</li>
 To demonstrate the difference, let us assume the following:
 </p>
 <ul class="org-ul">
-<li>Grant Date FMV: $60.00</li>
-<li>Purchase Date FMV: $30.00</li>
-<li>Actual purchase price: $25.50</li>
-<li>Sell (1 year later) price: $80.00</li>
+<li>Grant Date FMV: $30.00</li>
+<li>Purchase Date FMV: $60.00</li>
+<li>Actual purchase price: $25.50 (15% off the lower of $60 and $30)</li>
+<li>Sell price (1 year later): $80.00</li>
 </ul>
 
 <p>
@@ -103,12 +103,27 @@ In AU:
 </ul>
 
 <p>
-The thing needs to watch out is: as an Australian tax resident, when lodging tax
-income, remember to use the Purchase Date FMV as the cost basis not the one
-listed in the Etrade portal. Otherwise, the difference between $60.00 and $30.00
-will be taxed twice:
+In the Etrade web portal, it automatically adjusts the <b>Est. Cost Basis</b>
+according to the rules of the US:
+</p>
+<ul class="org-ul">
+<li>Initially the cost basis is the purchase date FMV ($60).</li>
+<li>After you hold the shares for one year, the cost basis is changed to $30.</li>
+</ul>
+
+<p>
+For Aussie tax residents, the thing needs to watch out is: when lodging tax
+income after selling ESPP shares, remember <b>not</b> to use the cost basis listed in
+the Etrade portal. Use the Purchase Date FMV instead. Otherwise, the difference
+between $60.00 and $30.00 will be taxed twice:
 </p>
 <ul class="org-ul">
 <li>It is firstly taxed upon the purchase as ordinary income, which is correct.</li>
-<li>It is taxed again as capital gain when I sell the shares, which is incorrect.</li>
+<li>It is taxed again as part of capital gain when the shares are sold, which is
+incorrect.</li>
 </ul>
+
+<p>
+<b>Disclaimer</b> I'm not a financial adviser. The above information does not
+ constitute personal financial advice.
+</p>
