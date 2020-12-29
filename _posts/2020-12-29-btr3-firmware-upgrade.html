@@ -1,0 +1,90 @@
+---
+layout: post
+title: Upgrading FIIO BTR3 Firmware in Ubuntu (and macOS)
+tagline:
+categories: computer
+tags: [FIIO, dfu-util]
+---
+
+
+<div class="figure">
+<p><img src="http://lgfang.github.io/images/fiio-dfu-0.png" alt="fiio-dfu-0.png" width="600" />
+</p>
+</div>
+
+<p>
+<a href="https://www.fiio.com/btr3">BTR3</a> might be the most popular one of FIIO's bluetooth DAC/amp series. It
+supports all bluetooth CODECs and can work as a USB DAC. One thing I like very
+much is that I can use it while charging it (via USB type C port). However, when
+I wanted to upgrade its firmware to <a href="http://fiio.net:8000/forum.php?mod=viewthread&amp;tid=44447">version 1.2</a> (mainly for "8. Improved the
+alert sounds and reduced the volume level"), I found many were stuck because
+FIIO only provides an upgrade tool for Windows. Actually, it can be very easily
+done using <code>dfu-util</code> (and a live Ubuntu USB stick if you are running maxOS).
+</p>
+
+<p>
+macOS users need a live Ubuntu USB stick because all my attempts of upgrading
+the firmware with <code>dfu-util</code> + macOS <b>failed</b> with the following error:
+</p>
+<pre class="example">
+$ sudo dfu-util -D BTR3-1.2-0531.dfu
+dfu-util 0.10
+
+Copyright 2005-2009 Weston Schmidt, Harald Welte and OpenMoko Inc.
+Copyright 2010-2020 Tormod Volden and Stefan Schmidt
+This program is Free Software and has ABSOLUTELY NO WARRANTY
+Please report bugs to http://sourceforge.net/p/dfu-util/tickets/
+
+Opening DFU capable USB device...
+ID 0a12:ffff
+Run-time device DFU version 0101
+Claiming USB DFU Runtime Interface...
+Determining device status: state = appIDLE, status = 0
+Device really in Runtime Mode, send DFU detach request...
+Resetting USB...
+dfu-util: error resetting after detach: LIBUSB_ERROR_NO_DEVICE
+</pre>
+
+<p>
+After some research, it appears to me an issue of <code>libusb</code> in macOS. Therefore,
+I need a Linux box. To me, rebooting the MacBook from a live Ubuntu USB drive is
+the simplest approach to get a Linux environment.
+</p>
+
+<p>
+Below is how I managed to upgrade the firmware for my BTR3:
+</p>
+<ol class="org-ol">
+<li>Firstly, <a href="https://ubuntu.com/tutorials/create-a-usb-stick-on-macos#1-overview">Create a bootable USB stick on macOS</a> and reboot the MacBook into Ubuntu.</li>
+<li>In Ubuntu, <a href="https://github.com/redbear/Duo/blob/master/docs/dfu-util_installation_guide.md">build the dfu-util from source</a>.</li>
+<li>Put <a href="https://www.fiio.com/newsinfo/84403.html">BTR3 into DFU mode</a> and connect it to the MacBook.</li>
+<li><p>
+Verify that the device is recognised by <code>dfu-util</code>
+</p>
+
+<div class="figure">
+<p><img src="http://lgfang.github.io/images/fiio-dfu-1.png" alt="fiio-dfu-1.png" width="600" />
+</p>
+</div></li>
+<li><p>
+Optional: backup the current firmware from the device.
+</p>
+
+<div class="figure">
+<p><img src="http://lgfang.github.io/images/fiio-dfu-2.png" alt="fiio-dfu-2.png" width="600" />
+</p>
+</div>
+
+<div class="figure">
+<p><img src="http://lgfang.github.io/images/fiio-dfu-3.png" alt="fiio-dfu-3.png" width="600" />
+</p>
+</div></li>
+<li><p>
+Write the new firmware to the device.
+</p>
+
+<div class="figure">
+<p><img src="http://lgfang.github.io/images/fiio-dfu-4.png" alt="fiio-dfu-4.png" width="600" />
+</p>
+</div></li>
+</ol>
