@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Upgrading FIIO BTR3 Firmware in Ubuntu (and macOS)
+title: Upgrading FIIO BTR3 Firmware - for Ubuntu/macOS
 tagline:
 categories: computer
 tags: [FIIO, dfu-util]
@@ -17,9 +17,10 @@ tags: [FIIO, dfu-util]
 supports all bluetooth CODECs and can work as a USB DAC. One thing I like very
 much is that I can use it while charging it (via USB type C port). However, when
 I wanted to upgrade its firmware to <a href="http://fiio.net:8000/forum.php?mod=viewthread&amp;tid=44447">version 1.2</a> (mainly for "8. Improved the
-alert sounds and reduced the volume level"), I found many were stuck because
-FIIO only provides an upgrade tool for Windows. Actually, it can be very easily
-done using <code>dfu-util</code> (and a live Ubuntu USB stick if you are running maxOS).
+alert sounds and reduced the volume level"), I found myself (as many others) was
+stuck because FIIO only provides an upgrade tool for Windows. Actually, it can
+be very easily done using <code>dfu-util</code> (and a live Ubuntu USB stick if you are
+running maxOS).
 </p>
 
 <p>
@@ -55,8 +56,10 @@ the simplest approach to get a Linux environment.
 Below is how I managed to upgrade the firmware for my BTR3:
 </p>
 <ol class="org-ol">
-<li>Firstly, <a href="https://ubuntu.com/tutorials/create-a-usb-stick-on-macos#1-overview">Create a bootable USB stick on macOS</a> and reboot the MacBook into Ubuntu.</li>
-<li>In Ubuntu, <a href="https://github.com/redbear/Duo/blob/master/docs/dfu-util_installation_guide.md">build the dfu-util from source</a>.</li>
+<li>Firstly, <a href="https://ubuntu.com/tutorials/create-a-usb-stick-on-macos#1-overview">Create a bootable USB stick on macOS</a> and reboot the MacBook into
+Ubuntu.</li>
+<li>In Ubuntu, <a href="https://github.com/redbear/Duo/blob/master/docs/dfu-util_installation_guide.md">build the dfu-util from source</a> (or install the package using
+<code>apt-get</code>).</li>
 <li>Put <a href="https://www.fiio.com/newsinfo/84403.html">BTR3 into DFU mode</a> and connect it to the MacBook.</li>
 <li><p>
 Verify that the device is recognised by <code>dfu-util</code>
