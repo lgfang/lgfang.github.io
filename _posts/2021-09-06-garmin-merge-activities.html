@@ -1,0 +1,69 @@
+---
+layout: post
+title: Merge Garmin Activities (Walk, Run etc.)
+tagline:
+categories: recreation
+tags: [garmin, fitness]
+---
+
+
+<div class="figure">
+<p><img src="http://lgfang.github.io/images/garmin_merge_before.png" alt="garmin_merge_before.png" width="600" />
+</p>
+</div>
+
+<p>
+If you have a Garmin smart watch and are looking for a way to merge multiple
+activities into one because you accidentaly/mistakenly saved one activity when
+you meant to pause it, this article is or you.
+</p>
+
+<p>
+What I wanted to merge activities, google told me that i) Garmin does not
+provide this kind of functionality. <a href="https://forums.garmin.com/apps-software/mobile-apps-web/f/garmin-connect-web/59993/merge-activities-feature">Someone has requested this feature over 9
+years ago</a> but there has no progress yet. Some third party tools/web sites claim
+to be able to do this task. But, somehow the two websites I tried did not work
+(or maybe I did it incorrectly). Luckily I found it could be easily done using
+any text editor. Below is how to do it:
+</p>
+
+<ol class="org-ol">
+<li>Firstly, login to the garmin connect website from your laptop/desktop and
+find the activities to be merged.</li>
+
+<li><p>
+Then, export the activities to TCX:
+</p>
+
+
+<div class="figure">
+<p><img src="http://lgfang.github.io/images/garmin_merge_export.png" alt="garmin_merge_export.png" />
+</p>
+</div></li>
+
+<li><p>
+After that, open the TCX file for the first activity using your favoriate text
+editor. You'll see an XML file similar to the one below. As you can see, the
+activity specific information is recorded as a <b>Lap</b> element.
+</p>
+
+
+<div class="figure">
+<p><img src="http://lgfang.github.io/images/garmin_merge_before.png" alt="garmin_merge_before.png" />
+</p>
+</div></li>
+
+<li><p>
+Now, copy the <b>Lap</b> elements from other TCX files and append them into the
+above file and save it. The file should look like this:
+</p>
+
+
+<div class="figure">
+<p><img src="http://lgfang.github.io/images/garmin_merge_after.png" alt="garmin_merge_after.png" />
+</p>
+</div></li>
+
+<li>Lastly, import the modified file into garmin connect. After verifying the
+merged activity is correct, delete the original ones.</li>
+</ol>
