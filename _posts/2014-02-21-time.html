@@ -120,23 +120,12 @@ Fri, 21 Feb 2014 08:00:00 +0000
 
 <ol class="org-ol">
 <li><p>
-时间戳里包含时区: <code>2014-02-21 16:00:00+0800</code>
+时间戳里包含时区: <code>+0800</code> and <code>AEDT</code> in the following examples
 </p>
-
-<pre class="example">
-$ file /etc/localtime
-/etc/localtime: symbolic link to `../usr/share/zoneinfo/Asia/Shanghai'
-
-$ TZ=UTC date -d '2014-02-21 16:00:00+0800'
-Fri, Feb 21, 2014  8:00:00 AM
-
-$ TZ=Australia/Sydney date -d '2014-02-21 16:00:00+0800'
-Fri Feb 21 19:00:00 AEDT 2014
-
-$ TZ=UTC-11 date -d '2014-02-21 16:00:00+0800' # Note: this Posix "-11" equals to the ISO "+1100"
-Fri Feb 21 19:00:00 UTC 2014
-</pre>
-
+<ul class="org-ul">
+<li><code>2014-02-21 16:00:00+0800</code>:</li>
+<li><code>Fri Feb 21 19:00:00 AEDT 2014</code></li>
+</ul>
 <p>
 NOTE: <a href="https://www.w3.org/TR/NOTE-datetime">Date and Time Formats</a>
 </p></li>
@@ -146,8 +135,8 @@ NOTE: <a href="https://www.w3.org/TR/NOTE-datetime">Date and Time Formats</a>
 </p>
 
 <p>
-因为 "epoch" 时刻的描述是完整无歧异的 (1970-01-01 00:00:00+0000)，所
-以“相对它若干秒”的描述也是无歧义的。
+因为 "epoch" 时刻（1970-01-01 00:00:00+0000）的描述是完整无歧异的（包含时
+间、时区），所以“epoch之后N秒”的描述也是无歧义的。
 </p>
 <pre class="example">
 $ TZ=Asia/Shanghai date -d @1392969600
@@ -192,7 +181,7 @@ Tue, Nov 15, 2011  7:35:00 AM
 $ date -d '2 week 1 day ago '
 Sat, Jan 11, 2014 12:08:08 PM
 
-$ date -d '2 month' # &lt;-- NOTE how leap month dealt with
+$ date -d '2 month' # &lt;-- 2 months later, NOTE how leap month is dealt with
 Sat, Mar 01, 2014 12:02:51 PM
 </pre>
 </div>
@@ -248,17 +237,33 @@ $ TZ=Australia/Sydney date -d 2020-04-05T01:00:00 --iso-8601=seconds
 2020-04-05T01:00:00+11:00           &lt;=== Timezone offset: 11 hours
 
 $ TZ=Australia/Sydney date -d 2020-04-05T02:00:00 --iso-8601=seconds
-2020-04-05T02:00:00+10:00           &lt;=== Timezone offset: becomes 10 hours one hours later
+2020-04-05T02:00:00+10:00           &lt;=== Timezone offset: becomes 10 hours
 </pre>
 </div>
 </div>
 
-<div id="outline-container-org527641b" class="outline-2">
-<h2 id="org527641b">The same time in another timezone</h2>
-<div class="outline-text-2" id="text-org527641b">
-<p>
-Refer to <a href="#orgc529f98">避免歧义</a>
-</p>
+<div id="outline-container-org1c9d713" class="outline-2">
+<h2 id="org1c9d713">Show the same time in different timezones</h2>
+<div class="outline-text-2" id="text-org1c9d713">
+<pre class="example">
+$ ls -l /etc/localtime
+lrwxr-xr-x 1 root wheel 42 Jan 27 13:17 /etc/localtime -&gt; /var/db/timezone/zoneinfo/Australia/Sydney
+
+$ date -d '2014-02-21 19:00:00+1100'
+Fri Feb 21 19:00:00 AEDT 2014
+
+$ TZ=Asia/Shanghai date -d '2014-02-21 19:00:00+1100'
+Fri Feb 21 16:00:00 CST 2014
+
+$ TZ=UTC date -d '2014-02-21 19:00:00+1100'
+Fri Feb 21 08:00:00 UTC 2014
+
+$ TZ=-08 date -R -d '2014-02-21 19:00:00+1100'          # Note: the Posix "-08" equals to the ISO "+0800"
+Fri, 21 Feb 2014 16:00:00 +0800
+
+$ TZ=MY_TZ_NAME-08 date -d '2014-02-21 19:00:00+1100'   # Same as the above, but with customized timezone name
+Fri Feb 21 16:00:00 MY_TZ_NAME 2014
+</pre>
 </div>
 </div>
 
