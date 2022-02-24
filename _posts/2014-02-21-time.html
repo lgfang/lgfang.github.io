@@ -65,8 +65,8 @@ Fri, Feb 21, 2014  8:00:00 AM
 </pre>
 
 <p>
-date 假定你输入的时间是当前时区的时间，而你也假定 date 打印的是当前时
-区的时间
+如果没有明确指定， <code>date</code> 假定你输入的时间是 <b>当前时区</b> 的时间，而你也假定
+<code>date</code> 打印的是当前时区的时间
 </p>
 </div>
 </div>
@@ -74,64 +74,75 @@ date 假定你输入的时间是当前时区的时间，而你也假定 date 打
 <div id="outline-container-org32aae22" class="outline-3">
 <h3 id="org32aae22">假定的错位</h3>
 <div class="outline-text-3" id="text-org32aae22">
-<ul class="org-ul">
+<p>
+以下是个常见的时间戳导致问题的场景：
+</p>
+
+<ol class="org-ol">
 <li><p>
-记录的时候用 UTC 时间
+记录时间戳的设备是北京时间（UTC+0800），时间戳也是北京时间。
 </p>
 
 <pre class="example">
-$ fmt='+%Y-%m-%d %H'; date "$fmt"
-2014-02-21 16
+$ date -Iseconds
+2014-02-21T09:16:00+08:00
 
-$ date -u "$fmt" &gt; timestamp
+$ echo "2014-02-21T09:16:18" &gt; timestamp
 </pre></li>
 
 <li><p>
-读取的时候当作 Beijing 时间
+读取时间戳的设备时区为悉尼时间（UTC+1100），所以它假定时间戳记录的是悉尼时
+间。
 </p>
 
 <pre class="example">
-$ read t &lt;timestamp; date -d "$t"
-Fri, Feb 21, 2014  8:00:00 AM
+$  read t &lt;timestamp; date -Iseconds -d "$t"
+2014-02-21T09:16:00+11:00
+</pre></li>
+
+<li><p>
+表面上看日期、时、分、秒都没错，但因为一个是北京时间、一个是悉尼夏令时，两
+者实际相差3小时。都转换到同一个时区就一目了然了：原始时间其实是悉尼时间12
+点16分，但读取出来把它当成悉尼时间9点16分了。
+</p>
+<pre class="example">
+$ date -d "2014-02-21T09:16:00+08:00"
+Fri Feb 21 12:16:00 AEDT 2014
+
+$ date -d "2014-02-21T09:16:00+11:00"
+Fri Feb 21 09:16:00 AEDT 2014
 </pre></li>
 
 <li><p>
 更正错误的假定
 </p>
 
+<p>
+错误的原因是时间戳没有指明时区。所以知道记录时间戳时用的是哪个时区，在读取
+时间戳后把时区信息加上就行了。
+</p>
 <pre class="example">
-$ read t &lt;timestamp; date -d "$t+0000"
-Fri, Feb 21, 2014  4:00:00 PM
-
-$ read t &lt;timestamp.bak; date -u -d "$t" -R
-Fri, 21 Feb 2014 08:00:00 +0000
+$ read t &lt;timestamp; date -d "$t+08:00"
+Fri Feb 21 12:16:00 AEDT 2014
 </pre></li>
-</ul>
+</ol>
 </div>
 </div>
 
 <div id="outline-container-orgc529f98" class="outline-3">
 <h3 id="orgc529f98">避免歧义</h3>
 <div class="outline-text-3" id="text-orgc529f98">
-<ol class="org-ol">
-<li>显式约定时间戳的时区（通常难以执行）</li>
-</ol>
-
-
-<ol class="org-ol">
-<li><p>
-时间戳里包含时区: <code>+0800</code> and <code>AEDT</code> in the following examples
-</p>
-<ul class="org-ul">
-<li><code>2014-02-21 16:00:00+0800</code>:</li>
-<li><code>Fri Feb 21 19:00:00 AEDT 2014</code></li>
-</ul>
 <p>
-NOTE: <a href="https://www.w3.org/TR/NOTE-datetime">Date and Time Formats</a>
-</p></li>
+从上面讨论可以看出，时间戳的混乱主要来源于时区信息的缺失。所以理论上可以如下
+解决：
+</p>
+
+<ol class="org-ol">
+<li>显式约定时间戳的时区：理论上可以，但实际难以贯彻执行。这正是大部分时间疑问
+的根源。</li>
 
 <li><p>
-用相对 "epoch" 的秒
+用相对 "epoch" 的秒：不容易出错，但可读性不强。
 </p>
 
 <p>
@@ -153,6 +164,18 @@ Fri, Feb 21, 2014  3:00:00 AM
 NOTE: UTC datetime: "UTC datetime" basically refers to a data type. This
 data type is usually a 64-bit integer that represents the number of
 milliseconds since Unix epoch ('1970-01-01 00:00:00+0000').
+</p></li>
+
+<li><p>
+把时区信息包含在每一个时间戳里，即下面例子中的 <code>+0800</code> 和 <code>AEDT</code> 。这是我
+唯一推荐的做法，应该也是最普遍的做法。
+</p>
+<ul class="org-ul">
+<li><code>2014-02-21 16:00:00+0800</code>:</li>
+<li><code>Fri Feb 21 19:00:00 AEDT 2014</code></li>
+</ul>
+<p>
+NOTE: <a href="https://www.w3.org/TR/NOTE-datetime">Date and Time Formats</a>
 </p></li>
 </ol>
 </div>
@@ -221,7 +244,10 @@ Thu Dec 15 07:35:00 CST 2011
 <div class="outline-text-2" id="text-orgc779e77">
 <pre class="example">
 $ date -R
-Sun, 29 Dec 2013 14:31:47 +0800
+Sun, 29 Dec 2013 14:31:47 +0800     &lt;=== +0800 : offet
+
+$ date -Iseconds
+2022-02-24T13:04:41+11:00           &lt;=== +11:00 : offset
 
 $ TZ=US/Eastern date +%Z:%z
 EDT:-0400           &lt;=== EDT: Daylight Saving in effect; -0400: offset
@@ -229,16 +255,40 @@ EDT:-0400           &lt;=== EDT: Daylight Saving in effect; -0400: offset
 
 <p>
 Note: due to daylight saving, a timezone (zoneinfo) may have different offset
-at different times. Therefore, given a time, please ensure the offset is
-calculated based on that exact point in time as shown below:
+at different times:
 </p>
 <pre class="example">
-$ TZ=Australia/Sydney date -d 2020-04-05T01:00:00 --iso-8601=seconds
-2020-04-05T01:00:00+11:00           &lt;=== Timezone offset: 11 hours
+$ TZ=Australia/Sydney date -d 2020-04-05T01:00:00 -R
+Sun, 05 Apr 2020 01:00:00 +1100     &lt;=== Timezone offset: 11 hours
 
-$ TZ=Australia/Sydney date -d 2020-04-05T02:00:00 --iso-8601=seconds
-2020-04-05T02:00:00+10:00           &lt;=== Timezone offset: becomes 10 hours
+$ TZ=Australia/Sydney date -d 2020-04-05T02:00:00 -R
+Sun, 05 Apr 2020 02:00:00 +1000     &lt;=== Timezone offset: becomes 10 hours
 </pre>
+
+<p>
+If you convert both time into UTC, you'll see that the difference between the
+two points in time is <b>not</b> 1 hour but 2 hours:
+</p>
+<pre class="example">
+$ date -u -d "Sun, 05 Apr 2020 01:00:00 +1100"
+Sat Apr  4 14:00:00 UTC 2020
+
+$ date -u -d "Sun, 05 Apr 2020 02:00:00 +1000"
+Sat Apr  4 16:00:00 UTC 2020
+</pre>
+
+<p>
+Therefore, given a timezone, when trying to find out the timezone offset,
+ensure it is the offset is calculated based on the exact point in time of
+concern.
+</p>
+
+<p>
+<b>Fun Fact</b> While normally "Sydney time xxxx" defines a single point in time
+without any issue, "Sydney time Apr 5 02:00:00 2020" is ambiguous because it
+happens to fall in the one hour "overlap" of AEDT and AEST caused by the end
+of daylight saving time. You have to explicitly specify if it is AEDT or not.
+</p>
 </div>
 </div>
 
