@@ -8,7 +8,7 @@ tags: [LDAP, regexp]
 
 <p>
 Asterisk (<code>*</code>) is wildly used as a wildcard card in regular express (regexp)
-matching and file name matching. So it is not a suprise at all the many expect
+matching and file name matching. So it is not a suprise at all that many expect
 it works the same way when put into a LDAP search filter. However, it may give
 surprising search results at times. More specifically, sometimes the filter does
 not match any entries while it should. This blog is to help you understand the
@@ -19,7 +19,7 @@ reason of it and use <code>*</code> in LDAP searches correctly.
 Firstly, please note that the filter <code>attribute=*</code> (say <code>member=*</code>) is different
 from <code>attribute=a_string_contains_*_etc</code> (<code>member=test*</code>, <code>member=*test</code> and
 <code>member=*test*</code> for example). The former filter means "present", i.e. so long as
-the attribute exists, corresponding LDAN entry is considered a match. This type
+the attribute exists, corresponding LDAP entry is considered a match. This type
 of filters does not really incur many confusions. It is the later that sometimes
 does not work as one may have expected. To be accurate, this filter is not a
 regexp but a "substring filter". I'll be focusing on substring filters from now
@@ -27,19 +27,19 @@ on. (Please refer to <a href="https://datatracker.ietf.org/doc/html/rfc2254#sect
 </p>
 
 <p>
-One key point to understand "LDAP search regexp issues" is: while <code>*</code> in LDAP
-substring filters normally works the same way as it is Linux shell file name
-matching, <b>LDAP substring filters are ignored</b> if the targeted attributes do not
-have substring matching rules defined. To better understand this, let's have a
-look at the following test:
+One key point to understand "LDAP search regexp issues" is: attributes can have
+a different LDAP substring filter matching rules. So, while <code>*</code> in LDAP
+substring filters <b>normally</b> work the same way as Linux shell file name
+matching, it is ignored if the targeted attribute does not have substring
+matching rules. To better understand this, let's have a look at the following
+test:
 </p>
 
 <ol class="org-ol">
 <li><p>
-Reviewing the schemas of <a href="https://ldapwiki.com/wiki/Description">description</a> and <a href="https://ldapwiki.com/wiki/Member">member</a>, we can see that
-<code>description</code> has a substring matching rule (<code>SUBSTR
-   caseIgnoreSubstringsMatch</code>) but <code>member</code> does not. The corresponding schemas
-definition should be similar to the following:
+Reviewing the schemas of <a href="https://ldapwiki.com/wiki/Description">description</a> and <a href="https://ldapwiki.com/wiki/Member">member</a> (shown below), we can see
+that <code>description</code> has a substring matching rule (<code>SUBSTR
+   caseIgnoreSubstringsMatch</code>) but <code>member</code> does not. 
 </p>
 
 <div class="org-src-container">
