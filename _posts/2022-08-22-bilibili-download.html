@@ -1,0 +1,100 @@
+---
+layout: post
+title: 哔哩哔哩下载音乐
+tagline:
+categories: Recreation
+tags: [bilibili, music]
+---
+
+
+<div id="orgc08292e" class="figure">
+<p><img src="images/bilibili-downloaded.png" alt="bilibili-downloaded.png" />
+</p>
+</div>
+
+<p>
+在B站（Bilibili）听到好听的音乐想要下载但不知如何操作？以下是本人于 2022-08-22 亲
+测可用于 安卓11 + 哔哩哔哩手机应用版本3.13.0 的方法。其实过程很简单：就是在哔哩哔
+哩手机应用里缓存想要下载的音乐，然后找到相应的目录把对应的视频、音频文件复制出来。
+问题就是第二步稍微有点曲折。
+</p>
+
+<p>
+对我来说，这么折腾的主要动机是：
+</p>
+<ul class="org-ul">
+<li>自驾游时音乐不会因没手机信号而中断。</li>
+<li>手机连上 Andriod Auto 的时候，可以用 Youtube Music 方便的选歌。（哔哩哔哩缓存
+歌曲的管理功能太简陋了）。</li>
+</ul>
+
+<p>
+下面是具体的步骤：
+</p>
+
+<ol class="org-ol">
+<li>在哔哩哔哩的手机应用里把中意的视频缓存到手机。
+<ul class="org-ul">
+<li>虽然缓存到手机后理论上就可以离线观看了，但我觉得实际使用还是多有不便。所以
+我希望能把音乐复制出来导入其它播放器中。因此继续下一步。</li>
+</ul></li>
+
+<li>继续在哔哩哔哩的手机应用中，前往 <b>我的 》离线缓存 》右上角齿轮图标 》 离线诊
+断</b> 然后点击想要的视频。注意查看
+<dl class="org-dl">
+<dt>存储目录</dt><dd>应该是 <b>手机默认存储</b></dd>
+<dt>文件结构</dt><dd>记住文件夹的名字</dd>
+</dl></li>
+
+<li>把手机连上电脑（MacBook 的话用一个叫做 Android File Transfer 的工具）打开手机
+目录 <code>Android/data/com.bilibili.app.in/download</code> 然后进入到上一步所记录的文件
+夹并按照 <b>文件结构</b> 的指引找到 audio.m4s 和/或 video.m4s 并复制即可。
+<ul class="org-ul">
+<li>之所以要连到电脑上是因为安卓11里直接用手机上的文件管理器是看不到
+<code>Android/data/</code> 下有任何文件的。如果目录 <b>不是</b> 默认的位置，而是一个手机可
+以直接访问的目录则不必连电脑。</li>
+<li><p>
+为了能被其它应用打开，audio.m4s 和 video.m4s 可能需要改名。音视频编解码我不
+太熟；如果理解没错的话，两个文件都可以直接更名为 <code>*.mp4</code> （但播放器需要支持
+相应的编码才行）。
+</p>
+<div class="org-src-container">
+<pre class="src src-text">$ ffmpeg -i audio.m4s
+Input #0, mov,mp4,m4a,3gp,3g2,mj2, from 'audio.m4s':
+  Metadata:
+    major_brand     : iso5
+    minor_version   : 1
+    compatible_brands: avc1iso5dsmsmsixdash
+    encoder         : Lavf57.71.100
+    description     : Packed by Bilibili XCoder v2.0.2
+  Duration: 00:05:07.14, start: 0.000000, bitrate: 129 kb/s
+  Stream #0:0[0x2](und): Audio: aac (LC) (mp4a / 0x6134706D), 48000 Hz, stereo, fltp, 2 kb/s (default)
+...
+$ ffmpeg -i video.m4s
+Input #0, mov,mp4,m4a,3gp,3g2,mj2, from 'video.m4s':
+  Metadata:
+    major_brand     : iso5
+    minor_version   : 1
+    compatible_brands: iso5dsmsmsixdash
+    encoder         : Lavf57.71.100
+    description     : Packed by Bilibili XCoder v2.0.2
+  Duration: 00:05:07.12, start: 0.040000, bitrate: 487 kb/s
+  Stream #0:0[0x1](und): Video: hevc (Main) (hev1 / 0x31766568), yuv420p(tv, bt709), 1280x720 [SAR 1:1 DAR 16:9], 1 kb/s, 25 fps, 25 tbr, 16k tbn (default)
+...
+</pre>
+</div></li>
+</ul></li>
+</ol>
+
+<p>
+相比缓存一首导出一首，我一般是攒若干首歌曲然后用 shell 命令一次性全部转换成
+<code>aac</code> 格式的音乐文件里（然后 <code>m4s</code> 文件就可以删掉了）。
+</p>
+<div class="org-src-container">
+<pre class="src src-shell-script"><span class="org-keyword">for</span> each<span class="org-keyword"> in</span> $(<span class="org-sh-quoted-exec">find . -name 'audio.m4s'</span>); <span class="org-keyword">do</span>
+    <span class="org-variable-name">folder</span>=$(<span class="org-sh-quoted-exec">echo $each | cut -d / -f2</span>)
+    <span class="org-variable-name">name</span>=$(<span class="org-sh-quoted-exec">find $folder -name entry.json -exec jq -r .title {} \;</span>)
+    ffmpeg -i $<span class="org-variable-name">each</span> -acodec copy <span class="org-string">"${name}.aac"</span>
+<span class="org-keyword">done</span>
+</pre>
+</div>
