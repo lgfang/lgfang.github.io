@@ -1,0 +1,45 @@
+---
+layout: post
+title: Purge Downloaded Customer Logs Regularly Using Cron
+tagline:
+categories: computer
+tags: [macos, linux, cron]
+---
+
+<p>
+As a support engineer, it is a good habit and maybe even a company policy to
+delete customer logs downloaded to local PCs/laptops once they are no longer
+needed. Instead of doing this manaually periodically, you can set up a cron job
+similar to the following to do that.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash"><span class="org-variable-name">SHELL</span>=/bin/bash
+<span class="org-variable-name">LOG_DIR</span>=/Users/lungang.fang/Downloads
+<span class="org-variable-name">LOG_DAYS</span>=15
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">At 12:30pm Mon-Fri, delete files/dirs older than 15 days and create/update timestamp file "LOG_PURGE"</span>
+30 12 * * 1-5 find $<span class="org-variable-name">LOG_DIR</span> -mtime +$<span class="org-variable-name">LOG_DAYS</span> <span class="org-string">\(</span> -type f -or <span class="org-string">\(</span> -type d -empty <span class="org-string">\)</span> <span class="org-string">\)</span> -delete &amp;&amp; date &gt; $<span class="org-variable-name">LOG_DIR</span>/LOG_PURGE
+</pre>
+</div>
+
+<p>
+Note:
+</p>
+<ul class="org-ul">
+<li>This is my implementation of @josh.allan's idea.</li>
+<li>Disclaimer: the above source code of cron job is just an example. Modify, test
+and apply it at your own risk.</li>
+<li>Although <code>launchd</code> appears to the recommended approach to schedule jobs in
+MacOS, <code>cron</code> meets our needs perfectly, so just use it for simplicity.</li>
+<li>For cron jobs to work in MacOS, <code>cron</code> must be granted full disk access (see
+<a href="https://apple.stackexchange.com/questions/378553/crontab-operation-not-permitted">this post</a> for how to do that).</li>
+<li>The job is <b>not</b> scheduled at midnights because, unlike servers, laptops are
+most likely sleeping at that time.</li>
+<li>I didn't discard stderr (i.e. <code>find ... 2&gt;/dev/null</code>) because I do prefer
+getting a system mail in such cases.</li>
+<li>Create a file named <code>LOG_PURGE</code> in the log directory mainly to remind myself
+that such a cron job exists.</li>
+<li>Do not delete non-empty folders even if they are old because subfolders or
+files may be new.</li>
+</ul>
