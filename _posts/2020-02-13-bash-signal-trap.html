@@ -3,14 +3,15 @@ layout: post
 title: More on Signals in Bash
 tagline:
 categories: computer
-tags: [Bash]
+tags: [Bash, Linux]
 ---
 
 <p>
-You login a shell and launch a long running script, then quit the shell/terminal
-but not sure if the script (and its child processes) will continue running or
-not? You try to catch and handle signals in the script but it does work as you
-expected? Below are some tests to help you understand these things.
+You will login a shell, launch a long running script and then quit the
+shell/terminal but not sure if the script (and/or its child processes) will
+continue running or not? You tried to catch and handle signals in a script but
+it didn't work as you expected? Below are some tests to help you understand
+these things.
 </p>
 
 <div class="org-src-container">
@@ -29,7 +30,7 @@ expected? Below are some tests to help you understand these things.
 <span class="linenr">13: </span><span class="org-string">'</span>
 <span class="linenr">14: </span>
 <span class="linenr">15: </span><span class="org-keyword">while</span> True; <span class="org-keyword">do</span>
-<span class="linenr">16: </span>    <span class="org-builtin">echo</span> <span class="org-string">"Script loop - $(</span><span class="org-sh-quoted-exec">date</span><span class="org-string"> -u)"</span>; sleep 2
+<span class="linenr">16: </span>    <span class="org-builtin">echo</span> <span class="org-string">"Script loop - $(</span><span class="org-sh-quoted-exec">date -u</span><span class="org-string">)"</span>; sleep 2
 <span class="linenr">17: </span><span class="org-keyword">done</span>
 <span class="linenr">18: </span>
 <span class="linenr">19: </span><span class="org-builtin">echo</span> <span class="org-string">"end of the script"</span>
@@ -53,23 +54,20 @@ and then monitor (tail) the output file to check if the processes are terminated
 or not.
 </p>
 
-<ul class="org-ul">
-<li><p>
-Fistly, the simplest case, run the script in the foreground: <code>./test.sh
-  &gt;test.out 2&gt;&amp;1</code>
-</p>
-
+<div id="outline-container-org1adbefb" class="outline-2">
+<h2 id="org1adbefb">Fistly, the simplest case, run the script in the foreground: <code>./test.sh &gt;test.out 2&gt;&amp;1</code></h2>
+<div class="outline-text-2" id="text-org1adbefb">
 <p>
 The interactive bash shell sends SIGINT (for Ctrl-c) or SIGHUP (or closing
 terminal) to all foreground processes. Therefore, in these two cases, both the
-parent process (<code>test.sh</code>) and the child process (<code>python3</code>) will get the
-signal and exit:
+parent process (<code>test.sh</code>) and the child process (<code>python3</code>) will get the signal
+and exit:
 </p>
 <ul class="org-ul">
 <li><p>
 Press Ctrl-c
 </p>
-<pre class="example">
+<pre class="example" id="orgc1eebff">
 Python loop - 2020-02-11 14:51:04.795263
 ...
 Python loop - 2020-02-11 14:51:12.806468
@@ -81,23 +79,24 @@ Received SIGINT                               &lt;=== from the parent process: t
 <li><p>
 Close the terminal
 </p>
-<pre class="example">
+<pre class="example" id="orgbfa9517">
 Python loop - 2020-02-11 14:52:24.618521
 Python loop - 2020-02-11 14:52:26.620370
 Python loop - 2020-02-11 14:52:28.622768
 Hangup: 1                                     &lt;=== from the child
 Received SIGHUP                               &lt;=== from the parent
 </pre></li>
-</ul></li>
+</ul>
+</div>
+</div>
 
-<li><p>
-Secondly, run the script in background: <code>./test.sh &gt;test.out 2&gt;&amp;1 &amp;</code>
-</p>
-
+<div id="outline-container-orgce507c4" class="outline-2">
+<h2 id="orgce507c4">Secondly, run the script in background: <code>./test.sh &gt;test.out 2&gt;&amp;1 &amp;</code></h2>
+<div class="outline-text-2" id="text-orgce507c4">
 <p>
 Obviously, the processes will continue running upon Ctrl-c because the
-interactive shell will <b>not</b> send SIGINT to background processes. But, when
-the terminal is closed, they will still receive SIGHUP and abort.
+interactive shell will <b>not</b> send SIGINT to background processes. But, when the
+terminal is closed, they will still receive SIGHUP and abort.
 </p>
 
 <p>
@@ -105,25 +104,26 @@ the terminal is closed, they will still receive SIGHUP and abort.
 </p>
 <ul class="org-ul">
 <li>Closing the terminal means closing the terminal directly. Running <code>exit</code> to
-quit the shell (so that the terminal emulator close the window
-automatically) does not count. In this case, the shell quits actively and
-does not receive SIGHUP. Hence it won't send SIGHUP to the script and the
-child processes of the script.</li>
-<li>You may not observe this behaviour with some terminal emulators. My guess
-is: some terminal emulators manage to communicate with the shell session and
-close it gracefully when a terminal window is closed. Therefore, the shell
-(as well as the script and its child processes) does not receive SIGHUP.
-According to my test with OS X, SIGHUP is sent when a terminal is closed in
-<a href="https://github.com/tmux/tmux/wiki">tmux</a> or iTerm2 but that is not case with the builtin Terminal APP.</li>
-</ul></li>
+quit the shell (so that the terminal emulator close the window automatically)
+does not count. In this case, the shell quits actively and does not receive
+SIGHUP. Hence it won't send SIGHUP to the script and the child processes of
+the script.</li>
+<li>You may not observe this behaviour with some terminal emulators. My guess is:
+some terminal emulators manage to communicate with the shell session and close
+it gracefully when a terminal window is closed. Therefore, the shell (as well
+as the script and its child processes) does not receive SIGHUP. According to
+my test with OS X, SIGHUP is sent when a terminal is closed in <a href="https://github.com/tmux/tmux/wiki">tmux</a> or iTerm2
+but that is not case with the builtin Terminal APP.</li>
+</ul>
+</div>
+</div>
 
-<li><p>
-Run the script using <code>nohup</code>
-</p>
-
+<div id="outline-container-org59c4714" class="outline-2">
+<h2 id="org59c4714">The 3rd and 4th tests are running the script using <code>nohup</code></h2>
+<div class="outline-text-2" id="text-org59c4714">
 <p>
-As the name suggests, <code>nohup</code> makes the spawned process ignore SIGHUP. But
-they will <b>not</b> ignore SIGINT. As a result:
+As the name suggests, <code>nohup</code> makes the spawned process ignore SIGHUP. But they
+will <b>not</b> ignore SIGINT. As a result:
 </p>
 <ul class="org-ul">
 <li>If <code>nohup</code> is run in the foreground (<code>nohup ./test.sh</code>), Ctrl-c interrupts
@@ -131,14 +131,20 @@ the script. However, closing the terminal will <b>not</b> interrupt the script.<
 <li>In comparison, if <code>nohup</code> is run in the background (<code>nohup ./test.sh &amp;</code>),
 neither Ctrl-C nor closing terminal would interrupt the script.</li>
 </ul>
-<p>
-<b>NOTE</b> If a process registers its own SIGHUP handler, <code>nohup</code> will not
-overwrite the handler to ignore SIGHUP.
-</p></li>
 
-<li><p>
-What if we edit <code>test.sh</code> to <b>execute the Python process in the background</b>
-(i.e. <code>python3 -c '...' &amp;</code>)?
+<p>
+<b>NOTE</b> If a process registers its own SIGHUP handler, <code>nohup</code> will not overwrite
+the handler to ignore SIGHUP.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org20c808c" class="outline-2">
+<h2 id="org20c808c">What if we edit <code>test.sh</code> to <b>execute the Python process in the background</b>?</h2>
+<div class="outline-text-2" id="text-org20c808c">
+<p>
+I.e. edit <code>test.sh</code> to run <code>python3 -c '...' &amp;</code> (note the additional <code>&amp;</code> at the
+end).
 </p>
 
 <p>
@@ -149,8 +155,7 @@ we'd expect the following:
 
 <ul class="org-ul">
 <li><p>
-Ctrl-c does not affect the Python process but may interrupt the parent
-script. 
+Ctrl-c does not affect the Python process but may interrupt the parent script.
 </p>
 
 <p>
@@ -159,7 +164,7 @@ process and child process were printing timestamps. Once I pressed Ctrl-c,
 the parent process (the loop in the script) was interrupted but the Python
 process continued.
 </p>
-<pre class="example">
+<pre class="example" id="orga13e5ca">
 Python loop - 2020-02-11 23:12:02.196811
 Script loop - Tue Feb 11 12:12:04 UTC 2020
 Python loop - 2020-02-11 23:12:04.198417
@@ -173,10 +178,10 @@ Python loop - 2020-02-11 23:12:12.209047
 
 <li><p>
 On the other hand, closing terminal still delivers SIGHUP to both the parent
-and the child process and interrupts them regardless if the script is
-executed in the foreground or not.
+and the child process and interrupts them regardless if the script is executed
+in the foreground or not.
 </p>
-<pre class="example">
+<pre class="example" id="org1fd70b9">
 Script loop - Tue Feb 11 12:15:10 UTC 2020
 Python loop - 2020-02-11 23:15:10.597609
 Python loop - 2020-02-11 23:15:12.600922
@@ -186,11 +191,16 @@ Script loop - Tue Feb 11 12:15:14 UTC 2020
 Hangup: 1
 Received SIGHUP
 </pre></li>
-</ul></li>
+</ul>
+</div>
+</div>
 
-<li><p>
-What if we remove the <code>while True:</code> loop from the shell script? Does it change
-the test results at all when compared with the previous test?
+<div id="outline-container-orgb98f1a6" class="outline-2">
+<h2 id="orgb98f1a6">What if we remove the <code>while True:</code> loop from the shell script?</h2>
+<div class="outline-text-2" id="text-orgb98f1a6">
+<p>
+I.e. what if the parent script finishes before the child? Does it change the
+test results at all?
 </p>
 
 <p>
@@ -216,14 +226,14 @@ python3 -c <span class="org-string">'</span>
 </div>
 
 <p>
-Launch the above modified script in the foreground and then check the
-processes. From the output of <code>ps</code> below, we can see:
+Launch the above modified script in the foreground and then check the processes.
+From the output of <code>ps</code> below, we can see:
 </p>
 <ul class="org-ul">
-<li>The parent process (the script) has finished (not in the output).</li>
+<li>The parent process (the script) has finished.</li>
 <li>The child process is reaped by the <code>init</code> process (ppid of it is 1).</li>
 </ul>
-<pre class="example">
+<pre class="example" id="orgb73c86a">
 $ ./test.sh &gt;test.out 2&gt;&amp;1
 
 $ ps -eo "pid,ppid,pgid,jobc,command" | egrep -i '(test|python)' | sed 's/ \/.*\// /'
@@ -236,7 +246,7 @@ In comparison, when both the script and the python process keep running, the
 currently shell is the parent of the script and the script is the parent of
 the spawned process:
 </p>
-<pre class="example">
+<pre class="example" id="org9d6b56a">
 $ echo $$
 53064
 
@@ -247,21 +257,18 @@ $ ps -eo "pid,ppid,pgid,jobc,command" | egrep -i '(test|python)' | sed 's/ \/.*\
 </pre>
 
 <p>
-This is actually a very importance difference. Many processes do register
-their own SIGHUP handlers and that defeats the purpose of <code>nohup</code>: upon the
-reception of SIGHUP, these processes will <b>not</b> ignore the signal but instead
-call the registered signal handlers. In this situation, the common practice to
-ensure these processes keep running after corresponding terminals are closed
-is: the parent script spawn the long running process in the background and
-then quit. As shown above, this makes the spawned process a child of the
-<code>init</code> process, meaning the current session will not dispatch SIGINT, SIGHUP
-etc. to it.
-</p></li>
-
-<li><p>
-trap
+<b>This is actually a very importance difference</b>. Once the spawned process a
+child of the <code>init</code> process, the current session will no longer not dispatch
+SIGINT, SIGHUP etc. to it. Hence, it is common practice to start a daemon like
+this: a parent script spawn the long running daemon process in the background
+and then quit.
 </p>
+</div>
+</div>
 
+<div id="outline-container-org0f88a58" class="outline-2">
+<h2 id="org0f88a58">trap</h2>
+<div class="outline-text-2" id="text-org0f88a58">
 <p>
 Finally let's have a closer look at <code>trap</code>. As you must already know, <code>trap</code>
 catches the specified signals and runs according command(s).
@@ -276,7 +283,7 @@ signal.
 <p>
 Below is how I ran the test:
 </p>
-<pre class="example">
+<pre class="example" id="org208c06f">
 $ ./test.sh &gt;test.out 2&gt;&amp;1 &amp;        # &lt;=== run the script
 [1] 75519
 
@@ -299,7 +306,7 @@ The <code>test.out</code> indicates the script didn't respond to the signal unti
 SIGINT to the child (python) process. Once the child aborted because of
 SIGINT, the parent ran the trap.
 </p>
-<pre class="example">
+<pre class="example" id="org8c636e9">
 Python loop - 2020-02-13 16:09:59.676853
 Python loop - 2020-02-13 16:10:01.677777
 Python loop - 2020-02-13 16:10:03.679282
@@ -337,12 +344,12 @@ immediately after which the trap is executed.
 <p>
 How does <code>wait</code> change the behaviour of the parent process and the child
 process? I'd leave it for you to figure out.
-</p></li>
-
-<li><p>
-Why <code>kill -SIGINT pid_of_parent</code> does not work the same as pressing Ctrl-c?
 </p>
+</div>
 
+<div id="outline-container-org1ea0b43" class="outline-3">
+<h3 id="org1ea0b43">Why <code>kill -SIGINT pid_of_parent</code> does not work the same as pressing Ctrl-c?</h3>
+<div class="outline-text-3" id="text-org1ea0b43">
 <p>
 Now we understand why the parent process didn't exit immediately when we sent
 it a SIGINT via <code>kill -SIGINT pid</code>. But, why in the first test we were able to
@@ -350,14 +357,15 @@ interrupt both the parent and the child by pressing Ctrl-c?
 </p>
 
 <p>
-The reason is: actually Ctrl-c sends SIGINT to not a process a process group.
-Therefore, when we press Ctrl-c, both the child and parent receive the signal,
-causing the child and parent exit in turn. To achieve the same using <code>kill</code>,
-please send the signal to the process group instead using <code>kill -SIGHUP --
-  -pgid</code>. In the following example, both the script and the python process
-belong to process group 77210, therefore <code>kill -SIGINT -- -77210</code> did the trick.
+The reason is: actually Ctrl-c sends SIGINT to not a process but a process
+group, i.e. all the processes within the group. Therefore, when we press
+Ctrl-c, both the child and parent receive the signal, causing the child and
+parent exit in turn. To achieve the same using <code>kill</code>, please send the signal
+to the process group instead using <code>kill -SIGHUP -- -pgid</code>. In the following
+example, both the script and the python process belong to process group 77210,
+therefore <code>kill -SIGINT -- -77210</code> did the trick.
 </p>
-<pre class="example">
+<pre class="example" id="org1fe5d49">
 $ ./test.sh &gt;test.out 2&gt;&amp;1 &amp;
 [1] 77210
 
@@ -368,19 +376,22 @@ $ ps -eo "pid,ppid,pgid,jobc,command" | egrep -i '(test|python)' | sed 's/ \/.*\
 
 $ kill -SIGINT -- -77210
 [1]+  Exit 1                  ./test.sh &gt; test.out 2&gt;&amp;1
-</pre></li>
+</pre>
+</div>
+</div>
+</div>
 
-<li><p>
-<b>References</b>:
-</p>
-
+<div id="outline-container-org88c9faf" class="outline-2">
+<h2 id="org88c9faf">References</h2>
+<div class="outline-text-2" id="text-org88c9faf">
 <p>
-For in-depth discussions on processes and signals in the UNIX/Linux
-environment, please refer to:
+For in-depth discussions on processes and signals in the UNIX/Linux environment,
+please refer to:
 </p>
 <ul class="org-ul">
 <li>Advanced Programming in the UNIX Environment, Third Edition: Chapter 8.
 Process Control, 9. Process Relationships, and 10. Signals.</li>
 <li><a href="https://tldp.org/LDP/Bash-Beginners-Guide/html/chap_12.html">Bash Guide for Beginners - Chapter 12. Catching signals</a></li>
-</ul></li>
 </ul>
+</div>
+</div>
